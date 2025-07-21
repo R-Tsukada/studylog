@@ -128,6 +128,11 @@ export default {
           
           // 認証状態を確認
           this.verifyAuth()
+          
+          // 認証済みでログイン画面にいる場合はダッシュボードにリダイレクト
+          if (this.$route.path === '/login' || this.$route.path === '/register') {
+            this.$router.push('/dashboard')
+          }
         } catch (error) {
           console.error('認証状態復元エラー:', error)
           this.handleLogout()
@@ -142,11 +147,19 @@ export default {
           this.user = response.data.user
           localStorage.setItem('user', JSON.stringify(response.data.user))
         } else {
+          console.warn('認証状態確認失敗:', response.data)
           this.handleLogout()
         }
       } catch (error) {
         console.error('認証確認エラー:', error)
-        this.handleLogout()
+        console.error('エラーレスポンス:', error.response?.data)
+        // 認証エラー（401）以外は再試行の余地があるかもしれないので、すぐにはログアウトしない
+        if (error.response?.status === 401) {
+          console.log('認証トークンが無効です。ログアウトします。')
+          this.handleLogout()
+        } else {
+          console.log('一時的なエラーの可能性があります。認証状態を保持します。')
+        }
       }
     },
     
@@ -173,7 +186,9 @@ export default {
       delete axios.defaults.headers.common['Authorization']
       
       // ログインページにリダイレクト
-      this.$router.push('/login')
+      if (this.$route.path !== '/login' && this.$route.path !== '/register') {
+        this.$router.push('/login')
+      }
     },
     
     // グローバルメッセージ表示

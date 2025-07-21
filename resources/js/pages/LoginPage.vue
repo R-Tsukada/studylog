@@ -248,8 +248,8 @@ export default {
       // Axiosのデフォルトヘッダーにトークンを設定
       axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`
       
-      // ダッシュボードにリダイレクト
-      this.$router.push('/dashboard')
+      // ページリロードして認証状態を更新
+      window.location.href = '/dashboard'
     },
     
     showError(message) {
