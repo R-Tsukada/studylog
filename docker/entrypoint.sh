@@ -4,13 +4,16 @@ set -e
 # Laravelアプリケーションの初期化
 echo "Initializing Laravel application..."
 
-# データベースファイルの作成
+# データベースファイルの作成と権限設定
 if [ ! -f /var/www/html/database/database.sqlite ]; then
     echo "Creating SQLite database..."
     touch /var/www/html/database/database.sqlite
-    chown www-data:www-data /var/www/html/database/database.sqlite
-    chmod 664 /var/www/html/database/database.sqlite
 fi
+
+echo "Setting database permissions..."
+chown -R www-data:www-data /var/www/html/database/
+chmod 775 /var/www/html/database/
+chmod 664 /var/www/html/database/database.sqlite
 
 # キャッシュクリア
 php artisan config:clear
