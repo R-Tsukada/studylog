@@ -21,9 +21,27 @@ services:
           name: study-app
           property: host
       - key: DB_CONNECTION
-        value: sqlite
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: study-app-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: study-app-db
+          property: port
       - key: DB_DATABASE
-        value: /var/www/html/database/database.sqlite
+        fromDatabase:
+          name: study-app-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: study-app-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: study-app-db
+          property: password
       - key: CACHE_STORE
         value: file
       - key: SESSION_DRIVER
@@ -42,3 +60,10 @@ services:
       php artisan route:cache
       php artisan view:cache
     startCommand: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+
+  - type: pserv
+    name: study-app-db
+    env: docker
+    plan: starter
+    databaseName: study_app_production
+    region: singapore
