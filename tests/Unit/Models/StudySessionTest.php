@@ -132,28 +132,39 @@ class StudySessionTest extends TestCase
         $user = User::factory()->create();
         $subjectArea = SubjectArea::factory()->create();
         
-        $startDate = Carbon::now()->subDays(5);
-        $endDate = Carbon::now()->subDays(1);
+        // テスト専用の日付範囲を使用（他のデータと重ならない）
+        $startDate = Carbon::create(2023, 1, 10);
+        $endDate = Carbon::create(2023, 1, 15);
         
         // 範囲内のセッション
-        StudySession::factory()->create([
+        $inRangeSession = StudySession::factory()->create([
             'user_id' => $user->id,
             'subject_area_id' => $subjectArea->id,
-            'started_at' => $startDate->copy()->addDays(1),
-            'ended_at' => $startDate->copy()->addDays(1)->addHours(1),
+            'started_at' => Carbon::create(2023, 1, 12),
+            'ended_at' => Carbon::create(2023, 1, 12, 1),
         ]);
         
-        // 範囲外のセッション
+        // 範囲外のセッション（開始日前）
         StudySession::factory()->create([
             'user_id' => $user->id,
             'subject_area_id' => $subjectArea->id,
-            'started_at' => $startDate->copy()->subDays(1),
-            'ended_at' => $startDate->copy()->subDays(1)->addHours(1),
+            'started_at' => Carbon::create(2023, 1, 5),
+            'ended_at' => Carbon::create(2023, 1, 5, 1),
+        ]);
+        
+        // 範囲外のセッション（終了日後）
+        StudySession::factory()->create([
+            'user_id' => $user->id,
+            'subject_area_id' => $subjectArea->id,
+            'started_at' => Carbon::create(2023, 1, 20),
+            'ended_at' => Carbon::create(2023, 1, 20, 1),
         ]);
         
         $sessionsInRange = StudySession::dateRange($startDate, $endDate)->get();
         
-        $this->assertEquals(1, $sessionsInRange->count());
+        // 範囲内のセッションが確実に1つ含まれることをチェック
+        $this->assertTrue($sessionsInRange->contains($inRangeSession));
+        
         foreach ($sessionsInRange as $session) {
             $this->assertTrue($session->started_at->between($startDate, $endDate));
         }
