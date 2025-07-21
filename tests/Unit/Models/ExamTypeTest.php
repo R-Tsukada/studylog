@@ -83,12 +83,21 @@ class ExamTypeTest extends TestCase
     /** @test */
     public function active_scope_returns_only_active_exam_types()
     {
-        ExamType::factory()->create(['is_active' => true]);
-        ExamType::factory()->create(['is_active' => false]);
+        // 既存のアクティブなExamTypeの数を取得
+        $existingActiveCount = ExamType::active()->count();
+        
+        // 新しくテスト用のExamTypeを作成
+        ExamType::factory()->create(['is_active' => true, 'code' => 'test_active_1']);
+        ExamType::factory()->create(['is_active' => true, 'code' => 'test_active_2']);
+        ExamType::factory()->create(['is_active' => false, 'code' => 'test_inactive_1']);
         
         $activeExamTypes = ExamType::active()->get();
+        $inactiveExamTypes = ExamType::where('is_active', false)->get();
         
-        $this->assertCount(3, $activeExamTypes); // 2つのシーダー + 1つのファクトリー
+        // 既存のアクティブな数 + 新しく作成した2つ
+        $this->assertCount($existingActiveCount + 2, $activeExamTypes);
+        $this->assertGreaterThanOrEqual(1, $inactiveExamTypes->count()); // 少なくとも1つは作成した
+        
         foreach ($activeExamTypes as $examType) {
             $this->assertTrue($examType->is_active);
         }
