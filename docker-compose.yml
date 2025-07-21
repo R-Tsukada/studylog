@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: study-app
+    ports:
+      - "8000:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_KEY=${APP_KEY:-base64:SGVsbG9Xb3JsZEhlbGxvV29ybGRIZWxsb1dvcmxk}
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+      - CACHE_DRIVER=file
+      - SESSION_DRIVER=file
+      - QUEUE_CONNECTION=database
+      - LOG_CHANNEL=stack
+      - LOG_DEPRECATIONS_CHANNEL=null
+      - LOG_LEVEL=error
+    volumes:
+      - ./database/database.sqlite:/var/www/html/database/database.sqlite
+      - ./storage:/var/www/html/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 開発用のデータベースサービス（オプション）
+  mysql:
+    image: mysql:8.0
+    container_name: study-app-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: study_app
+      MYSQL_USER: study_user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    profiles:
+      - mysql
+
+volumes:
+  mysql_data:
