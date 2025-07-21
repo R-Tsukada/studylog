@@ -7,30 +7,146 @@
     <meta name="description" content="資格試験学習のための学習記録・管理アプリケーション">
     <link rel="icon" href="/favicon.ico">
     
-    <!-- CSS -->
-    <link rel="stylesheet" href="/build/assets/app-CwSVWoW5.css">
-    <link rel="stylesheet" href="/build/assets/app-Ctup3Zlp.css">
-    
-    <!-- JavaScript -->
-    <script type="module" src="/build/assets/app-Dm_xUNrT.js"></script>
+    <!-- 動的アセット読み込み用スタイル -->
+    <style>
+        .loading-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .loading-content {
+            text-align: center;
+        }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-container {
+            background-color: #f3f4f6;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .error-title {
+            color: #dc2626;
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .error-message {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 <body class="antialiased">
     <div id="app">
-        <!-- Vue.jsアプリケーションのマウントポイント -->
-        <div class="flex items-center justify-center min-h-screen">
-            <div class="text-center">
-                <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <p class="text-gray-600">学習管理アプリを読み込んでいます...</p>
+        <!-- 初期ローディング表示 -->
+        <div class="loading-container">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p style="color: #6b7280;">学習管理アプリを読み込んでいます...</p>
             </div>
         </div>
     </div>
     
-    <!-- エラーが発生した場合のフォールバック -->
+    <!-- 動的アセット読み込みスクリプト -->
+    <script>
+        async function loadAssets() {
+            try {
+                // manifestファイルを取得
+                const manifestResponse = await fetch('/build/manifest.json');
+                if (!manifestResponse.ok) {
+                    throw new Error('Manifestファイルの取得に失敗しました');
+                }
+                const manifest = await manifestResponse.json();
+                
+                // CSSファイルを動的に読み込み
+                const appCssEntry = manifest['resources/css/app.css'];
+                if (appCssEntry) {
+                    const cssLink = document.createElement('link');
+                    cssLink.rel = 'stylesheet';
+                    cssLink.href = `/build/${appCssEntry.file}`;
+                    document.head.appendChild(cssLink);
+                }
+                
+                // Vue.jsアプリケーションのCSSも読み込み
+                const appJsEntry = manifest['resources/js/app.js'];
+                if (appJsEntry && appJsEntry.css) {
+                    appJsEntry.css.forEach(cssFile => {
+                        const cssLink = document.createElement('link');
+                        cssLink.rel = 'stylesheet';
+                        cssLink.href = `/build/${cssFile}`;
+                        document.head.appendChild(cssLink);
+                    });
+                }
+                
+                // JavaScriptファイルを動的に読み込み
+                if (appJsEntry) {
+                    const script = document.createElement('script');
+                    script.type = 'module';
+                    script.src = `/build/${appJsEntry.file}`;
+                    
+                    // スクリプト読み込みエラーハンドリング
+                    script.onerror = function() {
+                        showError('JavaScriptファイルの読み込みに失敗しました。');
+                    };
+                    
+                    document.head.appendChild(script);
+                } else {
+                    throw new Error('アプリケーションファイルが見つかりません');
+                }
+                
+            } catch (error) {
+                console.error('Asset loading error:', error);
+                showError(`アプリケーションの読み込み中にエラーが発生しました: ${error.message}`);
+            }
+        }
+        
+        function showError(message) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="loading-container">
+                    <div class="error-container">
+                        <div class="error-title">読み込みエラー</div>
+                        <div class="error-message">
+                            ${message}<br><br>
+                            ページを再読み込みしてみてください。<br>
+                            問題が続く場合は、開発者にお問い合わせください。
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ページ読み込み完了後にアセットを読み込み
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAssets);
+        } else {
+            loadAssets();
+        }
+    </script>
+    
+    <!-- JavaScriptが無効な場合のフォールバック -->
     <noscript>
-        <div class="fixed inset-0 bg-gray-100 flex items-center justify-center">
-            <div class="text-center p-8">
-                <h1 class="text-2xl font-bold text-gray-800 mb-4">JavaScriptが無効になっています</h1>
-                <p class="text-gray-600">このアプリケーションを使用するにはJavaScriptを有効にしてください。</p>
+        <div class="loading-container">
+            <div class="error-container">
+                <div class="error-title">JavaScriptが無効になっています</div>
+                <div class="error-message">
+                    このアプリケーションを使用するにはJavaScriptを有効にしてください。
+                </div>
             </div>
         </div>
     </noscript>
