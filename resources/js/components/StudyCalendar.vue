@@ -211,7 +211,7 @@ export default {
 }
 
 .month-labels-spacer {
-  width: 24px;
+  width: 32px;
   height: 18px;
   float: left;
 }
@@ -219,16 +219,20 @@ export default {
 .calendar-main {
   display: flex;
   align-items: flex-start;
-  gap: 4px;
+  gap: 8px;
+  position: relative;
 }
 
 .weekday-labels {
   display: grid;
   grid-template-rows: repeat(7, 12px);
   gap: 2px;
-  width: 20px;
+  width: 24px;
   text-align: right;
   flex-shrink: 0;
+  z-index: 10;
+  background: white;
+  padding-right: 4px;
 }
 
 .calendar-grid {
@@ -306,12 +310,12 @@ export default {
   }
   
   .weekday-labels {
-    width: 18px;
+    width: 22px;
     grid-template-rows: repeat(7, 10px);
   }
   
   .month-labels-spacer {
-    width: 22px;
+    width: 26px;
   }
 }
 
