@@ -12,11 +12,13 @@ RUN apt-get update && apt-get install -y \
     unzip \
     sqlite3 \
     libsqlite3-dev \
+    libpq-dev \
+    postgresql-client \
     nginx \
     supervisor \
     ca-certificates \
     gnupg \
-    && docker-php-ext-install pdo pdo_sqlite mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo pdo_sqlite pdo_pgsql pgsql mbstring exif pcntl bcmath gd
 
 # Node.js 20をインストール（最新LTSバージョン）
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \

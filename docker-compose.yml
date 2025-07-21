@@ -31,7 +31,22 @@ services:
       retries: 3
       start_period: 40s
 
-  # 開発用のデータベースサービス（オプション）
+  # 開発用のPostgreSQLサービス（オプション）
+  postgres:
+    image: postgres:15
+    container_name: study-app-postgres
+    environment:
+      POSTGRES_DB: study_app
+      POSTGRES_USER: study_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    profiles:
+      - postgres
+
+  # 開発用のMySQLサービス（オプション）
   mysql:
     image: mysql:8.0
     container_name: study-app-mysql
@@ -48,4 +63,5 @@ services:
       - mysql
 
 volumes:
+  postgres_data:
   mysql_data:
