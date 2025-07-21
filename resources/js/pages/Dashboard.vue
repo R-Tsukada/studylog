@@ -1,5 +1,25 @@
 <template>
   <div>
+    <!-- モック環境お知らせ（本番環境のみ） -->
+    <div v-if="showMockNotice" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <span class="text-yellow-600 text-xl">🎭</span>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">デモ環境で動作中</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>現在はモックデータで動作しています。実際の学習データの保存・管理機能は開発中です。</p>
+            <div class="mt-2">
+              <button @click="dismissMockNotice" class="text-yellow-800 underline hover:text-yellow-900">
+                このメッセージを非表示
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 現在のセッション状態 -->
     <section v-if="currentSession" class="bg-red-50 border border-red-200 rounded-lg shadow p-6 mb-6">
       <h2 class="text-lg font-semibold mb-4 text-red-800">🔥 学習中</h2>
@@ -151,7 +171,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { apiService } from '../services/apiService.js'
 import StudyCalendar from '../components/StudyCalendar.vue'
 
 export default {
@@ -184,9 +204,16 @@ export default {
       // タイマー
       sessionTimer: null,
       dashboardTimer: null,
+      
+      // モック環境通知
+      showMockNotice: false,
     }
   },
   async mounted() {
+    // モック環境通知を表示（初回のみ）
+    if (apiService.mockMode && !localStorage.getItem('mockNoticeDismissed')) {
+      this.showMockNotice = true
+    }
     await this.loadInitialData()
   },
   beforeUnmount() {
@@ -226,7 +253,7 @@ export default {
     // 試験タイプと学習分野を取得
     async loadExamTypes() {
       try {
-        const response = await axios.get('/api/exam-types')
+        const response = await apiService.getExamTypes()
         this.examTypes = response.data
       } catch (error) {
         console.error('試験タイプ取得エラー:', error)
@@ -237,7 +264,7 @@ export default {
     // 現在のセッション状態を取得
     async loadCurrentSession() {
       try {
-        const response = await axios.get('/api/study-sessions/current')
+        const response = await apiService.getCurrentSession()
         if (response.data.success && response.data.session) {
           this.currentSession = response.data.session
         }
@@ -311,7 +338,7 @@ export default {
     async loadStudyHistory() {
       this.loadingHistory = true
       try {
-        const response = await axios.get('/api/study-sessions/history?limit=5')
+        const response = await apiService.getStudyHistory({ limit: 5 })
         if (response.data.success) {
           this.recentSessions = response.data.history
         }
@@ -326,7 +353,7 @@ export default {
     async loadDashboardData() {
       this.loadingDashboard = true
       try {
-        const response = await axios.get('/api/dashboard')
+        const response = await apiService.getDashboardData()
         if (response.data.success) {
           const data = response.data.data
           this.continuousDays = data.continuous_days
@@ -384,6 +411,12 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 5000)
+    },
+    
+    // モック環境通知を非表示
+    dismissMockNotice() {
+      this.showMockNotice = false
+      localStorage.setItem('mockNoticeDismissed', 'true')
     }
   }
 }

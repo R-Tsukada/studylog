@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { apiService } from '../services/apiService.js'
 
 export default {
   name: 'LoginPage',
@@ -174,7 +174,7 @@ export default {
       this.errorMessage = ''
       
       try {
-        const response = await axios.post('/api/auth/login', this.loginForm)
+        const response = await apiService.login(this.loginForm)
         
         if (response.data.success) {
           this.handleAuthSuccess(response.data)
@@ -186,7 +186,7 @@ export default {
         if (error.response?.data?.message) {
           this.showError(error.response.data.message)
         } else {
-          this.showError('ログイン中にエラーが発生しました')
+          this.showError(error.message || 'ログイン中にエラーが発生しました')
         }
       } finally {
         this.loading = false
@@ -198,7 +198,7 @@ export default {
       this.errorMessage = ''
       
       try {
-        const response = await axios.post('/api/auth/register', this.registerForm)
+        const response = await apiService.register(this.registerForm)
         
         if (response.data.success) {
           this.handleAuthSuccess(response.data)
@@ -213,7 +213,7 @@ export default {
         } else if (error.response?.data?.message) {
           this.showError(error.response.data.message)
         } else {
-          this.showError('登録中にエラーが発生しました')
+          this.showError(error.message || '登録中にエラーが発生しました')
         }
       } finally {
         this.loading = false

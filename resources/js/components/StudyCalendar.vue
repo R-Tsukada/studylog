@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { apiService } from '../services/apiService.js'
 
 export default {
   name: 'StudyCalendar',
@@ -141,7 +141,7 @@ export default {
     async loadCalendarData() {
       this.loading = true
       try {
-        const response = await axios.get('/api/dashboard/study-calendar')
+        const response = await apiService.getStudyCalendar()
         if (response.data.success) {
           this.calendarData = response.data.data
         }
