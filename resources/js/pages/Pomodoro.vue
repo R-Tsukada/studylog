@@ -73,7 +73,7 @@
                                   {{ session.notes.substring(0, 30) }}...
                                   <button
                                     @click="session.showFullMemo = true"
-                                    class="text-blue-600 hover:text-blue-700 underline ml-1"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1 cursor-pointer"
                                   >
                                     全文
                                   </button>
@@ -82,7 +82,7 @@
                                   {{ session.notes }}
                                   <button
                                     @click="session.showFullMemo = false"
-                                    class="text-blue-600 hover:text-blue-700 underline ml-1"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1 cursor-pointer"
                                   >
                                     省略
                                   </button>
@@ -103,13 +103,13 @@
                           <span class="text-xs text-gray-600">📝 メモを編集</span>
                           <button
                             @click="saveSessionMemo(session)"
-                            class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                            class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 cursor-pointer"
                           >
                             保存
                           </button>
                           <button
                             @click="cancelEditingSessionMemo(session)"
-                            class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
+                            class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 cursor-pointer"
                           >
                             キャンセル
                           </button>
@@ -143,7 +143,7 @@
                     <!-- メモ編集ボタン -->
                     <button
                       @click="startEditingSessionMemo(session)"
-                      class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors cursor-pointer"
                       title="メモを編集"
                     >
                       ✏️
@@ -151,7 +151,7 @@
                     <!-- 削除ボタン -->
                     <button
                       @click="deleteSession(session)"
-                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors cursor-pointer"
                       title="このセッションを削除"
                     >
                       🗑️
