@@ -444,9 +444,9 @@ export default {
     
     // セッションメモ編集関連メソッド
     startEditingSessionMemo(session) {
-      // Vue.jsの反応性のために$setを使用
-      this.$set(session, 'isEditingMemo', true);
-      this.$set(session, 'editingNotes', session.notes || '');
+      // Vue 3では直接プロパティを設定
+      session.isEditingMemo = true;
+      session.editingNotes = session.notes || '';
     },
     
     async saveSessionMemo(session) {
