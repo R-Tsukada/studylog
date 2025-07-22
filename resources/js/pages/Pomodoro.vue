@@ -64,48 +64,36 @@
                     <div class="mt-2">
                       <div v-if="!session.isEditingMemo" class="memo-display">
                         <div v-if="session.notes && session.notes.trim()" class="text-xs text-gray-700">
-                          <div class="flex items-start justify-between">
+                          <div class="flex items-start gap-2">
                             <span class="text-gray-600">📝</span>
-                            <button
-                              @click="startEditingSessionMemo(session)"
-                              class="text-blue-600 hover:text-blue-700 underline"
-                              title="メモを編集"
-                            >
-                              編集
-                            </button>
-                          </div>
-                          
-                          <div class="mt-1">
-                            <span v-if="session.notes.length <= 30">{{ session.notes }}</span>
-                            <span v-else-if="!session.showFullMemo">
-                              {{ session.notes.substring(0, 30) }}...
-                              <button
-                                @click="session.showFullMemo = true"
-                                class="text-blue-600 hover:text-blue-700 underline ml-1"
-                              >
-                                全文
-                              </button>
-                            </span>
-                            <span v-else>
-                              {{ session.notes }}
-                              <button
-                                @click="session.showFullMemo = false"
-                                class="text-blue-600 hover:text-blue-700 underline ml-1"
-                              >
-                                省略
-                              </button>
-                            </span>
+                            <div class="flex-1">
+                              <div>
+                                <span v-if="session.notes.length <= 30">{{ session.notes }}</span>
+                                <span v-else-if="!session.showFullMemo">
+                                  {{ session.notes.substring(0, 30) }}...
+                                  <button
+                                    @click="session.showFullMemo = true"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1"
+                                  >
+                                    全文
+                                  </button>
+                                </span>
+                                <span v-else>
+                                  {{ session.notes }}
+                                  <button
+                                    @click="session.showFullMemo = false"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1"
+                                  >
+                                    省略
+                                  </button>
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         
                         <div v-else class="flex items-center gap-2">
                           <span class="text-xs text-gray-400">📝 メモなし</span>
-                          <button
-                            @click="startEditingSessionMemo(session)"
-                            class="text-xs text-blue-600 hover:text-blue-700 underline"
-                          >
-                            追加
-                          </button>
                         </div>
                       </div>
                       
@@ -149,16 +137,27 @@
                       {{ session.was_interrupted ? '中断' : '完了' }}
                     </div>
                   </div>
-                  <!-- 削除ボタン（実行中以外のセッションのみ） -->
-                  <button
-                    v-if="session.is_completed"
-                    @click="deleteSession(session)"
-                    class="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all"
-                    title="このセッションを削除"
-                  >
-                    🗑️
-                  </button>
-                  <div v-else class="w-6 h-6"></div> <!-- 実行中セッションのスペーサー -->
+                  
+                  <!-- 編集・削除ボタン -->
+                  <div v-if="session.is_completed" class="flex items-center gap-2">
+                    <!-- メモ編集ボタン -->
+                    <button
+                      @click="startEditingSessionMemo(session)"
+                      class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      title="メモを編集"
+                    >
+                      ✏️
+                    </button>
+                    <!-- 削除ボタン -->
+                    <button
+                      @click="deleteSession(session)"
+                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                      title="このセッションを削除"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  <div v-else class="w-16 h-6"></div> <!-- 実行中セッションのスペーサー -->
                 </div>
               </div>
             </div>
