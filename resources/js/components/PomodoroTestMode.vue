@@ -209,11 +209,12 @@ export default {
           body: JSON.stringify(sessionData)
         })
         
-        if (response.ok) {
-          const data = await response.json()
-          // タイマー時間を秒単位に調整
-          const session = { ...data.data }
-          this.startGlobalPomodoroTimer(session)
+        if (response.status === 201 || response.status === 200) {
+          const sessionData = await response.json()
+          console.log('テストセッション作成成功:', sessionData)
+          
+          // グローバルタイマーでセッションを開始
+          this.startGlobalPomodoroTimer(sessionData)
           
           // テスト用に実際の残り時間を秒単位で設定
           this.globalPomodoroTimer.timeRemaining = this.testDurations.focus

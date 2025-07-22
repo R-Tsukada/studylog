@@ -301,8 +301,9 @@ export default {
     },
     
     async handleGlobalTimerComplete() {
-      console.log('グローバルタイマー完了')
+      console.log('=== グローバルタイマー完了 ===')
       const completedSession = { ...this.globalPomodoroTimer.currentSession }
+      console.log('完了したセッション:', completedSession)
       
       // 通知表示
       if (Notification.permission === 'granted') {
@@ -322,27 +323,50 @@ export default {
       // 音声通知
       this.playNotificationSound()
       
+      // 一旦タイマー停止（状態をクリア）
+      this.stopGlobalPomodoroTimer()
+      
       // API セッション完了処理
       await this.completeCurrentSession(completedSession)
       
-      // 一旦タイマー停止
-      this.stopGlobalPomodoroTimer()
-      
       // 自動開始設定がONの場合、次のセッションを自動開始
       const settings = completedSession.settings
-      if (settings?.auto_start_break || settings?.auto_start_focus) {
+      const shouldAutoStart = settings?.auto_start_break || settings?.auto_start_focus
+      
+      console.log('自動開始チェック:', {
+        settings: settings,
+        shouldAutoStart: shouldAutoStart,
+        sessionType: completedSession.session_type
+      })
+      
+      if (shouldAutoStart) {
         setTimeout(() => {
           this.startNextAutoSession(completedSession)
         }, 2000) // 2秒後に自動開始
+      } else {
+        console.log('自動開始設定がOFFのため、次のセッションは開始しません')
       }
     },
     
     playNotificationSound() {
       try {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmccBzuU3OzMeShiSNcjGiusY')
-        audio.play().catch(console.error)
+        // ブラウザの標準通知音を使用（音声ファイルエラーを回避）
+        const context = new (window.AudioContext || window.webkitAudioContext)()
+        const oscillator = context.createOscillator()
+        const gainNode = context.createGain()
+        
+        oscillator.connect(gainNode)
+        gainNode.connect(context.destination)
+        
+        oscillator.frequency.value = 800
+        gainNode.gain.setValueAtTime(0.3, context.currentTime)
+        gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5)
+        
+        oscillator.start(context.currentTime)
+        oscillator.stop(context.currentTime + 0.5)
       } catch (error) {
-        console.error('音声再生エラー:', error)
+        console.log('音声通知をスキップ:', error)
+        // 音声が再生できなくてもエラーにしない
       }
     },
     
@@ -398,6 +422,7 @@ export default {
     async completeCurrentSession(session) {
       try {
         const actualDuration = Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60)
+        console.log('セッション完了処理開始:', session.id, '実際の時間:', actualDuration)
         
         const response = await axios.post(`/api/pomodoro/${session.id}/complete`, {
           actual_duration: actualDuration,
@@ -405,11 +430,15 @@ export default {
           notes: '自動完了'
         })
         
-        if (response.data.success) {
-          console.log('セッション自動完了成功:', session.session_type)
+        // Laravel のレスポンス構造に合わせる（success フィールドがない場合もある）
+        if (response.status === 200) {
+          console.log('セッション自動完了成功:', session.session_type, response.data)
+        } else {
+          console.warn('セッション完了レスポンス異常:', response.status, response.data)
         }
       } catch (error) {
         console.error('セッション完了エラー:', error)
+        // エラーでも次の処理は続行する
       }
     },
     
@@ -458,11 +487,13 @@ export default {
         
         const response = await axios.post('/api/pomodoro', sessionData)
         
-        if (response.data.success) {
-          console.log('次のセッション自動作成成功:', response.data.data)
+        // Laravel は通常 success フィールドを返さない
+        if (response.status === 201 || response.status === 200) {
+          const newSession = response.data
+          console.log('次のセッション自動作成成功:', newSession)
           
           // グローバルタイマーで新しいセッションを開始
-          this.startGlobalPomodoroTimer(response.data.data)
+          this.startGlobalPomodoroTimer(newSession)
           
           // 自動開始通知
           if (Notification.permission === 'granted') {
@@ -477,6 +508,8 @@ export default {
               icon: '/favicon.ico'
             })
           }
+        } else {
+          console.error('次のセッション作成失敗:', response.status, response.data)
         }
       } catch (error) {
         console.error('次のセッション自動開始エラー:', error)

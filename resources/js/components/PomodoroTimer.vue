@@ -534,9 +534,24 @@ export default {
     
     playNotificationSound() {
       if (this.settings.sound_enabled) {
-        // ブラウザの通知音を再生
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmccBzuU3OzMeShiSNcjGiusY');
-        audio.play().catch(console.error);
+        try {
+          // Web Audio API で通知音を生成
+          const context = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = context.createOscillator();
+          const gainNode = context.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(context.destination);
+          
+          oscillator.frequency.value = 800;
+          gainNode.gain.setValueAtTime(0.3, context.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+          
+          oscillator.start(context.currentTime);
+          oscillator.stop(context.currentTime + 0.5);
+        } catch (error) {
+          console.log('音声通知をスキップ:', error);
+        }
       }
       
       // ブラウザ通知
