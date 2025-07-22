@@ -127,6 +127,11 @@
         </div>
       </div>
 
+      <!-- テストモード（開発用） -->
+      <div class="mt-8">
+        <PomodoroTestMode />
+      </div>
+
       <!-- ポモドーロテクニックの説明 -->
       <div class="mt-8 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4">💡 ポモドーロテクニックとは？</h2>
@@ -165,11 +170,13 @@
 
 <script>
 import PomodoroTimer from '../components/PomodoroTimer.vue'
+import PomodoroTestMode from '../components/PomodoroTestMode.vue'
 
 export default {
   name: 'Pomodoro',
   components: {
-    PomodoroTimer
+    PomodoroTimer,
+    PomodoroTestMode
   },
   data() {
     return {
