@@ -166,6 +166,11 @@
       </div>
 
       <!-- メモ表示・編集エリア（集中セッション時のみ） -->
+      <!-- デバッグ表示（一時的） -->
+      <div v-if="isActive || currentSession" class="debug-info text-xs text-gray-500 mb-2">
+        デバッグ: session_type={{ currentSession?.session_type }}, isActive={{ isActive }}
+      </div>
+      
       <div v-if="currentSession?.session_type === 'focus'" class="memo-section mb-6">
         <div v-if="!isEditingMemo" class="memo-display">
           <div class="flex items-start justify-between mb-2">
@@ -204,7 +209,7 @@
             </div>
           </div>
           
-          <div v-else class="text-sm text-gray-500 italic">
+          <div v-else class="text-sm text-gray-500 italic bg-gray-50 p-3 rounded-lg">
             メモは入力されていません
           </div>
         </div>
