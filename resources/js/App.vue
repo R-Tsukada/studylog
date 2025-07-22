@@ -41,8 +41,26 @@
       <!-- ボトムナビゲーション -->
       <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
         <!-- アクティブなタイマー表示 -->
-        <div v-if="globalPomodoroTimer.isActive" class="bg-red-500 text-white text-xs text-center py-1 mb-2 rounded">
-          🍅 {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - {{ globalPomodoroTimer.currentSession?.session_type === 'focus' ? '集中' : '休憩' }}
+        <div v-if="globalPomodoroTimer.isActive" 
+             :class="[
+               'text-white text-xs text-center py-1 mb-2 rounded',
+               globalPomodoroTimer.currentSession?.session_type === 'focus' 
+                 ? 'bg-red-500' 
+                 : 'bg-green-500'
+             ]"
+        >
+          <span v-if="globalPomodoroTimer.currentSession?.session_type === 'focus'">
+            🎯 {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - 集中中
+          </span>
+          <span v-else-if="globalPomodoroTimer.currentSession?.session_type === 'short_break'">
+            ☕ {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - 休憩中
+          </span>
+          <span v-else-if="globalPomodoroTimer.currentSession?.session_type === 'long_break'">
+            🛋️ {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - 長い休憩中
+          </span>
+          <span v-else>
+            🍅 {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - セッション中
+          </span>
         </div>
         
         <div class="max-w-4xl mx-auto flex justify-around">
@@ -282,13 +300,13 @@ export default {
       localStorage.removeItem('pomodoroTimer')
     },
     
-    handleGlobalTimerComplete() {
+    async handleGlobalTimerComplete() {
       console.log('グローバルタイマー完了')
-      this.stopGlobalPomodoroTimer()
+      const completedSession = { ...this.globalPomodoroTimer.currentSession }
       
       // 通知表示
       if (Notification.permission === 'granted') {
-        const sessionType = this.globalPomodoroTimer.currentSession?.session_type
+        const sessionType = completedSession?.session_type
         const messages = {
           focus: '🎯 集中セッション完了！',
           short_break: '☕ 短い休憩完了！',
@@ -303,6 +321,20 @@ export default {
       
       // 音声通知
       this.playNotificationSound()
+      
+      // API セッション完了処理
+      await this.completeCurrentSession(completedSession)
+      
+      // 一旦タイマー停止
+      this.stopGlobalPomodoroTimer()
+      
+      // 自動開始設定がONの場合、次のセッションを自動開始
+      const settings = completedSession.settings
+      if (settings?.auto_start_break || settings?.auto_start_focus) {
+        setTimeout(() => {
+          this.startNextAutoSession(completedSession)
+        }, 2000) // 2秒後に自動開始
+      }
     },
     
     playNotificationSound() {
@@ -360,6 +392,94 @@ export default {
       } catch (error) {
         console.error('タイマー状態復元エラー:', error)
         localStorage.removeItem('pomodoroTimer')
+      }
+    },
+    
+    async completeCurrentSession(session) {
+      try {
+        const actualDuration = Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60)
+        
+        const response = await axios.post(`/api/pomodoro/${session.id}/complete`, {
+          actual_duration: actualDuration,
+          was_interrupted: false,
+          notes: '自動完了'
+        })
+        
+        if (response.data.success) {
+          console.log('セッション自動完了成功:', session.session_type)
+        }
+      } catch (error) {
+        console.error('セッション完了エラー:', error)
+      }
+    },
+    
+    async startNextAutoSession(completedSession) {
+      try {
+        console.log('次のセッション自動開始:', completedSession.session_type)
+        
+        // 次のセッションタイプを決定
+        let nextSessionType
+        let nextDuration
+        const settings = completedSession.settings
+        
+        if (completedSession.session_type === 'focus') {
+          // 集中→休憩
+          nextSessionType = 'short_break'
+          nextDuration = settings?.short_break_duration || 5
+        } else if (completedSession.session_type === 'short_break') {
+          // 短い休憩→集中
+          nextSessionType = 'focus'
+          nextDuration = settings?.focus_duration || 25
+        } else if (completedSession.session_type === 'long_break') {
+          // 長い休憩→集中
+          nextSessionType = 'focus'
+          nextDuration = settings?.focus_duration || 25
+        }
+        
+        // 自動開始の設定確認
+        const shouldAutoStart = (
+          (nextSessionType !== 'focus' && settings?.auto_start_break) ||
+          (nextSessionType === 'focus' && settings?.auto_start_focus)
+        )
+        
+        if (!shouldAutoStart) {
+          console.log('自動開始設定が無効なため、次のセッションは開始しません')
+          return
+        }
+        
+        // APIで次のセッションを作成
+        const sessionData = {
+          session_type: nextSessionType,
+          planned_duration: nextDuration,
+          study_session_id: null,
+          subject_area_id: nextSessionType === 'focus' ? completedSession.subject_area_id : null,
+          settings: settings
+        }
+        
+        const response = await axios.post('/api/pomodoro', sessionData)
+        
+        if (response.data.success) {
+          console.log('次のセッション自動作成成功:', response.data.data)
+          
+          // グローバルタイマーで新しいセッションを開始
+          this.startGlobalPomodoroTimer(response.data.data)
+          
+          // 自動開始通知
+          if (Notification.permission === 'granted') {
+            const messages = {
+              focus: '🎯 集中セッション自動開始！',
+              short_break: '☕ 短い休憩自動開始！',
+              long_break: '🛋️ 長い休憩自動開始！'
+            }
+            
+            new Notification('ポモドーロタイマー', {
+              body: messages[nextSessionType] || '次のセッション自動開始！',
+              icon: '/favicon.ico'
+            })
+          }
+        }
+      } catch (error) {
+        console.error('次のセッション自動開始エラー:', error)
       }
     }
   },

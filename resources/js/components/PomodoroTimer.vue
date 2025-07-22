@@ -238,7 +238,7 @@ export default {
       selectedSubjectArea: '',
       settings: {
         sound_enabled: true,
-        auto_start: false,
+        auto_start: true,  // デフォルトで自動開始を有効に
       },
       
       // セッション管理
@@ -488,8 +488,11 @@ export default {
           this.showCompletionMessage();
           await this.loadTodayStats();
           
+          // 2秒後に次のセッション提案
           if (this.settings.auto_start) {
-            this.suggestNextSession();
+            setTimeout(() => {
+              this.suggestNextSession();
+            }, 2000);
           }
         }
       } catch (error) {
