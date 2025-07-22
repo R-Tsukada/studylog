@@ -14,7 +14,7 @@
             <div class="text-sm text-gray-700 mt-2">{{ currentSession.study_comment }}</div>
           </div>
           <div class="text-right">
-            <div class="text-3xl font-bold text-blue-600">{{ formatElapsedTime(currentSession.elapsed_minutes) }}</div>
+            <div class="text-3xl font-bold text-blue-600">{{ formatElapsedTime(globalStudyTimer.elapsedMinutes) }}</div>
             <div class="text-sm text-gray-600">経過時間</div>
           </div>
         </div>
@@ -103,6 +103,7 @@
 <script>
 export default {
   name: 'StudySession',
+  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   data() {
     return {
       // フォーム
@@ -110,35 +111,29 @@ export default {
       studyComment: '',
       
       // 状態
-      currentSession: null,
       subjectAreas: [],
       loading: false,
       
       // メッセージ
       errorMessage: '',
-      successMessage: '',
-      
-      // タイマー
-      refreshTimer: null
+      successMessage: ''
+    }
+  },
+  
+  computed: {
+    // グローバルタイマーの状態を参照
+    currentSession() {
+      return this.globalStudyTimer.currentSession
+    },
+    
+    isActive() {
+      return this.globalStudyTimer.isActive
     }
   },
   
   async mounted() {
     await this.loadSubjectAreas()
     await this.checkCurrentSession()
-    
-    // 1秒ごとに現在のセッション情報を更新
-    this.refreshTimer = setInterval(() => {
-      if (this.currentSession) {
-        this.updateElapsedTime()
-      }
-    }, 1000)
-  },
-  
-  beforeUnmount() {
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer)
-    }
   },
   
   methods: {
@@ -165,6 +160,7 @@ export default {
     
     async checkCurrentSession() {
       try {
+        console.log('現在の時間計測セッション確認開始...')
         const response = await fetch('/api/study-sessions/current', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -174,41 +170,33 @@ export default {
         
         if (response.ok) {
           const data = await response.json()
+          console.log('API側の現在の時間計測セッション:', data)
+          
           if (data.success && data.session) {
-            this.currentSession = data.session
+            // グローバルタイマーが動いていない場合、API側のセッションでタイマーを開始
+            if (!this.globalStudyTimer.isActive) {
+              console.log('API側にアクティブセッション発見、グローバルタイマーを開始')
+              this.startGlobalStudyTimer(data.session)
+            }
+          } else {
+            // API側にアクティブセッションがない場合、グローバルタイマーも停止
+            if (this.globalStudyTimer.isActive) {
+              console.log('API側にセッションなし、グローバルタイマーを停止')
+              this.stopGlobalStudyTimer()
+            }
           }
+        } else if (response.status === 404) {
+          console.log('アクティブな時間計測セッションなし')
+          // グローバルタイマーも停止
+          if (this.globalStudyTimer.isActive) {
+            this.stopGlobalStudyTimer()
+          }
+        } else {
+          const errorData = await response.json()
+          console.error('時間計測セッション取得エラー:', errorData)
         }
       } catch (error) {
         console.error('現在のセッション取得エラー:', error)
-      }
-    },
-    
-    updateElapsedTime() {
-      if (this.currentSession) {
-        // タイムスタンプが利用可能な場合はそれを使用、そうでなければ文字列をパース
-        let startTime
-        if (this.currentSession.started_at_timestamp) {
-          startTime = new Date(this.currentSession.started_at_timestamp * 1000)
-        } else {
-          // フォールバック: 文字列をISO形式に変換
-          const startTimeStr = this.currentSession.started_at.replace(' ', 'T')
-          startTime = new Date(startTimeStr)
-        }
-        
-        const now = new Date()
-        const elapsedMinutes = Math.floor((now - startTime) / (1000 * 60))
-        this.currentSession.elapsed_minutes = Math.max(0, elapsedMinutes)
-        
-        // デバッグ情報（一時的に常に表示）
-        console.log('🔍 Update elapsed time debug:', {
-          started_at: this.currentSession.started_at,
-          timestamp: this.currentSession.started_at_timestamp,
-          startTime: startTime.toString(),
-          now: now.toString(),
-          elapsed: elapsedMinutes,
-          timeDiff: now - startTime,
-          timeDiffMinutes: (now - startTime) / (1000 * 60)
-        })
       }
     },
     
@@ -235,7 +223,8 @@ export default {
         const data = await response.json()
         
         if (response.ok && data.success) {
-          this.currentSession = data.session
+          // グローバルタイマーを開始
+          this.startGlobalStudyTimer(data.session)
           this.showSuccess('学習セッションを開始しました！')
           this.resetForm()
         } else {
@@ -273,9 +262,10 @@ export default {
         const data = await response.json()
         
         if (response.ok && data.success) {
-          const duration = this.formatElapsedTime(this.currentSession.elapsed_minutes)
+          const duration = this.formatElapsedTime(this.globalStudyTimer.elapsedMinutes)
           this.showSuccess(`学習セッションを終了しました！学習時間: ${duration}`)
-          this.currentSession = null
+          // グローバルタイマーを停止
+          this.stopGlobalStudyTimer()
         } else {
           this.showError(data.message || '学習セッション終了に失敗しました')
         }

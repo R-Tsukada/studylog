@@ -41,6 +41,7 @@
       <!-- ボトムナビゲーション -->
       <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-50">
         <!-- アクティブなタイマー表示 -->
+        <!-- ポモドーロタイマー -->
         <div v-if="globalPomodoroTimer.isActive" 
              :class="[
                'text-white text-xs text-center py-1 mb-2 rounded',
@@ -61,6 +62,13 @@
           <span v-else>
             🍅 {{ Math.floor(globalPomodoroTimer.timeRemaining / 60).toString().padStart(2, '0') }}:{{ (globalPomodoroTimer.timeRemaining % 60).toString().padStart(2, '0') }} - セッション中
           </span>
+        </div>
+        
+        <!-- 時間計測タイマー -->
+        <div v-if="globalStudyTimer.isActive"
+             class="text-white text-xs text-center py-1 mb-2 rounded bg-blue-500"
+        >
+          ⏰ {{ formatElapsedTime(globalStudyTimer.elapsedMinutes) }} - 学習中 ({{ globalStudyTimer.currentSession?.subject_area_name || '時間計測' }})
         </div>
         
         <div class="max-w-4xl mx-auto flex justify-around">
@@ -146,6 +154,15 @@ export default {
         timeRemaining: 0,
         startTime: 0,
         timer: null
+      }),
+      
+      // グローバル時間計測タイマー
+      globalStudyTimer: reactive({
+        isActive: false,
+        currentSession: null,
+        elapsedMinutes: 0,
+        startTime: 0,
+        timer: null
       })
     }
   },
@@ -155,6 +172,7 @@ export default {
     
     // タイマー状態を復元
     this.restoreTimerStateFromStorage()
+    this.restoreStudyTimerStateFromStorage()
     
     // 通知権限を要求
     if (Notification.permission === 'default') {
@@ -501,6 +519,110 @@ export default {
       } catch (error) {
         console.error('次のセッション自動開始エラー:', error)
       }
+    },
+    
+    // ========== 時間計測タイマー管理 ==========
+    
+    // 時間計測タイマー開始
+    startGlobalStudyTimer(session) {
+      console.log('グローバル時間計測タイマー開始:', session)
+      this.globalStudyTimer.currentSession = session
+      this.globalStudyTimer.isActive = true
+      this.globalStudyTimer.startTime = Date.now()
+      this.globalStudyTimer.elapsedMinutes = 0
+      
+      // 既存のタイマーがあれば停止
+      if (this.globalStudyTimer.timer) {
+        clearInterval(this.globalStudyTimer.timer)
+      }
+      
+      // 新しいタイマーを開始（1分ごとに更新）
+      this.globalStudyTimer.timer = setInterval(() => {
+        this.updateStudyElapsedTime()
+        this.saveStudyTimerStateToStorage()
+      }, 1000) // 1秒ごとに更新
+    },
+    
+    // 時間計測タイマー停止
+    stopGlobalStudyTimer() {
+      console.log('グローバル時間計測タイマー停止')
+      if (this.globalStudyTimer.timer) {
+        clearInterval(this.globalStudyTimer.timer)
+        this.globalStudyTimer.timer = null
+      }
+      
+      this.globalStudyTimer.isActive = false
+      this.globalStudyTimer.currentSession = null
+      this.globalStudyTimer.elapsedMinutes = 0
+      this.globalStudyTimer.startTime = 0
+      
+      // localStorage をクリア
+      localStorage.removeItem('studyTimer')
+    },
+    
+    // 経過時間を更新
+    updateStudyElapsedTime() {
+      if (this.globalStudyTimer.isActive && this.globalStudyTimer.startTime) {
+        const now = Date.now()
+        const elapsedMinutes = Math.floor((now - this.globalStudyTimer.startTime) / (1000 * 60))
+        this.globalStudyTimer.elapsedMinutes = Math.max(0, elapsedMinutes)
+      }
+    },
+    
+    // 時間計測タイマー状態をlocalStorageに保存
+    saveStudyTimerStateToStorage() {
+      const state = {
+        isActive: this.globalStudyTimer.isActive,
+        currentSession: this.globalStudyTimer.currentSession,
+        elapsedMinutes: this.globalStudyTimer.elapsedMinutes,
+        startTime: this.globalStudyTimer.startTime
+      }
+      localStorage.setItem('studyTimer', JSON.stringify(state))
+    },
+    
+    // 時間計測タイマー状態をlocalStorageから復元
+    restoreStudyTimerStateFromStorage() {
+      try {
+        const saved = localStorage.getItem('studyTimer')
+        if (saved) {
+          const state = JSON.parse(saved)
+          
+          if (state.isActive && state.currentSession && state.startTime) {
+            // 現在の経過時間を計算
+            const elapsed = Math.floor((Date.now() - state.startTime) / (1000 * 60))
+            
+            // タイマーを復元
+            this.globalStudyTimer.currentSession = state.currentSession
+            this.globalStudyTimer.isActive = true
+            this.globalStudyTimer.startTime = state.startTime
+            this.globalStudyTimer.elapsedMinutes = elapsed
+            
+            // タイマーを再開
+            this.globalStudyTimer.timer = setInterval(() => {
+              this.updateStudyElapsedTime()
+              this.saveStudyTimerStateToStorage()
+            }, 1000)
+            
+            console.log('時間計測タイマー状態復元成功:', elapsed, '分経過')
+          }
+        }
+      } catch (error) {
+        console.error('時間計測タイマー状態復元エラー:', error)
+        localStorage.removeItem('studyTimer')
+      }
+    },
+    
+    // 時間フォーマット関数
+    formatElapsedTime(minutes) {
+      const totalMinutes = Math.max(0, Math.floor(Number(minutes) || 0))
+      const hours = Math.floor(totalMinutes / 60)
+      const mins = totalMinutes % 60
+      
+      if (hours > 0) {
+        return `${hours}時間${mins}分`
+      } else {
+        return `${mins}分`
+      }
     }
   },
   
@@ -511,7 +633,10 @@ export default {
       showSuccess: this.showSuccess,
       globalPomodoroTimer: this.globalPomodoroTimer,
       startGlobalPomodoroTimer: this.startGlobalPomodoroTimer,
-      stopGlobalPomodoroTimer: this.stopGlobalPomodoroTimer
+      stopGlobalPomodoroTimer: this.stopGlobalPomodoroTimer,
+      globalStudyTimer: this.globalStudyTimer,
+      startGlobalStudyTimer: this.startGlobalStudyTimer,
+      stopGlobalStudyTimer: this.stopGlobalStudyTimer
     }
   }
 }

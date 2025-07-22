@@ -10,7 +10,7 @@
             <div class="text-sm text-gray-600">{{ currentSession.exam_type_name }}</div>
           </div>
           <div class="text-right">
-            <div class="text-2xl font-bold text-red-600">{{ formatElapsedTime(currentSession.elapsed_minutes) }}</div>
+            <div class="text-2xl font-bold text-red-600">{{ formatElapsedTime(globalStudyTimer.elapsedMinutes) }}</div>
             <div class="text-sm text-gray-600">経過時間</div>
           </div>
         </div>
@@ -167,6 +167,7 @@ import UnifiedAnalytics from '../components/UnifiedAnalytics.vue'
 
 export default {
   name: 'Dashboard',
+  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
     StudyCalendar,
     StudyMethodSuggestion,
@@ -184,7 +185,6 @@ export default {
       examTypes: [],
       selectedSubjectAreaId: '',
       studyComment: '',
-      currentSession: null,
       recentSessions: [],
       
       // ローディング・エラー管理
@@ -195,10 +195,21 @@ export default {
       successMessage: '',
       
       // タイマー
-      sessionTimer: null,
       dashboardTimer: null,
     }
   },
+  
+  computed: {
+    // グローバルタイマーの状態を参照
+    currentSession() {
+      return this.globalStudyTimer.currentSession
+    },
+    
+    isActive() {
+      return this.globalStudyTimer.isActive
+    }
+  },
+  
   async mounted() {
     await this.loadInitialData()
   },
@@ -208,16 +219,9 @@ export default {
   methods: {
     async loadInitialData() {
       await this.loadExamTypes()
-      await this.loadCurrentSession()
+      await this.checkGlobalStudyTimerSync()
       await this.loadStudyHistory()
       await this.loadDashboardData()
-      
-      // 5秒ごとに現在のセッション状態を更新
-      this.sessionTimer = setInterval(() => {
-        if (this.currentSession) {
-          this.updateCurrentSessionTimer()
-        }
-      }, 5000)
       
       // 30秒ごとにダッシュボードデータを更新
       this.dashboardTimer = setInterval(() => {
@@ -226,10 +230,6 @@ export default {
     },
     
     clearTimers() {
-      if (this.sessionTimer) {
-        clearInterval(this.sessionTimer)
-        this.sessionTimer = null
-      }
       if (this.dashboardTimer) {
         clearInterval(this.dashboardTimer)
         this.dashboardTimer = null
@@ -251,19 +251,31 @@ export default {
       }
     },
     
-    // 現在のセッション状態を取得
-    async loadCurrentSession() {
+    // グローバルタイマーとの同期チェック
+    async checkGlobalStudyTimerSync() {
       try {
+        console.log('ダッシュボード: グローバルタイマー同期チェック')
         const response = await axios.get('/api/study-sessions/current', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           }
         })
+        
         if (response.data.success && response.data.session) {
-          this.currentSession = response.data.session
+          // API側にアクティブセッションがあり、グローバルタイマーが動いていない場合
+          if (!this.globalStudyTimer.isActive) {
+            console.log('ダッシュボード: API側セッション発見、グローバルタイマー開始')
+            this.startGlobalStudyTimer(response.data.session)
+          }
+        } else {
+          // API側にアクティブセッションがない場合、グローバルタイマーも停止
+          if (this.globalStudyTimer.isActive) {
+            console.log('ダッシュボード: API側セッションなし、グローバルタイマー停止')
+            this.stopGlobalStudyTimer()
+          }
         }
       } catch (error) {
-        console.error('現在セッション取得エラー:', error)
+        console.error('グローバルタイマー同期チェックエラー:', error)
       }
     },
     
@@ -287,7 +299,8 @@ export default {
         
         if (response.data.success) {
           this.showSuccess('学習セッションを開始しました！')
-          this.currentSession = response.data.session
+          // グローバルタイマーを開始
+          this.startGlobalStudyTimer(response.data.session)
           this.selectedSubjectAreaId = ''
           this.studyComment = ''
           await this.loadDashboardData()
@@ -318,7 +331,8 @@ export default {
         
         if (response.data.success) {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
-          this.currentSession = null
+          // グローバルタイマーを停止
+          this.stopGlobalStudyTimer()
           await this.loadStudyHistory()
           await this.loadDashboardData()
         } else {
@@ -378,12 +392,6 @@ export default {
       }
     },
     
-    // 現在のセッションタイマーを更新
-    updateCurrentSessionTimer() {
-      if (this.currentSession) {
-        this.currentSession.elapsed_minutes++
-      }
-    },
     
     // 時間フォーマット
     formatElapsedTime(minutes) {
