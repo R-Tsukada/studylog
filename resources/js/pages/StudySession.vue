@@ -185,10 +185,30 @@ export default {
     
     updateElapsedTime() {
       if (this.currentSession) {
-        const startTime = new Date(this.currentSession.started_at)
+        // タイムスタンプが利用可能な場合はそれを使用、そうでなければ文字列をパース
+        let startTime
+        if (this.currentSession.started_at_timestamp) {
+          startTime = new Date(this.currentSession.started_at_timestamp * 1000)
+        } else {
+          // フォールバック: 文字列をISO形式に変換
+          const startTimeStr = this.currentSession.started_at.replace(' ', 'T')
+          startTime = new Date(startTimeStr)
+        }
+        
         const now = new Date()
         const elapsedMinutes = Math.floor((now - startTime) / (1000 * 60))
         this.currentSession.elapsed_minutes = Math.max(0, elapsedMinutes)
+        
+        // デバッグ情報（開発中のみ）
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Update elapsed time:', {
+            started_at: this.currentSession.started_at,
+            timestamp: this.currentSession.started_at_timestamp,
+            startTime: startTime,
+            now: now,
+            elapsed: elapsedMinutes
+          })
+        }
       }
     },
     
