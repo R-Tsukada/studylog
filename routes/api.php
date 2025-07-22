@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\PomodoroController;
+use App\Http\Controllers\Api\StudyAnalyticsController;
 
 // 認証が不要なエンドポイント
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -42,6 +44,27 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [StudySessionController::class, 'show']);
         Route::put('/{id}', [StudySessionController::class, 'update']);
         Route::delete('/{id}', [StudySessionController::class, 'destroy']);
+    });
+    
+    // Pomodoro Session API（認証済みユーザーのセッションのみ）
+    Route::prefix('pomodoro')->group(function () {
+        Route::get('/', [PomodoroController::class, 'index']);
+        Route::post('/', [PomodoroController::class, 'store']);
+        Route::get('/current', [PomodoroController::class, 'current']);
+        Route::get('/stats', [PomodoroController::class, 'stats']);
+        Route::get('/{pomodoroSession}', [PomodoroController::class, 'show']);
+        Route::put('/{pomodoroSession}', [PomodoroController::class, 'update']);
+        Route::post('/{pomodoroSession}/complete', [PomodoroController::class, 'complete']);
+        Route::delete('/{pomodoroSession}', [PomodoroController::class, 'destroy']);
+    });
+    
+    // Study Analytics API（統合分析）
+    Route::prefix('analytics')->group(function () {
+        Route::get('/history', [StudyAnalyticsController::class, 'history']);
+        Route::get('/stats', [StudyAnalyticsController::class, 'stats']);
+        Route::get('/insights', [StudyAnalyticsController::class, 'insights']);
+        Route::get('/suggest', [StudyAnalyticsController::class, 'suggest']);
+        Route::get('/comparison', [StudyAnalyticsController::class, 'comparison']);
     });
 });
 

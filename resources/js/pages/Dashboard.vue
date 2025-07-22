@@ -26,6 +26,15 @@
       </div>
     </section>
 
+    <!-- 学習方法推奨 -->
+    <StudyMethodSuggestion 
+      @method-selected="onMethodSelected"
+      :auto-load="!currentSession"
+    />
+
+    <!-- 統合分析 -->
+    <UnifiedAnalytics />
+
     <!-- 今日の学習状況 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-lg font-semibold mb-4 text-gray-800">📊 今日の学習状況</h2>
@@ -153,11 +162,15 @@
 <script>
 import axios from 'axios'
 import StudyCalendar from '../components/StudyCalendar.vue'
+import StudyMethodSuggestion from '../components/StudyMethodSuggestion.vue'
+import UnifiedAnalytics from '../components/UnifiedAnalytics.vue'
 
 export default {
   name: 'Dashboard',
   components: {
-    StudyCalendar
+    StudyCalendar,
+    StudyMethodSuggestion,
+    UnifiedAnalytics
   },
   data() {
     return {
@@ -226,8 +239,12 @@ export default {
     // 試験タイプと学習分野を取得
     async loadExamTypes() {
       try {
-        const response = await axios.get('/api/exam-types')
-        this.examTypes = response.data
+        const response = await axios.get('/api/user/exam-types', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        this.examTypes = response.data.exam_types || []
       } catch (error) {
         console.error('試験タイプ取得エラー:', error)
         this.showError('試験タイプの取得に失敗しました')
@@ -237,7 +254,11 @@ export default {
     // 現在のセッション状態を取得
     async loadCurrentSession() {
       try {
-        const response = await axios.get('/api/study-sessions/current')
+        const response = await axios.get('/api/study-sessions/current', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
         if (response.data.success && response.data.session) {
           this.currentSession = response.data.session
         }
@@ -258,6 +279,10 @@ export default {
         const response = await axios.post('/api/study-sessions/start', {
           subject_area_id: this.selectedSubjectAreaId,
           study_comment: this.studyComment
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
         })
         
         if (response.data.success) {
@@ -285,7 +310,11 @@ export default {
     async endStudySession() {
       this.loading = true
       try {
-        const response = await axios.post('/api/study-sessions/end')
+        const response = await axios.post('/api/study-sessions/end', {}, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
         
         if (response.data.success) {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
@@ -311,7 +340,11 @@ export default {
     async loadStudyHistory() {
       this.loadingHistory = true
       try {
-        const response = await axios.get('/api/study-sessions/history?limit=5')
+        const response = await axios.get('/api/study-sessions/history?limit=5', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
         if (response.data.success) {
           this.recentSessions = response.data.history
         }
@@ -326,7 +359,11 @@ export default {
     async loadDashboardData() {
       this.loadingDashboard = true
       try {
-        const response = await axios.get('/api/dashboard')
+        const response = await axios.get('/api/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
         if (response.data.success) {
           const data = response.data.data
           this.continuousDays = data.continuous_days
@@ -384,6 +421,19 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 5000)
+    },
+
+    // 学習方法推奨の選択ハンドラー
+    onMethodSelected(selection) {
+      console.log('学習方法が選択されました:', selection)
+      
+      if (selection.method === 'time_tracking') {
+        // 時間計測ページに遷移
+        this.$router.push('/study')
+      } else if (selection.method === 'pomodoro') {
+        // ポモドーロページに遷移
+        this.$router.push('/pomodoro')
+      }
     }
   }
 }

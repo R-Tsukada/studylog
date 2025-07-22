@@ -261,11 +261,18 @@ class StudySessionController extends Controller
         try {
             $userId = auth()->id();
 
-            $sessions = StudySession::forUser($userId)
+            $query = StudySession::forUser($userId)
                 ->with('subjectArea.examType')
-                ->orderBy('started_at', 'desc')
-                ->limit(10)
-                ->get();
+                ->orderBy('started_at', 'desc');
+            
+            // statusパラメータの処理
+            if ($request->has('status') && $request->status === 'active') {
+                $query->whereNull('ended_at');
+            } else {
+                $query->limit(10);
+            }
+            
+            $sessions = $query->get();
 
             $data = $sessions->map(function ($session) {
                 return [
@@ -276,12 +283,17 @@ class StudySessionController extends Controller
                     'ended_at' => $session->ended_at?->format('Y-m-d H:i:s'),
                     'duration_minutes' => $session->duration_minutes,
                     'is_active' => $session->isActive(),
-                    'study_comment' => $session->study_comment
+                    'study_comment' => $session->study_comment,
+                    'subject_area' => [
+                        'id' => $session->subjectArea->id,
+                        'name' => $session->subjectArea->name
+                    ]
                 ];
             });
 
             return response()->json([
                 'success' => true,
+                'data' => $data,
                 'sessions' => $data
             ]);
 

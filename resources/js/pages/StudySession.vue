@@ -1,6 +1,7 @@
 <template>
   <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-lg font-semibold mb-4 text-gray-800">🚀 学習セッション</h2>
+    <h2 class="text-lg font-semibold mb-4 text-gray-800">⏰ 時間計測</h2>
+    <p class="text-sm text-gray-600 mb-6">自由な時間で学習を計測できます。長時間の学習や読書に最適です。</p>
     
     <!-- 現在のセッション -->
     <div v-if="currentSession" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -48,201 +49,225 @@
             required
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="">分野を選択してください</option>
-            <optgroup v-for="examType in examTypes" :key="examType.id" :label="examType.name">
-              <option 
-                v-for="subject in examType.subject_areas" 
-                :key="subject.id" 
-                :value="subject.id"
-              >
-                {{ subject.name }}
-              </option>
-            </optgroup>
+            <option value="">学習分野を選択してください</option>
+            <option 
+              v-for="area in subjectAreas" 
+              :key="area.id" 
+              :value="area.id"
+            >
+              {{ area.exam_type?.name }} - {{ area.name }}
+            </option>
           </select>
         </div>
 
         <!-- 学習コメント -->
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-2">今日の学習内容</label>
-          <textarea 
+          <textarea
             v-model="studyComment"
             required
+            rows="3"
+            placeholder="例：第3章の復習、過去問演習など"
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows="4"
-            placeholder="今日学習する内容を詳しく記入してください&#10;例：&#10;- 第3章「データベース設計」の復習&#10;- 過去問題集の演習（問題1-10）&#10;- 苦手分野の正規化について理解を深める"
           ></textarea>
-        </div>
-
-        <!-- 学習目標時間 -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">目標学習時間（分）</label>
-          <input 
-            type="number" 
-            v-model.number="targetMinutes"
-            min="5"
-            max="480"
-            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="60"
-          />
-          <p class="text-xs text-gray-500 mt-1">目標時間は任意です。集中して取り組める時間を設定してください。</p>
         </div>
 
         <!-- 開始ボタン -->
         <button 
           type="submit" 
           :disabled="loading || !selectedSubjectAreaId || !studyComment.trim()"
-          class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-4 px-4 rounded-lg transition-colors duration-200 text-lg"
+          class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
         >
-          {{ loading ? '開始中...' : '🎯 学習開始！' }}
+          <span v-if="loading">開始中...</span>
+          <span v-else>🚀 学習開始</span>
         </button>
       </form>
-    </div>
 
-    <!-- 学習のコツ -->
-    <div v-if="!currentSession" class="mt-8 bg-gray-50 rounded-lg p-6">
-      <h3 class="text-md font-semibold mb-3 text-gray-800">💡 効果的な学習のコツ</h3>
-      <ul class="text-sm text-gray-600 space-y-2">
-        <li>• 集中できる環境を整える</li>
-        <li>• 25-30分の集中と5分の休憩を繰り返す（ポモドーロテクニック）</li>
-        <li>• 学習内容を具体的に記録する</li>
-        <li>• 分からない部分は後で調べるためにメモしておく</li>
-        <li>• 定期的に振り返りを行う</li>
-      </ul>
+      <!-- ポモドーロ紹介 -->
+      <div class="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <h4 class="font-semibold text-red-800 mb-2">🍅 集中力を高めたい方に</h4>
+        <p class="text-sm text-red-700 mb-3">
+          25分間の集中セッションと休憩を組み合わせたポモドーロテクニックもお試しください。
+        </p>
+        <router-link 
+          to="/pomodoro" 
+          class="inline-block bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-2 rounded transition-colors"
+        >
+          ポモドーロを試す
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-
 export default {
   name: 'StudySession',
   data() {
     return {
-      examTypes: [],
+      // フォーム
       selectedSubjectAreaId: '',
       studyComment: '',
-      targetMinutes: 60,
+      
+      // 状態
       currentSession: null,
+      subjectAreas: [],
       loading: false,
+      
+      // メッセージ
       errorMessage: '',
       successMessage: '',
-      sessionTimer: null
+      
+      // タイマー
+      refreshTimer: null
     }
   },
+  
   async mounted() {
-    await this.loadExamTypes()
-    await this.loadCurrentSession()
+    await this.loadSubjectAreas()
+    await this.checkCurrentSession()
     
-    // 5秒ごとに現在のセッション状態を更新
-    this.sessionTimer = setInterval(() => {
+    // 1秒ごとに現在のセッション情報を更新
+    this.refreshTimer = setInterval(() => {
       if (this.currentSession) {
-        this.updateCurrentSessionTimer()
+        this.updateElapsedTime()
       }
-    }, 5000)
+    }, 1000)
   },
+  
   beforeUnmount() {
-    if (this.sessionTimer) {
-      clearInterval(this.sessionTimer)
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer)
     }
   },
+  
   methods: {
-    async loadExamTypes() {
+    async loadSubjectAreas() {
       try {
-        const response = await axios.get('/api/exam-types')
-        this.examTypes = response.data
+        const response = await fetch('/api/user/subject-areas', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          this.subjectAreas = data.subject_areas || []
+        } else {
+          this.showError('学習分野の取得に失敗しました')
+        }
       } catch (error) {
-        console.error('試験タイプ取得エラー:', error)
-        this.showError('試験タイプの取得に失敗しました')
+        console.error('学習分野取得エラー:', error)
+        this.showError('学習分野の取得に失敗しました')
       }
     },
     
-    async loadCurrentSession() {
+    async checkCurrentSession() {
       try {
-        const response = await axios.get('/api/study-sessions/current')
-        if (response.data.success && response.data.session) {
-          this.currentSession = response.data.session
+        const response = await fetch('/api/study-sessions/current', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Accept': 'application/json'
+          }
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.session) {
+            this.currentSession = data.session
+          }
         }
       } catch (error) {
-        console.error('現在セッション取得エラー:', error)
+        console.error('現在のセッション取得エラー:', error)
+      }
+    },
+    
+    updateElapsedTime() {
+      if (this.currentSession) {
+        const startTime = new Date(this.currentSession.started_at)
+        const now = new Date()
+        const elapsedMinutes = Math.floor((now - startTime) / (1000 * 60))
+        this.currentSession.elapsed_minutes = elapsedMinutes
       }
     },
     
     async startStudySession() {
-      if (!this.selectedSubjectAreaId || !this.studyComment.trim()) {
-        this.showError('学習分野とコメントを入力してください')
-        return
-      }
+      if (this.loading) return
       
       this.loading = true
+      this.clearMessages()
+      
       try {
-        const response = await axios.post('/api/study-sessions/start', {
-          subject_area_id: this.selectedSubjectAreaId,
-          study_comment: this.studyComment
+        const response = await fetch('/api/study-sessions/start', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            subject_area_id: this.selectedSubjectAreaId,
+            study_comment: this.studyComment
+          })
         })
         
-        if (response.data.success) {
-          this.showSuccess('学習セッションを開始しました！頑張って！')
-          this.currentSession = response.data.session
-          this.selectedSubjectAreaId = ''
-          this.studyComment = ''
-          this.targetMinutes = 60
+        const data = await response.json()
+        
+        if (response.ok && data.success) {
+          this.currentSession = data.session
+          this.showSuccess('学習セッションを開始しました！')
+          this.resetForm()
         } else {
-          this.showError(response.data.message || '学習開始に失敗しました')
+          this.showError(data.message || '学習セッションの開始に失敗しました')
         }
       } catch (error) {
-        console.error('学習開始エラー:', error)
-        if (error.response?.data?.message) {
-          this.showError(error.response.data.message)
-        } else {
-          this.showError('学習開始中にエラーが発生しました')
-        }
+        console.error('学習セッション開始エラー:', error)
+        this.showError('学習セッションの開始に失敗しました')
       } finally {
         this.loading = false
       }
     },
     
     async endStudySession() {
+      if (this.loading || !this.currentSession) return
+      
+      if (!confirm('学習セッションを終了しますか？')) return
+      
       this.loading = true
+      this.clearMessages()
+      
       try {
-        const response = await axios.post('/api/study-sessions/end')
+        const response = await fetch('/api/study-sessions/end', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            study_comment: this.currentSession.study_comment
+          })
+        })
         
-        if (response.data.success) {
-          this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
+        const data = await response.json()
+        
+        if (response.ok && data.success) {
+          const duration = this.formatElapsedTime(this.currentSession.elapsed_minutes)
+          this.showSuccess(`学習セッションを終了しました！学習時間: ${duration}`)
           this.currentSession = null
-          // ダッシュボードに移動
-          setTimeout(() => {
-            this.$router.push('/dashboard')
-          }, 2000)
         } else {
-          this.showError(response.data.message || '学習終了に失敗しました')
+          this.showError(data.message || '学習セッション終了に失敗しました')
         }
       } catch (error) {
-        console.error('学習終了エラー:', error)
-        if (error.response?.data?.message) {
-          this.showError(error.response.data.message)
-        } else {
-          this.showError('学習終了中にエラーが発生しました')
-        }
+        console.error('学習セッション終了エラー:', error)
+        this.showError('学習セッション終了に失敗しました')
       } finally {
         this.loading = false
       }
     },
     
-    updateCurrentSessionTimer() {
-      if (this.currentSession) {
-        this.currentSession.elapsed_minutes++
-        
-        // 目標時間に達した場合の通知（ブラウザ通知は実装していないのでコンソールログ）
-        if (this.targetMinutes && this.currentSession.elapsed_minutes === this.targetMinutes) {
-          console.log('目標時間に達しました！')
-        }
-      }
-    },
-    
     formatElapsedTime(minutes) {
-      if (!minutes) return '0分'
-      
       const hours = Math.floor(minutes / 60)
       const mins = minutes % 60
       
@@ -251,6 +276,11 @@ export default {
       } else {
         return `${mins}分`
       }
+    },
+    
+    resetForm() {
+      this.selectedSubjectAreaId = ''
+      this.studyComment = ''
     },
     
     showError(message) {
@@ -267,7 +297,24 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 5000)
+    },
+    
+    clearMessages() {
+      this.errorMessage = ''
+      this.successMessage = ''
     }
   }
 }
 </script>
+
+<style scoped>
+/* 学習中セッションのパルスアニメーション */
+.bg-blue-50 {
+  animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+</style>

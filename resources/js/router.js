@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from './pages/LoginPage.vue'
 import Dashboard from './pages/Dashboard.vue'
 import StudySession from './pages/StudySession.vue'
+import Pomodoro from './pages/Pomodoro.vue'
 import History from './pages/History.vue'
 import Settings from './pages/Settings.vue'
 
@@ -40,6 +41,12 @@ const routes = [
     path: '/study',
     name: 'StudySession',
     component: StudySession,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/pomodoro',
+    name: 'Pomodoro',
+    component: Pomodoro,
     meta: { requiresAuth: true }
   },
   {
