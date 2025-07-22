@@ -18,32 +18,47 @@
       </div>
       
       <div v-else class="space-y-4">
-        <div v-for="session in sessions" :key="session.id" class="border rounded-lg p-4 hover:bg-gray-50">
+        <div v-for="session in sessions" :key="`${session.type}-${session.id}`" class="border rounded-lg p-4 hover:bg-gray-50">
           <div class="flex justify-between items-start mb-2">
             <div class="flex-1">
-              <div class="font-medium">{{ session.subject_area_name }}</div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-lg">{{ getSessionIcon(session) }}</span>
+                <div class="font-medium">{{ session.subject_area_name || '休憩セッション' }}</div>
+                <span class="text-xs px-2 py-1 rounded-full" :class="getSessionTypeClass(session.type)">
+                  {{ getSessionTypeLabel(session.type) }}
+                </span>
+              </div>
               <div class="text-sm text-gray-600">{{ session.exam_type_name }}</div>
+              <div v-if="session.type === 'pomodoro'" class="text-xs text-gray-500 mt-1">
+                {{ session.session_details?.method }} - {{ session.session_details?.session_type }}
+                <span v-if="session.was_interrupted" class="text-red-500 ml-1">（中断）</span>
+              </div>
             </div>
             <div class="text-right">
-              <div class="font-bold text-blue-600">{{ session.duration_minutes }}分</div>
-              <div class="text-xs text-gray-500">{{ formatDate(session.date) }}</div>
+              <div class="font-bold" :class="session.type === 'pomodoro' ? 'text-red-600' : 'text-blue-600'">
+                {{ session.duration_minutes }}分
+              </div>
+              <div class="text-xs text-gray-500">{{ formatDate(session.started_at) }}</div>
             </div>
           </div>
-          <div class="text-sm text-gray-700 mb-2">{{ session.study_comment }}</div>
+          <div v-if="session.notes" class="text-sm text-gray-700 mb-2">
+            📝 {{ session.notes }}
+          </div>
           <div class="flex justify-between items-center">
             <div class="text-xs text-gray-500">
-              {{ session.started_at }} - {{ session.ended_at }}
+              {{ formatTime(session.started_at) }} - {{ formatTime(session.ended_at) }}
             </div>
             <div class="flex gap-2">
               <button 
+                v-if="session.type === 'time_tracking'"
                 @click="editSession(session)"
-                class="text-blue-600 hover:text-blue-800 text-xs"
+                class="text-blue-600 hover:text-blue-800 text-xs cursor-pointer"
               >
                 ✏️ 編集
               </button>
               <button 
                 @click="deleteSession(session)"
-                class="text-red-600 hover:text-red-800 text-xs"
+                class="text-red-600 hover:text-red-800 text-xs cursor-pointer"
               >
                 🗑️ 削除
               </button>
@@ -208,10 +223,12 @@ export default {
     async loadStudyHistory() {
       this.loadingHistory = true
       try {
-        const response = await axios.get(`/api/study-sessions/history?page=1&limit=20`)
+        // 統合分析APIを使用してポモドーロセッションも含めて取得
+        const response = await axios.get(`/api/analytics/history?limit=20`)
         if (response.data.success) {
-          this.sessions = response.data.history
-          this.hasMore = response.data.pagination.current_page < response.data.pagination.last_page
+          this.sessions = response.data.data || []
+          // 統合APIはページネーションが異なるため、シンプルな判定
+          this.hasMore = this.sessions.length >= 20
           this.currentPage = 1
         }
       } catch (error) {
@@ -224,12 +241,13 @@ export default {
     async loadMoreHistory() {
       this.loadingMore = true
       try {
-        const nextPage = this.currentPage + 1
-        const response = await axios.get(`/api/study-sessions/history?page=${nextPage}&limit=20`)
+        // 統合APIでオフセットベースの取得
+        const offset = this.sessions.length
+        const response = await axios.get(`/api/analytics/history?limit=20&offset=${offset}`)
         if (response.data.success) {
-          this.sessions.push(...response.data.history)
-          this.hasMore = response.data.pagination.current_page < response.data.pagination.last_page
-          this.currentPage = nextPage
+          const newSessions = response.data.data || []
+          this.sessions.push(...newSessions)
+          this.hasMore = newSessions.length >= 20
         }
       } catch (error) {
         console.error('追加履歴取得エラー:', error)
@@ -295,9 +313,14 @@ export default {
     async executeDelete() {
       this.loading = true
       try {
-        const response = await axios.delete(`/api/study-sessions/${this.deletingSession.id}`)
+        // セッションタイプに応じて適切なAPIエンドポイントを使用
+        const apiPath = this.deletingSession.type === 'pomodoro' 
+          ? `/api/pomodoro/${this.deletingSession.id}`
+          : `/api/study-sessions/${this.deletingSession.id}`
         
-        if (response.data.success) {
+        const response = await axios.delete(apiPath)
+        
+        if (response.data.success || response.status === 200) {
           await this.loadStudyHistory()
           this.cancelDelete()
         } else {
@@ -314,6 +337,34 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString)
       return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+    },
+    
+    formatTime(dateString) {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    },
+    
+    getSessionIcon(session) {
+      if (session.type === 'pomodoro') {
+        const typeIcons = {
+          focus: '🎯',
+          short_break: '☕',
+          long_break: '🛋️'
+        }
+        return typeIcons[session.session_details?.session_type] || '🍅'
+      }
+      return '⏱️'
+    },
+    
+    getSessionTypeClass(type) {
+      return type === 'pomodoro' 
+        ? 'bg-red-100 text-red-800'
+        : 'bg-blue-100 text-blue-800'
+    },
+    
+    getSessionTypeLabel(type) {
+      return type === 'pomodoro' ? 'ポモドーロ' : '時間計測'
     }
   }
 }
