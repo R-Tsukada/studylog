@@ -165,6 +165,84 @@
         </div>
       </div>
 
+      <!-- メモ表示・編集エリア（集中セッション時のみ） -->
+      <div v-if="currentSession?.session_type === 'focus'" class="memo-section mb-6">
+        <div v-if="!isEditingMemo" class="memo-display">
+          <div class="flex items-start justify-between mb-2">
+            <h4 class="text-sm font-medium text-gray-700">📝 今回のメモ</h4>
+            <button
+              @click="startEditingMemo"
+              class="text-xs text-blue-600 hover:text-blue-700 underline"
+            >
+              編集
+            </button>
+          </div>
+          
+          <div v-if="sessionNotes && sessionNotes.trim()" class="memo-content">
+            <div v-if="sessionNotes.length <= 50" class="text-sm text-gray-800 bg-blue-50 p-3 rounded-lg">
+              {{ sessionNotes }}
+            </div>
+            <div v-else class="text-sm text-gray-800 bg-blue-50 p-3 rounded-lg">
+              <div v-if="!showFullMemo">
+                {{ sessionNotes.substring(0, 50) }}...
+                <button
+                  @click="showFullMemo = true"
+                  class="text-blue-600 hover:text-blue-700 underline ml-1"
+                >
+                  全文表示
+                </button>
+              </div>
+              <div v-else>
+                {{ sessionNotes }}
+                <button
+                  @click="showFullMemo = false"
+                  class="text-blue-600 hover:text-blue-700 underline ml-1 block mt-1"
+                >
+                  省略表示
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div v-else class="text-sm text-gray-500 italic">
+            メモは入力されていません
+          </div>
+        </div>
+        
+        <!-- メモ編集モード -->
+        <div v-else class="memo-edit">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-sm font-medium text-gray-700">📝 メモを編集</h4>
+            <div class="flex gap-2">
+              <button
+                @click="saveMemo"
+                class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+              >
+                保存
+              </button>
+              <button
+                @click="cancelEditingMemo"
+                class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+          
+          <textarea
+            v-model="editingMemoContent"
+            placeholder="セッションについてのメモを入力..."
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            rows="3"
+            ref="memoTextarea"
+          ></textarea>
+          
+          <div class="text-xs text-gray-500 mt-1">
+            {{ editingMemoContent.length }}/500文字
+          </div>
+        </div>
+      </div>
+
       <!-- コントロールボタン -->
       <div class="controls grid grid-cols-2 gap-3 mb-4">
         <button
@@ -244,6 +322,11 @@ export default {
       // セッション管理
       isPaused: false,
       sessionNotes: '',
+      
+      // メモ編集機能
+      isEditingMemo: false,
+      showFullMemo: false,
+      editingMemoContent: '',
       
       // データ
       availableSubjectAreas: [],
@@ -353,6 +436,9 @@ export default {
               this.globalPomodoroTimer.startTime = startedAt;
               this.globalPomodoroTimer.timeRemaining = remaining;
               
+              // 現在のメモを取得
+              this.sessionNotes = data.notes || '';
+              
               this.startGlobalPomodoroTimer(data);
             } else {
               // 時間切れなので自動完了
@@ -451,7 +537,11 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.startGlobalPomodoroTimer(data);
-          this.sessionNotes = '';
+          
+          // 新しいセッション開始時はメモを初期化
+          this.sessionNotes = this.sessionNotes || '';
+          this.isEditingMemo = false;
+          this.showFullMemo = false;
         } else {
           const errorData = await response.json();
           alert(errorData.message || 'セッション開始エラー');
@@ -622,6 +712,61 @@ export default {
         event.preventDefault();
         event.returnValue = '';
       }
+    },
+    
+    // メモ編集関連メソッド
+    startEditingMemo() {
+      this.isEditingMemo = true;
+      this.editingMemoContent = this.sessionNotes || '';
+      this.$nextTick(() => {
+        if (this.$refs.memoTextarea) {
+          this.$refs.memoTextarea.focus();
+        }
+      });
+    },
+    
+    async saveMemo() {
+      if (!this.currentSession) return;
+      
+      // 文字数制限チェック
+      if (this.editingMemoContent.length > 500) {
+        alert('メモは500文字以内で入力してください');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/pomodoro/${this.currentSession.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            notes: this.editingMemoContent
+          })
+        });
+        
+        if (response.ok) {
+          this.sessionNotes = this.editingMemoContent;
+          this.isEditingMemo = false;
+          this.showFullMemo = false;
+          
+          // 成功メッセージ（控えめに）
+          console.log('メモを保存しました');
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'メモの保存に失敗しました');
+        }
+      } catch (error) {
+        console.error('メモ保存エラー:', error);
+        alert('メモの保存中にエラーが発生しました');
+      }
+    },
+    
+    cancelEditingMemo() {
+      this.isEditingMemo = false;
+      this.editingMemoContent = '';
     }
   }
 }
