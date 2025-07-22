@@ -52,20 +52,112 @@
               <div
                 v-for="session in recentSessions"
                 :key="session.id"
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors"
               >
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-1">
                   <span class="text-lg">{{ getSessionIcon(session.session_type) }}</span>
-                  <div>
+                  <div class="flex-1">
                     <div class="font-medium">{{ getSessionLabel(session.session_type) }}</div>
                     <div class="text-sm text-gray-500">{{ formatDateTime(session.started_at) }}</div>
+                    
+                    <!-- メモ表示・編集エリア -->
+                    <div class="mt-2">
+                      <div v-if="!session.isEditingMemo" class="memo-display">
+                        <div v-if="session.notes && session.notes.trim()" class="text-xs text-gray-700">
+                          <div class="flex items-start gap-2">
+                            <span class="text-gray-600">📝</span>
+                            <div class="flex-1">
+                              <div>
+                                <span v-if="session.notes.length <= 30">{{ session.notes }}</span>
+                                <span v-else-if="!session.showFullMemo">
+                                  {{ session.notes.substring(0, 30) }}...
+                                  <button
+                                    @click="session.showFullMemo = true"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1 cursor-pointer"
+                                  >
+                                    全文
+                                  </button>
+                                </span>
+                                <span v-else>
+                                  {{ session.notes }}
+                                  <button
+                                    @click="session.showFullMemo = false"
+                                    class="text-blue-600 hover:text-blue-700 underline ml-1 cursor-pointer"
+                                  >
+                                    省略
+                                  </button>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div v-else class="flex items-center gap-2">
+                          <span class="text-xs text-gray-400">📝 メモなし</span>
+                        </div>
+                      </div>
+                      
+                      <!-- メモ編集モード -->
+                      <div v-else class="memo-edit mt-2">
+                        <div class="flex items-center gap-2 mb-2">
+                          <span class="text-xs text-gray-600">📝 メモを編集</span>
+                          <button
+                            @click="saveSessionMemo(session)"
+                            class="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 cursor-pointer"
+                          >
+                            保存
+                          </button>
+                          <button
+                            @click="cancelEditingSessionMemo(session)"
+                            class="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 cursor-pointer"
+                          >
+                            キャンセル
+                          </button>
+                        </div>
+                        
+                        <textarea
+                          v-model="session.editingNotes"
+                          placeholder="セッションについてのメモを入力..."
+                          class="w-full px-2 py-1 border border-gray-300 rounded text-xs"
+                          rows="2"
+                          maxlength="500"
+                        ></textarea>
+                        
+                        <div class="text-xs text-gray-400 mt-1">
+                          {{ (session.editingNotes || '').length }}/500文字
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="text-right">
-                  <div class="font-medium">{{ session.actual_duration || session.planned_duration }}分</div>
-                  <div class="text-xs" :class="session.was_interrupted ? 'text-red-500' : 'text-green-500'">
-                    {{ session.was_interrupted ? '中断' : '完了' }}
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <div class="font-medium">{{ session.actual_duration || session.planned_duration }}分</div>
+                    <div class="text-xs" :class="session.was_interrupted ? 'text-red-500' : 'text-green-500'">
+                      {{ session.was_interrupted ? '中断' : '完了' }}
+                    </div>
                   </div>
+                  
+                  <!-- 編集・削除ボタン -->
+                  <div v-if="session.is_completed" class="flex items-center gap-2">
+                    <!-- メモ編集ボタン -->
+                    <button
+                      @click="startEditingSessionMemo(session)"
+                      class="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+                      title="メモを編集"
+                    >
+                      ✏️
+                    </button>
+                    <!-- 削除ボタン -->
+                    <button
+                      @click="deleteSession(session)"
+                      class="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                      title="このセッションを削除"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  <div v-else class="w-16 h-6"></div> <!-- 実行中セッションのスペーサー -->
                 </div>
               </div>
             </div>
@@ -313,6 +405,90 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString);
       return `${date.getMonth() + 1}/${date.getDate()}`;
+    },
+    
+    async deleteSession(session) {
+      // 確認ダイアログ
+      const confirmMessage = `このセッションを削除しますか？\n\n${this.getSessionLabel(session.session_type)} - ${session.actual_duration || session.planned_duration}分\n${this.formatDateTime(session.started_at)}`;
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/pomodoro/${session.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          // セッション一覧から削除
+          this.recentSessions = this.recentSessions.filter(s => s.id !== session.id);
+          
+          // 統計データを再読み込み（削除の影響を反映）
+          await this.loadStats();
+          
+          console.log('セッションを削除しました');
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'セッションの削除に失敗しました');
+        }
+      } catch (error) {
+        console.error('セッション削除エラー:', error);
+        alert('セッションの削除中にエラーが発生しました');
+      }
+    },
+    
+    // セッションメモ編集関連メソッド
+    startEditingSessionMemo(session) {
+      // Vue 3では直接プロパティを設定
+      session.isEditingMemo = true;
+      session.editingNotes = session.notes || '';
+    },
+    
+    async saveSessionMemo(session) {
+      // 文字数制限チェック
+      if ((session.editingNotes || '').length > 500) {
+        alert('メモは500文字以内で入力してください');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/pomodoro/${session.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            notes: session.editingNotes || ''
+          })
+        });
+        
+        if (response.ok) {
+          // セッションのメモを更新
+          session.notes = session.editingNotes || '';
+          session.isEditingMemo = false;
+          session.showFullMemo = false;
+          
+          console.log('メモを保存しました');
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'メモの保存に失敗しました');
+        }
+      } catch (error) {
+        console.error('メモ保存エラー:', error);
+        alert('メモの保存中にエラーが発生しました');
+      }
+    },
+    
+    cancelEditingSessionMemo(session) {
+      session.isEditingMemo = false;
+      session.editingNotes = '';
     }
   }
 }

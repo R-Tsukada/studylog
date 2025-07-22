@@ -165,6 +165,7 @@
         </div>
       </div>
 
+
       <!-- コントロールボタン -->
       <div class="controls grid grid-cols-2 gap-3 mb-4">
         <button
@@ -244,6 +245,7 @@ export default {
       // セッション管理
       isPaused: false,
       sessionNotes: '',
+      
       
       // データ
       availableSubjectAreas: [],
@@ -353,6 +355,9 @@ export default {
               this.globalPomodoroTimer.startTime = startedAt;
               this.globalPomodoroTimer.timeRemaining = remaining;
               
+              // 現在のメモを取得
+              this.sessionNotes = data.notes || '';
+              
               this.startGlobalPomodoroTimer(data);
             } else {
               // 時間切れなので自動完了
@@ -451,7 +456,9 @@ export default {
         if (response.ok) {
           const data = await response.json();
           this.startGlobalPomodoroTimer(data);
-          this.sessionNotes = '';
+          
+          // 新しいセッション開始時はメモを初期化
+          this.sessionNotes = this.sessionNotes || '';
         } else {
           const errorData = await response.json();
           alert(errorData.message || 'セッション開始エラー');
@@ -622,7 +629,8 @@ export default {
         event.preventDefault();
         event.returnValue = '';
       }
-    }
+    },
+    
   }
 }
 </script>
