@@ -301,9 +301,8 @@ export default {
     },
     
     async handleGlobalTimerComplete() {
-      console.log('=== グローバルタイマー完了 ===')
+      console.log('ポモドーロタイマー完了')
       const completedSession = { ...this.globalPomodoroTimer.currentSession }
-      console.log('完了したセッション:', completedSession)
       
       // 通知表示
       if (Notification.permission === 'granted') {
@@ -333,18 +332,11 @@ export default {
       const settings = completedSession.settings
       const shouldAutoStart = settings?.auto_start_break || settings?.auto_start_focus
       
-      console.log('自動開始チェック:', {
-        settings: settings,
-        shouldAutoStart: shouldAutoStart,
-        sessionType: completedSession.session_type
-      })
-      
       if (shouldAutoStart) {
+        console.log('次のセッション自動開始準備:', completedSession.session_type)
         setTimeout(() => {
           this.startNextAutoSession(completedSession)
         }, 2000) // 2秒後に自動開始
-      } else {
-        console.log('自動開始設定がOFFのため、次のセッションは開始しません')
       }
     },
     
@@ -422,7 +414,6 @@ export default {
     async completeCurrentSession(session) {
       try {
         const actualDuration = Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60)
-        console.log('セッション完了処理開始:', session.id, '実際の時間:', actualDuration)
         
         const response = await axios.post(`/api/pomodoro/${session.id}/complete`, {
           actual_duration: actualDuration,
@@ -430,11 +421,8 @@ export default {
           notes: '自動完了'
         })
         
-        // Laravel のレスポンス構造に合わせる（success フィールドがない場合もある）
         if (response.status === 200) {
-          console.log('セッション自動完了成功:', session.session_type, response.data)
-        } else {
-          console.warn('セッション完了レスポンス異常:', response.status, response.data)
+          console.log('セッション自動完了:', session.session_type)
         }
       } catch (error) {
         console.error('セッション完了エラー:', error)
@@ -487,10 +475,9 @@ export default {
         
         const response = await axios.post('/api/pomodoro', sessionData)
         
-        // Laravel は通常 success フィールドを返さない
         if (response.status === 201 || response.status === 200) {
           const newSession = response.data
-          console.log('次のセッション自動作成成功:', newSession)
+          console.log('次のセッション自動開始:', newSession.session_type)
           
           // グローバルタイマーで新しいセッションを開始
           this.startGlobalPomodoroTimer(newSession)

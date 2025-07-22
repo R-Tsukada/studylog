@@ -211,7 +211,6 @@ export default {
         
         if (response.status === 201 || response.status === 200) {
           const sessionData = await response.json()
-          console.log('テストセッション作成成功:', sessionData)
           
           // グローバルタイマーでセッションを開始
           this.startGlobalPomodoroTimer(sessionData)
