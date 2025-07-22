@@ -12,7 +12,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: true
       - key: APP_KEY
         generateValue: true
       - key: APP_URL
@@ -51,14 +51,13 @@ services:
       - key: LOG_CHANNEL
         value: stack
       - key: LOG_LEVEL
-        value: error
+        value: debug
     buildCommand: |
-      # Laravel初期化コマンド（マイグレーション優先実行）
-      php artisan migrate --force
-      php artisan db:seed --force
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
+      # Composer依存関係のインストール
+      composer install --no-dev --optimize-autoloader
+      # npm依存関係のインストールとアセットビルド
+      npm install
+      npm run build
     startCommand: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
   - type: pserv

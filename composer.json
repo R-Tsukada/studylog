@@ -56,6 +56,19 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "render-build": [
+            "@php artisan cache:clear",
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear",
+            "@php artisan migrate --force",
+            "@php artisan db:seed --force",
+            "npm install",
+            "npm run build"
+        ],
+        "render-start": [
+            "@php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"
         ]
     },
     "extra": {
