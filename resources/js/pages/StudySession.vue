@@ -199,16 +199,16 @@ export default {
         const elapsedMinutes = Math.floor((now - startTime) / (1000 * 60))
         this.currentSession.elapsed_minutes = Math.max(0, elapsedMinutes)
         
-        // デバッグ情報（開発中のみ）
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Update elapsed time:', {
-            started_at: this.currentSession.started_at,
-            timestamp: this.currentSession.started_at_timestamp,
-            startTime: startTime,
-            now: now,
-            elapsed: elapsedMinutes
-          })
-        }
+        // デバッグ情報（一時的に常に表示）
+        console.log('🔍 Update elapsed time debug:', {
+          started_at: this.currentSession.started_at,
+          timestamp: this.currentSession.started_at_timestamp,
+          startTime: startTime.toString(),
+          now: now.toString(),
+          elapsed: elapsedMinutes,
+          timeDiff: now - startTime,
+          timeDiffMinutes: (now - startTime) / (1000 * 60)
+        })
       }
     },
     
