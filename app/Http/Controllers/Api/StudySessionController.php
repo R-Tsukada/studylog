@@ -59,6 +59,8 @@ class StudySessionController extends Controller
                     'subject_area_name' => $session->subjectArea->name,
                     'exam_type_name' => $session->subjectArea->examType->name,
                     'started_at' => $session->started_at->format('Y-m-d H:i:s'),
+                    'started_at_timestamp' => $session->started_at->timestamp,
+                    'elapsed_minutes' => 0,
                     'study_comment' => $session->study_comment
                 ]
             ], 201);
@@ -167,7 +169,7 @@ class StudySessionController extends Controller
             }
 
             $session->load('subjectArea.examType');
-            $elapsedMinutes = $session->started_at->diffInMinutes(now());
+            $elapsedMinutes = (int) $session->started_at->diffInMinutes(now());
 
             return response()->json([
                 'success' => true,
@@ -177,6 +179,7 @@ class StudySessionController extends Controller
                     'subject_area_name' => $session->subjectArea->name,
                     'exam_type_name' => $session->subjectArea->examType->name,
                     'started_at' => $session->started_at->format('Y-m-d H:i:s'),
+                    'started_at_timestamp' => $session->started_at->timestamp,
                     'elapsed_minutes' => $elapsedMinutes,
                     'study_comment' => $session->study_comment
                 ]
