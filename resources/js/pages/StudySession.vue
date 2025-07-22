@@ -188,7 +188,7 @@ export default {
         const startTime = new Date(this.currentSession.started_at)
         const now = new Date()
         const elapsedMinutes = Math.floor((now - startTime) / (1000 * 60))
-        this.currentSession.elapsed_minutes = elapsedMinutes
+        this.currentSession.elapsed_minutes = Math.max(0, elapsedMinutes)
       }
     },
     
@@ -268,8 +268,10 @@ export default {
     },
     
     formatElapsedTime(minutes) {
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
+      // 入力値を整数に変換し、負の値を0にする
+      const totalMinutes = Math.max(0, Math.floor(Number(minutes) || 0))
+      const hours = Math.floor(totalMinutes / 60)
+      const mins = totalMinutes % 60
       
       if (hours > 0) {
         return `${hours}時間${mins}分`

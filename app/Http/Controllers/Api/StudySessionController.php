@@ -167,7 +167,7 @@ class StudySessionController extends Controller
             }
 
             $session->load('subjectArea.examType');
-            $elapsedMinutes = $session->started_at->diffInMinutes(now());
+            $elapsedMinutes = (int) $session->started_at->diffInMinutes(now());
 
             return response()->json([
                 'success' => true,
