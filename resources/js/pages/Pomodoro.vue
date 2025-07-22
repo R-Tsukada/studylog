@@ -52,7 +52,7 @@
               <div
                 v-for="session in recentSessions"
                 :key="session.id"
-                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg group hover:bg-gray-100 transition-colors"
               >
                 <div class="flex items-center gap-3">
                   <span class="text-lg">{{ getSessionIcon(session.session_type) }}</span>
@@ -61,11 +61,23 @@
                     <div class="text-sm text-gray-500">{{ formatDateTime(session.started_at) }}</div>
                   </div>
                 </div>
-                <div class="text-right">
-                  <div class="font-medium">{{ session.actual_duration || session.planned_duration }}分</div>
-                  <div class="text-xs" :class="session.was_interrupted ? 'text-red-500' : 'text-green-500'">
-                    {{ session.was_interrupted ? '中断' : '完了' }}
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <div class="font-medium">{{ session.actual_duration || session.planned_duration }}分</div>
+                    <div class="text-xs" :class="session.was_interrupted ? 'text-red-500' : 'text-green-500'">
+                      {{ session.was_interrupted ? '中断' : '完了' }}
+                    </div>
                   </div>
+                  <!-- 削除ボタン（実行中以外のセッションのみ） -->
+                  <button
+                    v-if="session.is_completed"
+                    @click="deleteSession(session)"
+                    class="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-all"
+                    title="このセッションを削除"
+                  >
+                    🗑️
+                  </button>
+                  <div v-else class="w-6 h-6"></div> <!-- 実行中セッションのスペーサー -->
                 </div>
               </div>
             </div>
@@ -313,6 +325,41 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString);
       return `${date.getMonth() + 1}/${date.getDate()}`;
+    },
+    
+    async deleteSession(session) {
+      // 確認ダイアログ
+      const confirmMessage = `このセッションを削除しますか？\n\n${this.getSessionLabel(session.session_type)} - ${session.actual_duration || session.planned_duration}分\n${this.formatDateTime(session.started_at)}`;
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/pomodoro/${session.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          // セッション一覧から削除
+          this.recentSessions = this.recentSessions.filter(s => s.id !== session.id);
+          
+          // 統計データを再読み込み（削除の影響を反映）
+          await this.loadStats();
+          
+          console.log('セッションを削除しました');
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || 'セッションの削除に失敗しました');
+        }
+      } catch (error) {
+        console.error('セッション削除エラー:', error);
+        alert('セッションの削除中にエラーが発生しました');
+      }
     }
   }
 }
