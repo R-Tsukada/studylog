@@ -3,7 +3,7 @@
     <!-- 設定ページヘッダー -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-2xl font-semibold text-gray-800 mb-2">⚙️ 設定</h2>
-      <p class="text-gray-600">学習分野や試験予定日を管理できます</p>
+      <p class="text-gray-600">試験予定日、学習分野、学習目標の順番で設定することをお勧めします</p>
     </div>
 
     <!-- 試験予定日管理 -->
@@ -119,6 +119,148 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- 学習目標設定 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 学習目標設定</h3>
+      
+      <!-- 現在のアクティブ目標表示 -->
+      <div v-if="activeGoal && !editGoalMode" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <h4 class="font-medium text-blue-800 mb-2">現在の目標</h4>
+        <div class="text-sm text-blue-700 space-y-1">
+          <p><strong>日次目標:</strong> {{ activeGoal.daily_minutes_goal }}分 ({{ formatHours(activeGoal.daily_minutes_goal) }})</p>
+          <p v-if="activeGoal.weekly_minutes_goal"><strong>週次目標:</strong> {{ activeGoal.weekly_minutes_goal }}分 ({{ formatHours(activeGoal.weekly_minutes_goal) }})</p>
+          <p v-if="activeGoal.exam_type_name"><strong>対象試験:</strong> {{ activeGoal.exam_type_name }}</p>
+          <p v-if="activeGoal.exam_date"><strong>試験日:</strong> {{ formatDate(activeGoal.exam_date) }}</p>
+        </div>
+        <button 
+          @click="editGoalMode = true"
+          class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+        >
+          ✏️ 目標を編集
+        </button>
+      </div>
+
+      <!-- 目標設定フォーム -->
+      <div v-if="!activeGoal || editGoalMode" class="space-y-4">
+        <form @submit.prevent="saveGoal">
+          <!-- 日次目標時間 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              日次目標時間 <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center space-x-2">
+              <input
+                v-model.number="goalForm.daily_minutes_goal"
+                type="number"
+                min="1"
+                max="1440"
+                required
+                class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span class="text-sm text-gray-600">分/日</span>
+              <span class="text-xs text-gray-500">
+                ({{ formatHours(goalForm.daily_minutes_goal) }})
+              </span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+              推奨: 平日30-120分、休日60-240分
+            </p>
+          </div>
+
+          <!-- 週次目標時間（オプション） -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              週次目標時間（オプション）
+            </label>
+            <div class="flex items-center space-x-2">
+              <input
+                v-model.number="goalForm.weekly_minutes_goal"
+                type="number"
+                min="1"
+                max="10080"
+                class="w-32 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span class="text-sm text-gray-600">分/週</span>
+              <span class="text-xs text-gray-500">
+                ({{ formatHours(goalForm.weekly_minutes_goal) }})
+              </span>
+            </div>
+          </div>
+
+          <!-- 対象試験選択 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              対象試験（オプション）
+            </label>
+            <select
+              v-model="goalForm.exam_type_id"
+              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">試験を選択してください</option>
+              <option
+                v-for="examType in userExamTypes"
+                :key="examType.id"
+                :value="examType.id"
+              >
+                {{ examType.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- 試験日 -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              試験日（オプション）
+            </label>
+            <input
+              v-model="goalForm.exam_date"
+              type="date"
+              :min="tomorrow"
+              class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <!-- ボタン -->
+          <div class="flex gap-3 pt-4">
+            <button
+              type="submit"
+              :disabled="loadingGoal || !goalForm.daily_minutes_goal"
+              class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+            >
+              {{ loadingGoal ? '保存中...' : activeGoal ? '目標を更新' : '目標を設定' }}
+            </button>
+            <button
+              v-if="editGoalMode"
+              type="button"
+              @click="cancelGoalEdit"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              キャンセル
+            </button>
+            <button
+              v-if="activeGoal && editGoalMode"
+              type="button"
+              @click="deleteGoal"
+              class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            >
+              目標を削除
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 目標設定の説明 -->
+      <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+        <h4 class="font-medium text-gray-800 mb-2">💡 目標設定のコツ</h4>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• 毎日継続できる現実的な時間を設定しましょう</li>
+          <li>• 学習セッションとポモドーロタイマーの両方の時間がカウントされます</li>
+          <li>• 目標達成率はダッシュボードで確認できます</li>
+          <li>• 試験日を設定すると残り日数が表示されます</li>
+        </ul>
       </div>
     </div>
 
@@ -277,15 +419,18 @@ export default {
       // データ
       userExamTypes: [],
       userSubjects: [],
+      activeGoal: null,
       
       // ローディング状態
       loading: false,
       loadingExams: false,
       loadingSubjects: false,
+      loadingGoal: false,
       
       // モーダル表示状態
       showAddExamModal: false,
       showAddSubjectModal: false,
+      editGoalMode: false,
       
       // 編集中のデータ
       editingExam: null,
@@ -303,15 +448,31 @@ export default {
         exam_type_id: '',
         name: ''
       },
+      goalForm: {
+        exam_type_id: '',
+        daily_minutes_goal: 60, // デフォルト1時間
+        weekly_minutes_goal: null,
+        exam_date: '',
+        is_active: true
+      },
       
       // メッセージ
       errorMessage: '',
       successMessage: ''
     }
   },
+  
+  computed: {
+    tomorrow() {
+      const date = new Date()
+      date.setDate(date.getDate() + 1)
+      return date.toISOString().split('T')[0]
+    }
+  },
   async mounted() {
     await this.loadUserExamTypes()
     await this.loadUserSubjects()
+    await this.loadActiveGoal()
   },
   methods: {
     async loadUserExamTypes() {
@@ -524,6 +685,143 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 3000)
+    },
+
+    // 学習目標関連
+    async loadActiveGoal() {
+      try {
+        const response = await axios.get('/api/study-goals/active', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success && response.data.goal) {
+          this.activeGoal = response.data.goal
+          // フォームにデータを設定
+          this.goalForm = {
+            exam_type_id: this.activeGoal.exam_type_id || '',
+            daily_minutes_goal: this.activeGoal.daily_minutes_goal,
+            weekly_minutes_goal: this.activeGoal.weekly_minutes_goal,
+            exam_date: this.activeGoal.exam_date || '',
+            is_active: true
+          }
+        }
+      } catch (error) {
+        console.error('アクティブ目標取得エラー:', error)
+      }
+    },
+    
+    async saveGoal() {
+      this.loadingGoal = true
+      this.clearMessages()
+      
+      try {
+        let response
+        if (this.activeGoal && this.editGoalMode) {
+          // 更新
+          response = await axios.put(`/api/study-goals/${this.activeGoal.id}`, this.goalForm, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            }
+          })
+        } else {
+          // 新規作成
+          response = await axios.post('/api/study-goals', this.goalForm, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+            }
+          })
+        }
+        
+        if (response.data.success) {
+          this.showSuccess(response.data.message)
+          this.activeGoal = response.data.goal
+          this.editGoalMode = false
+        } else {
+          this.showError(response.data.message || '目標の保存に失敗しました')
+        }
+      } catch (error) {
+        console.error('目標保存エラー:', error)
+        if (error.response?.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat()
+          this.showError(errors.join(', '))
+        } else {
+          this.showError(error.response?.data?.message || '目標の保存中にエラーが発生しました')
+        }
+      } finally {
+        this.loadingGoal = false
+      }
+    },
+    
+    async deleteGoal() {
+      if (!confirm('本当に目標を削除しますか？')) return
+      
+      this.loadingGoal = true
+      this.clearMessages()
+      
+      try {
+        const response = await axios.delete(`/api/study-goals/${this.activeGoal.id}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          this.showSuccess('目標を削除しました')
+          this.activeGoal = null
+          this.editGoalMode = false
+          this.resetGoalForm()
+        } else {
+          this.showError(response.data.message || '目標の削除に失敗しました')
+        }
+      } catch (error) {
+        console.error('目標削除エラー:', error)
+        this.showError('目標の削除中にエラーが発生しました')
+      } finally {
+        this.loadingGoal = false
+      }
+    },
+    
+    cancelGoalEdit() {
+      this.editGoalMode = false
+      this.clearMessages()
+      if (this.activeGoal) {
+        // フォームを元に戻す
+        this.goalForm = {
+          exam_type_id: this.activeGoal.exam_type_id || '',
+          daily_minutes_goal: this.activeGoal.daily_minutes_goal,
+          weekly_minutes_goal: this.activeGoal.weekly_minutes_goal,
+          exam_date: this.activeGoal.exam_date || '',
+          is_active: true
+        }
+      }
+    },
+    
+    resetGoalForm() {
+      this.goalForm = {
+        exam_type_id: '',
+        daily_minutes_goal: 60,
+        weekly_minutes_goal: null,
+        exam_date: '',
+        is_active: true
+      }
+    },
+    
+    formatDate(dateString) {
+      if (!dateString) return ''
+      return new Date(dateString).toLocaleDateString('ja-JP')
+    },
+    
+    formatHours(minutes) {
+      if (!minutes) return '0時間'
+      const hours = Math.round(minutes / 60 * 10) / 10
+      return `${hours}時間`
+    },
+    
+    clearMessages() {
+      this.errorMessage = ''
+      this.successMessage = ''
     }
   }
 }

@@ -19,9 +19,12 @@ class DashboardController extends Controller
         try {
             $userId = auth()->id();
 
+            $todayTotalTime = $this->getTotalTodayStudyTime($userId);
+            
             $dashboardData = [
                 'continuous_days' => $this->calculateContinuousDays($userId),
-                'today_study_time' => $this->getTodayStudyTime($userId),
+                'today_study_time' => $todayTotalTime['formatted_time'],
+                'today_study_details' => $todayTotalTime, // 詳細情報
                 'today_session_count' => $this->getTodaySessionCount($userId),
                 'achievement_rate' => $this->calculateAchievementRate($userId),
                 'this_week_total' => $this->getThisWeekTotal($userId),
@@ -81,7 +84,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * 今日の学習時間を取得（分）
+     * 今日の学習時間を取得（分）- 学習セッションのみ
      */
     private function getTodayStudyTime(int $userId): int
     {
@@ -89,6 +92,31 @@ class DashboardController extends Controller
             ->forUser($userId)
             ->today()
             ->sum('duration_minutes');
+    }
+    
+    /**
+     * 今日の合計学習時間を取得（学習セッション＋ポモドーロ合算）
+     */
+    private function getTotalTodayStudyTime(int $userId): array
+    {
+        // 学習セッションの時間
+        $studySessionTime = $this->getTodayStudyTime($userId);
+        
+        // ポモドーロセッションの時間（完了したfocusセッションのみ）
+        $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->whereDate('started_at', today())
+            ->sum('actual_duration');
+        
+        $totalTime = $studySessionTime + $pomodoroTime;
+        
+        return [
+            'total_minutes' => $totalTime,
+            'study_session_minutes' => $studySessionTime,
+            'pomodoro_minutes' => $pomodoroTime,
+            'formatted_time' => $this->formatMinutesToHours($totalTime)
+        ];
     }
 
     /**
@@ -103,7 +131,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * 目標達成率を計算（日次目標ベース）
+     * 目標達成率を計算（日次目標ベース - 学習セッション＋ポモドーロ合算）
      */
     private function calculateAchievementRate(int $userId): int
     {
@@ -117,8 +145,19 @@ class DashboardController extends Controller
             return 0; // 目標が設定されていない場合
         }
 
-        $todayStudyTime = $this->getTodayStudyTime($userId);
-        $achievementRate = ($todayStudyTime / $activeGoal->daily_minutes_goal) * 100;
+        // 学習セッションの今日の合計時間
+        $studySessionTime = $this->getTodayStudyTime($userId);
+        
+        // ポモドーロセッションの今日の合計時間（完了したfocusセッションのみ）
+        $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->whereDate('started_at', today())
+            ->sum('actual_duration');
+
+        // 両方の時間を合算
+        $totalTodayTime = $studySessionTime + $pomodoroTime;
+        $achievementRate = ($totalTodayTime / $activeGoal->daily_minutes_goal) * 100;
 
         return min(100, round($achievementRate)); // 100%を上限とする
     }
