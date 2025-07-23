@@ -15,15 +15,16 @@
 
     <!-- カレンダー本体 -->
     <div v-else-if="calendarData" class="calendar-container">
-      <!-- 月ラベル（シンプルな横スクロール対応） -->
+      <!-- 月ラベル（正確な位置配置） -->
       <div class="month-labels-container">
         <div class="month-labels-spacer"></div>
         <div class="month-labels-wrapper">
-          <div class="month-labels-scroll">
+          <div class="month-labels-positioned">
             <div 
               v-for="month in compactMonthLabels" 
               :key="month.month"
-              class="month-label"
+              class="month-label-positioned"
+              :style="{ left: month.leftPosition + 'px' }"
             >
               {{ month.name }}
             </div>
@@ -45,15 +46,15 @@
         </div>
 
         <!-- カレンダーグリッド（横スクロール対応） -->
-        <div class="calendar-grid-wrapper">
+        <div class="calendar-grid-wrapper" @scroll="syncScroll">
           <div class="calendar-grid">
             <div 
-              v-for="(day, index) in calendarData.calendar_data" 
-              :key="day.date"
+              v-for="(day, index) in calendarGrid" 
+              :key="day ? day.date : `empty-${index}`"
               class="calendar-day"
-              :class="getDayColorClass(day.level)"
-              :title="getTooltip(day)"
-              @mouseenter="showTooltip($event, day)"
+              :class="day ? getDayColorClass(day.level) : 'level-empty'"
+              :title="day ? getTooltip(day) : ''"
+              @mouseenter="day && showTooltip($event, day)"
               @mouseleave="hideTooltip"
             >
             </div>
@@ -113,21 +114,75 @@ export default {
     }
   },
   computed: {
+    // 365日のデータを53週×7日のグリッドに変換
+    calendarGrid() {
+      if (!this.calendarData) return []
+      
+      const grid = []
+      const data = this.calendarData.calendar_data
+      
+      // 53週分の配列を初期化
+      for (let week = 0; week < 53; week++) {
+        grid[week] = new Array(7).fill(null)
+      }
+      
+      // 各日付を正しい位置に配置
+      data.forEach((day) => {
+        const dayIndex = data.indexOf(day)
+        const startDayOfWeek = data[0].day_of_week // 最初の日の曜日
+        
+        // 月曜日を0として調整（GitHubスタイル）
+        const adjustedDayOfWeek = (day.day_of_week + 6) % 7 // 日曜日0 → 月曜日0に変換
+        const adjustedStartDayOfWeek = (startDayOfWeek + 6) % 7
+        
+        // 週番号を計算
+        const weekIndex = Math.floor((dayIndex + adjustedStartDayOfWeek) / 7)
+        
+        if (weekIndex < 53) {
+          grid[weekIndex][adjustedDayOfWeek] = day
+        }
+      })
+      
+      // グリッド表示用に1次元配列に変換（週ごとに並ぶ）
+      const flatGrid = []
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        for (let week = 0; week < 53; week++) {
+          flatGrid.push(grid[week][dayOfWeek])
+        }
+      }
+      
+      return flatGrid
+    },
+    
     compactMonthLabels() {
       if (!this.calendarData) return []
       
       const labels = []
-      let currentMonth = null
+      const data = this.calendarData.calendar_data
+      const startDayOfWeek = data[0].day_of_week
+      const adjustedStartDayOfWeek = (startDayOfWeek + 6) % 7
       
-      this.calendarData.calendar_data.forEach((day, index) => {
-        if (day.month !== currentMonth) {
-          const weekIndex = Math.floor(index / 7)
+      // 各月の最初の日を見つけて、その週番号を計算
+      let currentMonthYear = null
+      data.forEach((day, index) => {
+        // 年月の組み合わせで比較（同じ月でも年が違えば別扱い）
+        const monthYear = `${new Date(day.date).getFullYear()}-${day.month}`
+        
+        if (monthYear !== currentMonthYear) {
+          const weekIndex = Math.floor((index + adjustedStartDayOfWeek) / 7)
+          
+          // レスポンシブ対応: モバイルかどうかを判定
+          const isMobile = window.innerWidth <= 768
+          const weekWidth = isMobile ? 11 : 14 // モバイル: 10px + 1px gap, デスクトップ: 12px + 2px gap
+          
           labels.push({
             month: day.month,
+            year: new Date(day.date).getFullYear(),
             name: this.getMonthName(day.month),
-            weekIndex: weekIndex
+            weekIndex: weekIndex,
+            leftPosition: weekIndex * weekWidth
           })
-          currentMonth = day.month
+          currentMonthYear = monthYear
         }
       })
       
@@ -136,6 +191,18 @@ export default {
   },
   async mounted() {
     await this.loadCalendarData()
+    
+    // ウィンドウリサイズ時に月ラベル位置を再計算
+    window.addEventListener('resize', this.handleResize)
+    
+    // 初期表示時に最新部分（右端）にスクロール
+    this.$nextTick(() => {
+      this.scrollToLatest()
+    })
+  },
+  
+  beforeUnmount() {
+    window.removeEventListener('resize', this.handleResize)
   },
   methods: {
     async loadCalendarData() {
@@ -186,6 +253,34 @@ export default {
         '7月', '8月', '9月', '10月', '11月', '12月'
       ]
       return months[month]
+    },
+    
+    handleResize() {
+      // リサイズ時にcomputed propertiesを再計算させるため、
+      // 強制的にリアクティブな更新をトリガー
+      this.$forceUpdate()
+    },
+    
+    scrollToLatest() {
+      // カレンダーグリッドと月ラベルを最新部分（右端）にスクロール
+      const calendarWrapper = this.$el.querySelector('.calendar-grid-wrapper')
+      const monthWrapper = this.$el.querySelector('.month-labels-wrapper')
+      
+      if (calendarWrapper) {
+        calendarWrapper.scrollLeft = calendarWrapper.scrollWidth - calendarWrapper.clientWidth
+      }
+      
+      if (monthWrapper) {
+        monthWrapper.scrollLeft = monthWrapper.scrollWidth - monthWrapper.clientWidth
+      }
+    },
+    
+    syncScroll(event) {
+      // カレンダーグリッドのスクロールに合わせて月ラベルもスクロール
+      const monthWrapper = this.$el.querySelector('.month-labels-wrapper')
+      if (monthWrapper) {
+        monthWrapper.scrollLeft = event.target.scrollLeft
+      }
     }
   }
 }
@@ -220,25 +315,28 @@ export default {
 
 .month-labels-wrapper {
   flex: 1;
-  overflow: hidden;
-}
-
-.month-labels-scroll {
-  display: flex;
-  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
+  overflow-y: hidden;
+  max-width: calc(100vw - 120px);
 }
 
-.month-label {
+.month-labels-positioned {
+  position: relative;
+  height: 20px;
+  width: calc(53 * 14px); /* 53週 × (12px + 2px gap) */
+  min-width: 100%;
+}
+
+.month-label-positioned {
+  position: absolute;
+  top: 0;
   font-size: 0.75rem;
   color: #6b7280;
   white-space: nowrap;
-  flex-shrink: 0;
   padding: 2px 6px;
   background: #f3f4f6;
   border-radius: 4px;
+  z-index: 1;
 }
 
 .calendar-main {
@@ -270,8 +368,9 @@ export default {
 
 .calendar-grid {
   display: grid;
+  grid-template-rows: repeat(7, 12px); /* 7曜日（月-日） */
   grid-template-columns: repeat(53, 12px); /* 53週 */
-  grid-template-rows: repeat(7, 12px); /* 7曜日 */
+  grid-auto-flow: column; /* 列方向に優先して配置 */
   gap: 2px;
   width: max-content;
   min-width: 100%;
@@ -292,6 +391,11 @@ export default {
 }
 
 /* レベル別の色 */
+.level-empty {
+  background-color: transparent;
+  cursor: default;
+}
+
 .level-0 {
   background-color: #ebedf0;
 }
@@ -335,8 +439,9 @@ export default {
   }
   
   .calendar-grid {
-    grid-template-columns: repeat(53, 10px);
     grid-template-rows: repeat(7, 10px);
+    grid-template-columns: repeat(53, 10px);
+    grid-auto-flow: column;
     gap: 1px;
   }
   
@@ -359,7 +464,11 @@ export default {
     max-width: calc(100vw - 80px);
   }
   
-  .month-label {
+  .month-labels-positioned {
+    width: calc(53 * 12px); /* モバイルでは12px間隔 */
+  }
+  
+  .month-label-positioned {
     font-size: 0.625rem;
     padding: 1px 4px;
   }
