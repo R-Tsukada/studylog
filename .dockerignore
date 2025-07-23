@@ -49,6 +49,7 @@ storage/framework/views/*
 bootstrap/cache/*
 public/hot
 public/storage
+public/build
 
 # IDE・エディタ
 .vscode
