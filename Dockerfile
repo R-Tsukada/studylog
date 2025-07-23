@@ -40,7 +40,8 @@ RUN npm ci --omit=dev
 COPY . .
 
 # フロントエンドをビルド（本番環境用）
-RUN npm run build && npm cache clean --force
+RUN npm run build
+RUN npm cache clean --force
 
 # ストレージディレクトリの権限設定
 RUN chown -R www-data:www-data /var/www/html/storage \
