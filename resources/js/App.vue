@@ -81,23 +81,6 @@
             <span class="text-xs mt-1">ダッシュボード</span>
           </router-link>
           
-          <router-link 
-            to="/study" 
-            class="flex flex-col items-center py-1 px-2 rounded-lg transition-colors"
-            :class="$route.name === 'StudySession' ? 'text-green-600 bg-green-50' : 'text-gray-600 hover:text-green-600'"
-          >
-            <span class="text-lg">⏰</span>
-            <span class="text-xs mt-1">時間計測</span>
-          </router-link>
-          
-          <router-link 
-            to="/pomodoro" 
-            class="flex flex-col items-center py-1 px-2 rounded-lg transition-colors"
-            :class="$route.name === 'Pomodoro' ? 'text-red-600 bg-red-50' : 'text-gray-600 hover:text-red-600'"
-          >
-            <span class="text-lg">🍅</span>
-            <span class="text-xs mt-1">ポモドーロ</span>
-          </router-link>
           
           <router-link 
             to="/history" 
