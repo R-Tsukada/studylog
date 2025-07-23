@@ -59,7 +59,7 @@ class StudyActivityService
                     'duration_minutes' => $session->actual_duration ?? $session->planned_duration,
                     'started_at' => $session->started_at,
                     'ended_at' => $session->completed_at,
-                    'notes' => $session->study_comment,
+                    'notes' => $session->notes,
                     'status' => $session->is_completed ? 'completed' : 'active',
                     'was_interrupted' => $session->was_interrupted,
                     'session_details' => [
