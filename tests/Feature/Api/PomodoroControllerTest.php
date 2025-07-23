@@ -228,13 +228,109 @@ class PomodoroControllerTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson("/api/pomodoro/{$session->id}", $updateData);
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'session' => [
+                    'id',
+                    'actual_duration',
+                    'notes',
+                    'subject_area'
+                ]
+            ])
+            ->assertJson([
+                'success' => true,
+                'message' => 'ポモドーロセッションを更新しました'
+            ]);
         
         $this->assertDatabaseHas('pomodoro_sessions', [
             'id' => $session->id,
             'actual_duration' => 25,
             'notes' => 'Great focus session!'
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_update_pomodoro_session_notes_only()
+    {
+        $session = PomodoroSession::factory()->create([
+            'user_id' => $this->user->id,
+            'notes' => '初期メモ',
+            'actual_duration' => 20
+        ]);
+
+        $updateData = [
+            'notes' => '更新されたメモ：集中できた！'
+        ];
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson("/api/pomodoro/{$session->id}", $updateData);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'ポモドーロセッションを更新しました'
+            ]);
+        
+        $this->assertDatabaseHas('pomodoro_sessions', [
+            'id' => $session->id,
+            'notes' => '更新されたメモ：集中できた！',
+            'actual_duration' => 20 // 他のフィールドは変更されない
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_validates_notes_max_length()
+    {
+        $session = PomodoroSession::factory()->create(['user_id' => $this->user->id]);
+        
+        $longNotes = str_repeat('あ', 1001); // 1001文字（制限を超過）
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson("/api/pomodoro/{$session->id}", ['notes' => $longNotes]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['notes']);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_clear_pomodoro_session_notes()
+    {
+        $session = PomodoroSession::factory()->create([
+            'user_id' => $this->user->id,
+            'notes' => '削除予定のメモ'
+        ]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson("/api/pomodoro/{$session->id}", ['notes' => null]);
+
+        $response->assertStatus(200);
+        
+        $this->assertDatabaseHas('pomodoro_sessions', [
+            'id' => $session->id,
+            'notes' => null
+        ]);
+    }
+
+    /**
+     * @test
+     */
+    public function it_cannot_update_other_users_pomodoro_session_notes()
+    {
+        $otherUser = User::factory()->create();
+        $session = PomodoroSession::factory()->create(['user_id' => $otherUser->id]);
+
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson("/api/pomodoro/{$session->id}", ['notes' => 'ハッキング試行']);
+
+        $response->assertStatus(403);
     }
 
     /**

@@ -107,7 +107,11 @@ class PomodoroController extends Controller
 
         $pomodoroSession->update($validated);
 
-        return response()->json($pomodoroSession->load('subjectArea.examType'));
+        return response()->json([
+            'success' => true,
+            'message' => 'ポモドーロセッションを更新しました',
+            'session' => $pomodoroSession->load('subjectArea.examType')
+        ]);
     }
 
     public function complete(Request $request, PomodoroSession $pomodoroSession): JsonResponse

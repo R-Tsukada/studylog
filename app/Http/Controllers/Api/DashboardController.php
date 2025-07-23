@@ -19,9 +19,12 @@ class DashboardController extends Controller
         try {
             $userId = auth()->id();
 
+            $todayTotalTime = $this->getTotalTodayStudyTime($userId);
+            
             $dashboardData = [
                 'continuous_days' => $this->calculateContinuousDays($userId),
-                'today_study_time' => $this->getTodayStudyTime($userId),
+                'today_study_time' => $todayTotalTime['formatted_time'],
+                'today_study_details' => $todayTotalTime, // 詳細情報
                 'today_session_count' => $this->getTodaySessionCount($userId),
                 'achievement_rate' => $this->calculateAchievementRate($userId),
                 'this_week_total' => $this->getThisWeekTotal($userId),
@@ -81,7 +84,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * 今日の学習時間を取得（分）
+     * 今日の学習時間を取得（分）- 学習セッションのみ
      */
     private function getTodayStudyTime(int $userId): int
     {
@@ -89,6 +92,31 @@ class DashboardController extends Controller
             ->forUser($userId)
             ->today()
             ->sum('duration_minutes');
+    }
+    
+    /**
+     * 今日の合計学習時間を取得（学習セッション＋ポモドーロ合算）
+     */
+    private function getTotalTodayStudyTime(int $userId): array
+    {
+        // 学習セッションの時間
+        $studySessionTime = $this->getTodayStudyTime($userId);
+        
+        // ポモドーロセッションの時間（完了したfocusセッションのみ）
+        $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->whereDate('started_at', today())
+            ->sum('actual_duration');
+        
+        $totalTime = $studySessionTime + $pomodoroTime;
+        
+        return [
+            'total_minutes' => $totalTime,
+            'study_session_minutes' => $studySessionTime,
+            'pomodoro_minutes' => $pomodoroTime,
+            'formatted_time' => $this->formatMinutesToHours($totalTime)
+        ];
     }
 
     /**
@@ -103,7 +131,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * 目標達成率を計算（日次目標ベース）
+     * 目標達成率を計算（日次目標ベース - 学習セッション＋ポモドーロ合算）
      */
     private function calculateAchievementRate(int $userId): int
     {
@@ -117,8 +145,19 @@ class DashboardController extends Controller
             return 0; // 目標が設定されていない場合
         }
 
-        $todayStudyTime = $this->getTodayStudyTime($userId);
-        $achievementRate = ($todayStudyTime / $activeGoal->daily_minutes_goal) * 100;
+        // 学習セッションの今日の合計時間
+        $studySessionTime = $this->getTodayStudyTime($userId);
+        
+        // ポモドーロセッションの今日の合計時間（完了したfocusセッションのみ）
+        $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->whereDate('started_at', today())
+            ->sum('actual_duration');
+
+        // 両方の時間を合算
+        $totalTodayTime = $studySessionTime + $pomodoroTime;
+        $achievementRate = ($totalTodayTime / $activeGoal->daily_minutes_goal) * 100;
 
         return min(100, round($achievementRate)); // 100%を上限とする
     }
@@ -168,24 +207,58 @@ class DashboardController extends Controller
     }
 
     /**
-     * 最近学習した分野を取得
+     * 最近学習した分野を取得（学習セッション＋ポモドーロ統合）
      */
     private function getRecentSubjects(int $userId): array
     {
-        $recentSessions = StudySession::completed()
+        // 学習セッション取得
+        $studySessions = StudySession::completed()
             ->forUser($userId)
-            ->with('subjectArea')
+            ->with('subjectArea.examType')
             ->orderBy('started_at', 'desc')
-            ->limit(3)
-            ->get();
+            ->limit(10) // 多めに取得して後でフィルタ
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'study_session',
+                    'subject_area_name' => $session->subjectArea->name,
+                    'exam_type_name' => $session->subjectArea->examType->name,
+                    'started_at' => $session->started_at,
+                    'last_studied_at' => $session->started_at->format('Y-m-d'),
+                    'duration_minutes' => $session->duration_minutes,
+                    'notes' => $session->study_comment // 学習セッションのコメントをnotesとして統一
+                ];
+            });
 
-        return $recentSessions->map(function ($session) {
-            return [
-                'subject_area_name' => $session->subjectArea->name,
-                'last_studied_at' => $session->started_at->format('Y-m-d'),
-                'duration_minutes' => $session->duration_minutes
-            ];
-        })->unique('subject_area_name')->values()->toArray();
+        // ポモドーロセッション取得（完了したfocusセッションのみ）
+        $pomodoroSessions = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->with('subjectArea.examType') // リレーションも取得
+            ->orderBy('started_at', 'desc')
+            ->limit(10) // 多めに取得して後でフィルタ
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'pomodoro_session',
+                    'subject_area_name' => $session->subjectArea ? $session->subjectArea->name : 'ポモドーロ学習',
+                    'exam_type_name' => $session->subjectArea && $session->subjectArea->examType ? $session->subjectArea->examType->name : null,
+                    'started_at' => $session->started_at,
+                    'last_studied_at' => $session->started_at->format('Y-m-d'),
+                    'duration_minutes' => $session->actual_duration,
+                    'notes' => $session->notes // メモを追加
+                ];
+            });
+
+        // 両方を統合して時系列でソート
+        $allSessions = $studySessions->concat($pomodoroSessions)
+            ->sortByDesc('started_at')
+            ->take(5) // 最新5件を取得
+            ->values();
+
+        return $allSessions->toArray();
     }
 
     /**
@@ -342,106 +415,4 @@ class DashboardController extends Controller
         return $trend;
     }
 
-    /**
-     * GitHub風学習カレンダーデータを取得（過去1年間）
-     */
-    public function getStudyCalendar(): JsonResponse
-    {
-        try {
-            $userId = auth()->id();
-            
-            // 過去1年間の日別学習データを取得
-            $calendarData = $this->getYearlyStudyData($userId);
-            
-            return response()->json([
-                'success' => true,
-                'data' => $calendarData
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => '学習カレンダーデータの取得中にエラーが発生しました',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * 過去1年間の日別学習データを取得
-     */
-    private function getYearlyStudyData(int $userId): array
-    {
-        $endDate = today();
-        $startDate = $endDate->copy()->subYear()->addDay(); // ちょうど1年前から
-        
-        // 期間内の全学習セッションを取得
-        $sessions = StudySession::completed()
-            ->forUser($userId)
-            ->whereBetween('started_at', [$startDate, $endDate])
-            ->selectRaw('DATE(started_at) as study_date, SUM(duration_minutes) as total_minutes, COUNT(*) as session_count')
-            ->groupBy('study_date')
-            ->get()
-            ->keyBy('study_date');
-
-        $calendarData = [];
-        $maxMinutes = 0;
-
-        // 1年間の全ての日をループして学習データを作成
-        $currentDate = $startDate->copy();
-        while ($currentDate->lte($endDate)) {
-            $dateString = $currentDate->format('Y-m-d');
-            $studyData = $sessions->get($dateString);
-            
-            $minutes = $studyData ? $studyData->total_minutes : 0;
-            $sessionCount = $studyData ? $studyData->session_count : 0;
-            
-            // 最大学習時間を記録（色の濃さ計算用）
-            if ($minutes > $maxMinutes) {
-                $maxMinutes = $minutes;
-            }
-
-            $calendarData[] = [
-                'date' => $dateString,
-                'minutes' => $minutes,
-                'session_count' => $sessionCount,
-                'formatted_time' => $this->formatMinutesToHours($minutes),
-                'day_of_week' => $currentDate->dayOfWeek, // 0=日曜日, 6=土曜日
-                'month' => $currentDate->month,
-                'day' => $currentDate->day
-            ];
-
-            $currentDate->addDay();
-        }
-
-        // 各日の強度レベルを計算（0-4のレベル）
-        foreach ($calendarData as &$day) {
-            $day['level'] = $this->calculateIntensityLevel($day['minutes'], $maxMinutes);
-        }
-
-        return [
-            'calendar_data' => $calendarData,
-            'start_date' => $startDate->format('Y-m-d'),
-            'end_date' => $endDate->format('Y-m-d'),
-            'total_days' => count($calendarData),
-            'max_minutes' => $maxMinutes,
-            'total_study_days' => count(array_filter($calendarData, fn($day) => $day['minutes'] > 0))
-        ];
-    }
-
-    /**
-     * 学習時間から強度レベルを計算（0-4）
-     */
-    private function calculateIntensityLevel(int $minutes, int $maxMinutes): int
-    {
-        if ($minutes === 0) return 0;
-        if ($maxMinutes === 0) return 1;
-        
-        // 0-4の5段階レベル
-        $ratio = $minutes / $maxMinutes;
-        if ($ratio >= 0.75) return 4;
-        if ($ratio >= 0.5) return 3; 
-        if ($ratio >= 0.25) return 2;
-        return 1;
-    }
 }

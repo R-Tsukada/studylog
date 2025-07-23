@@ -26,8 +26,6 @@
       </div>
     </section>
 
-    <!-- 学習カレンダー -->
-    <StudyCalendar />
 
     <!-- 今日の学習状況 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
@@ -140,34 +138,95 @@
       </div>
       
       <div v-else class="space-y-3">
-        <div v-for="session in recentSessions" :key="session.id" class="border rounded-lg p-4 hover:bg-gray-50">
+        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 hover:bg-gray-50">
           <div class="flex justify-between items-start">
             <div class="flex-1">
-              <div class="font-medium">{{ session.subject_area_name }}</div>
-              <div class="text-sm text-gray-600">{{ session.exam_type_name }}</div>
-              <div class="text-xs text-gray-500 mt-1">{{ session.study_comment }}</div>
+              <div class="flex items-center gap-2">
+                <div class="font-medium">{{ session.subject_area_name }}</div>
+                <span v-if="session.type === 'pomodoro_session'" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                  🍅 ポモドーロ
+                </span>
+                <span v-else class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                  📚 学習
+                </span>
+              </div>
+              <div v-if="session.exam_type_name" class="text-sm text-gray-600">{{ session.exam_type_name }}</div>
+              <div v-if="session.notes" class="text-xs text-gray-500 mt-1 italic">💭 {{ session.notes }}</div>
             </div>
             <div class="text-right">
               <div class="font-bold text-blue-600">{{ session.duration_minutes }}分</div>
-              <div class="text-xs text-gray-500">{{ formatDate(session.date) }}</div>
+              <div class="text-xs text-gray-500">{{ session.last_studied_at }}</div>
+              <button 
+                v-if="session.type === 'pomodoro_session'"
+                @click="openEditNotesModal(session)"
+                class="mt-1 text-xs text-blue-500 hover:text-blue-700"
+                title="メモ編集"
+              >
+                ✏️ 編集
+              </button>
             </div>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- ポモドーロメモ編集モーダル -->
+    <div v-if="editNotesModal.isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closeEditNotesModal">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4" @click.stop>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">🍅 ポモドーロメモ編集</h3>
+          <button @click="closeEditNotesModal" class="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        </div>
+        
+        <div class="mb-4">
+          <div class="text-sm text-gray-600 mb-2">
+            {{ editNotesModal.session?.subject_area_name }} - {{ editNotesModal.session?.duration_minutes }}分
+          </div>
+          <div class="text-xs text-gray-500">
+            {{ editNotesModal.session?.last_studied_at }}
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">メモ</label>
+          <textarea
+            v-model="editNotesModal.notes"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            rows="4"
+            placeholder="ポモドーロセッションでのメモを入力してください..."
+          ></textarea>
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            @click="closeEditNotesModal"
+            class="flex-1 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+          >
+            キャンセル
+          </button>
+          <button
+            @click="saveNotes"
+            :disabled="editNotesModal.saving"
+            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {{ editNotesModal.saving ? '保存中...' : '保存' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-import StudyCalendar from '../components/StudyCalendar.vue'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 
 export default {
   name: 'Dashboard',
   inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
-    StudyCalendar,
     PomodoroTimer,
   },
   data() {
@@ -193,6 +252,14 @@ export default {
       
       // タイマー
       dashboardTimer: null,
+      
+      // メモ編集モーダル
+      editNotesModal: {
+        isOpen: false,
+        session: null,
+        notes: '',
+        saving: false
+      },
     }
   },
   
@@ -217,8 +284,7 @@ export default {
     async loadInitialData() {
       await this.loadExamTypes()
       await this.checkGlobalStudyTimerSync()
-      await this.loadStudyHistory()
-      await this.loadDashboardData()
+      await this.loadDashboardData() // ここで recent_subjects も取得される
       
       // 30秒ごとにダッシュボードデータを更新
       this.dashboardTimer = setInterval(() => {
@@ -330,8 +396,7 @@ export default {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
           // グローバルタイマーを停止
           this.stopGlobalStudyTimer()
-          await this.loadStudyHistory()
-          await this.loadDashboardData()
+          await this.loadDashboardData() // 履歴も含めて更新
         } else {
           this.showError(response.data.message || '学習終了に失敗しました')
         }
@@ -344,25 +409,6 @@ export default {
         }
       } finally {
         this.loading = false
-      }
-    },
-    
-    // 学習履歴を取得
-    async loadStudyHistory() {
-      this.loadingHistory = true
-      try {
-        const response = await axios.get('/api/study-sessions/history?limit=5', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
-        if (response.data.success) {
-          this.recentSessions = response.data.history
-        }
-      } catch (error) {
-        console.error('学習履歴取得エラー:', error)
-      } finally {
-        this.loadingHistory = false
       }
     },
     
@@ -381,6 +427,9 @@ export default {
           this.todayStudyTime = data.today_study_time
           this.todaySessionCount = data.today_session_count
           this.achievementRate = Math.round(data.achievement_rate)
+          
+          // 最近の学習履歴もダッシュボードAPIから取得するように変更
+          this.recentSessions = data.recent_subjects || []
         }
       } catch (error) {
         console.error('ダッシュボードデータ取得エラー:', error)
@@ -408,6 +457,54 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString)
       return `${date.getMonth() + 1}/${date.getDate()}`
+    },
+    
+    // メモ編集モーダル関連
+    openEditNotesModal(session) {
+      this.editNotesModal.session = session
+      this.editNotesModal.notes = session.notes || ''
+      this.editNotesModal.isOpen = true
+    },
+    
+    closeEditNotesModal() {
+      this.editNotesModal.isOpen = false
+      this.editNotesModal.session = null
+      this.editNotesModal.notes = ''
+      this.editNotesModal.saving = false
+    },
+    
+    async saveNotes() {
+      if (!this.editNotesModal.session) return
+      
+      this.editNotesModal.saving = true
+      
+      try {
+        const response = await axios.put(`/api/pomodoro/${this.editNotesModal.session.id}`, {
+          notes: this.editNotesModal.notes
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          // リストのデータを更新
+          const sessionIndex = this.recentSessions.findIndex(s => 
+            s.type === 'pomodoro_session' && s.id === this.editNotesModal.session.id
+          )
+          if (sessionIndex !== -1) {
+            this.recentSessions[sessionIndex].notes = this.editNotesModal.notes
+          }
+          
+          this.showSuccess('メモを保存しました')
+          this.closeEditNotesModal()
+        }
+      } catch (error) {
+        console.error('メモ保存エラー:', error)
+        this.showError('メモの保存に失敗しました')
+      } finally {
+        this.editNotesModal.saving = false
+      }
     },
     
     // エラーメッセージ表示
