@@ -115,7 +115,6 @@
 
       <!-- ポモドーロタイマー -->
       <section class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4 text-gray-800">🍅 ポモドーロタイマー</h2>
         <PomodoroTimer />
       </section>
     </div>
