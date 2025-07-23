@@ -1,28 +1,22 @@
-# PHP環境用のDockerfile
+# メモリ効率を重視したDockerfile
 FROM php:8.2-fpm
 
-# システムの依存関係をインストール
+# 必要最小限のシステム依存関係のみインストール
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
     libpng-dev \
     libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    sqlite3 \
-    libsqlite3-dev \
     libpq-dev \
-    postgresql-client \
     nginx \
     supervisor \
-    ca-certificates \
-    gnupg \
-    && docker-php-ext-install pdo pdo_sqlite pdo_pgsql pgsql mbstring exif pcntl bcmath gd
+    && docker-php-ext-install pdo pdo_pgsql pgsql mbstring gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Node.js 20をインストール（最新LTSバージョン）
+# Node.js 20をインストール（最小構成）
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Composerをインストール
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -30,24 +24,28 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # 作業ディレクトリを設定
 WORKDIR /var/www/html
 
-# パッケージファイルをコピーして依存関係をインストール
-COPY package*.json ./
-RUN npm install
+# 依存関係ファイルのみ先にコピー（レイヤーキャッシュのため）
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Laravel artisanファイルを含むすべてのファイルを先にコピー
+# Node.js依存関係をインストール
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# アプリケーションファイルをコピー
 COPY . .
 
-# Composerで依存関係をインストール
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# フロントエンドをビルド
-RUN npm run build
+# フロントエンドをビルド（本番環境用）
+RUN npm run build && npm cache clean --force
 
 # ストレージディレクトリの権限設定
 RUN chown -R www-data:www-data /var/www/html/storage \
     && chown -R www-data:www-data /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
+
+# PHP-FPM設定（メモリ最適化）
+COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Nginx設定
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
