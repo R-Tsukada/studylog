@@ -26,14 +26,6 @@
       </div>
     </section>
 
-    <!-- 学習方法推奨 -->
-    <StudyMethodSuggestion 
-      @method-selected="onMethodSelected"
-      :auto-load="!currentSession"
-    />
-
-    <!-- 統合分析 -->
-    <UnifiedAnalytics />
 
     <!-- 今日の学習状況 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
@@ -162,16 +154,12 @@
 <script>
 import axios from 'axios'
 import StudyCalendar from '../components/StudyCalendar.vue'
-import StudyMethodSuggestion from '../components/StudyMethodSuggestion.vue'
-import UnifiedAnalytics from '../components/UnifiedAnalytics.vue'
 
 export default {
   name: 'Dashboard',
   inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
     StudyCalendar,
-    StudyMethodSuggestion,
-    UnifiedAnalytics
   },
   data() {
     return {
@@ -431,18 +419,6 @@ export default {
       }, 5000)
     },
 
-    // 学習方法推奨の選択ハンドラー
-    onMethodSelected(selection) {
-      console.log('学習方法が選択されました:', selection)
-      
-      if (selection.method === 'time_tracking') {
-        // 時間計測ページに遷移
-        this.$router.push('/study')
-      } else if (selection.method === 'pomodoro') {
-        // ポモドーロページに遷移
-        this.$router.push('/pomodoro')
-      }
-    }
   }
 }
 </script>
