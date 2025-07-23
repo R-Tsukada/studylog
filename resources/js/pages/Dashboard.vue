@@ -26,14 +26,8 @@
       </div>
     </section>
 
-    <!-- 学習方法推奨 -->
-    <StudyMethodSuggestion 
-      @method-selected="onMethodSelected"
-      :auto-load="!currentSession"
-    />
-
-    <!-- 統合分析 -->
-    <UnifiedAnalytics />
+    <!-- 学習カレンダー -->
+    <StudyCalendar />
 
     <!-- 今日の学習状況 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
@@ -58,9 +52,11 @@
       </div>
     </section>
 
-    <!-- 学習開始セクション -->
-    <section v-if="!currentSession" class="bg-white rounded-lg shadow p-6 mb-6">
-      <h2 class="text-lg font-semibold mb-4 text-gray-800">🚀 学習を開始</h2>
+    <!-- 学習開始セクション & ポモドーロタイマー -->
+    <div v-if="!currentSession" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- 学習開始セクション -->
+      <section class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4 text-gray-800">🚀 学習を開始</h2>
       
       <!-- エラーメッセージ -->
       <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -115,10 +111,13 @@
           {{ loading ? '開始中...' : '🎯 学習開始！' }}
         </button>
       </form>
-    </section>
+      </section>
 
-    <!-- 学習カレンダー -->
-    <StudyCalendar />
+      <!-- ポモドーロタイマー -->
+      <section class="bg-white rounded-lg shadow p-6">
+        <PomodoroTimer />
+      </section>
+    </div>
 
     <!-- 最近の学習履歴 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
@@ -162,16 +161,14 @@
 <script>
 import axios from 'axios'
 import StudyCalendar from '../components/StudyCalendar.vue'
-import StudyMethodSuggestion from '../components/StudyMethodSuggestion.vue'
-import UnifiedAnalytics from '../components/UnifiedAnalytics.vue'
+import PomodoroTimer from '../components/PomodoroTimer.vue'
 
 export default {
   name: 'Dashboard',
   inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
     StudyCalendar,
-    StudyMethodSuggestion,
-    UnifiedAnalytics
+    PomodoroTimer,
   },
   data() {
     return {
@@ -431,18 +428,6 @@ export default {
       }, 5000)
     },
 
-    // 学習方法推奨の選択ハンドラー
-    onMethodSelected(selection) {
-      console.log('学習方法が選択されました:', selection)
-      
-      if (selection.method === 'time_tracking') {
-        // 時間計測ページに遷移
-        this.$router.push('/study')
-      } else if (selection.method === 'pomodoro') {
-        // ポモドーロページに遷移
-        this.$router.push('/pomodoro')
-      }
-    }
   }
 }
 </script>

@@ -94,13 +94,13 @@ RUN apt-get update && apt-get install -y \
 # 作業ディレクトリを設定
 WORKDIR /var/www/html
 
-# ビルドステージから必要なファイルのみコピー
+# アプリケーションファイルをコピー（.dockerignoreで不要ファイルは除外）
+COPY . .
+
+# ビルドステージから必要なファイルのみコピー（上書きのため最後に実行）
 COPY --from=build-stage /var/www/html/vendor ./vendor
 COPY --from=build-stage /var/www/html/public/build ./public/build
 COPY --from=build-stage /var/www/html/bootstrap/cache ./bootstrap/cache
-
-# アプリケーションファイルをコピー（.dockerignoreで不要ファイルは除外）
-COPY . .
 
 # 権限設定
 RUN chown -R www-data:www-data /var/www/html/storage \
