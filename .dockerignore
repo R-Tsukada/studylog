@@ -1,15 +1,46 @@
+# Git関連
 .git
 .gitignore
+
+# ドキュメント関連
 README.md
+*.md
+docs/
+AUTHENTICATION_SETUP.md
+DOCKER_README.md
+GOOGLE_OAUTH_SETUP.md
+SUPABASE_SETUP.md
+development_setup_guide.md
+dev-server.md
+ui_ux_design.md
+
+# 環境変数
 .env
 .env.backup
+.env.example
+.env.local
+.env.*.local
+
+# テスト関連
+/tests
+phpunit.xml
 .phpunit.result.cache
+phpunit.xml
 Homestead.json
 Homestead.yaml
+
+# Node.js関連
+node_modules
 npm-debug.log
 yarn-error.log
-node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Composer vendor（ビルド前にCOPYするため除外）
 vendor
+
+# Laravel ストレージ・キャッシュ
 storage/logs/*.log
 storage/framework/cache/*
 storage/framework/sessions/*
@@ -18,10 +49,22 @@ storage/framework/views/*
 bootstrap/cache/*
 public/hot
 public/storage
+
+# IDE・エディタ
 .vscode
 .idea
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Docker関連
+docker-compose.yml
+
+# その他不要ファイル
+*.log
+*.pid
+cookies.txt
