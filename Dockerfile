@@ -3,6 +3,10 @@ FROM php:8.2-fpm
 
 # 必要最小限のシステム依存関係のみインストール
 RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    zip \
+    unzip \
     libpng-dev \
     libonig-dev \
     libpq-dev \
