@@ -33,7 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard API（認証済みユーザーのデータのみ）
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/statistics', [DashboardController::class, 'statistics']);
-    Route::get('/dashboard/study-calendar', [DashboardController::class, 'getStudyCalendar']);
     
     // Study Session API（認証済みユーザーのセッションのみ）
     Route::prefix('study-sessions')->group(function () {

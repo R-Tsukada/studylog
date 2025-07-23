@@ -26,8 +26,6 @@
       </div>
     </section>
 
-    <!-- 学習カレンダー -->
-    <StudyCalendar />
 
     <!-- 今日の学習状況 -->
     <section class="bg-white rounded-lg shadow p-6 mb-6">
@@ -160,14 +158,12 @@
 
 <script>
 import axios from 'axios'
-import StudyCalendar from '../components/StudyCalendar.vue'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 
 export default {
   name: 'Dashboard',
   inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
-    StudyCalendar,
     PomodoroTimer,
   },
   data() {
