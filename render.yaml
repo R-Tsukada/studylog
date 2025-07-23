@@ -60,9 +60,9 @@ services:
       npm run build
     startCommand: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
-  - type: pserv
-    name: study-app-db
-    env: docker
-    plan: starter
+databases:
+  - name: study-app-db
     databaseName: study_app_production
+    user: study_app_user
     region: singapore
+    plan: starter

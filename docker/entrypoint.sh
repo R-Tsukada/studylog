@@ -17,6 +17,28 @@ if [ "$DB_CONNECTION" = "sqlite" ]; then
     chmod 664 /var/www/html/database/database.sqlite
 else
     echo "Using PostgreSQL database connection"
+    echo "Waiting for PostgreSQL to be ready..."
+    
+    # PostgreSQLデータベースの接続テスト（最大60秒待機）
+    for i in {1..60}; do
+        if php artisan tinker --execute="try { DB::connection()->getPdo(); echo 'Database connected!'; } catch(Exception \$e) { echo 'Database not ready: ' . \$e->getMessage(); exit(1); }" 2>/dev/null | grep -q "Database connected"; then
+            echo "PostgreSQL database is ready!"
+            break
+        else
+            echo "Waiting for database connection... ($i/60)"
+            sleep 1
+        fi
+        
+        if [ $i -eq 60 ]; then
+            echo "Error: Could not connect to PostgreSQL database after 60 seconds"
+            echo "Database connection details:"
+            echo "DB_HOST: $DB_HOST"
+            echo "DB_PORT: $DB_PORT" 
+            echo "DB_DATABASE: $DB_DATABASE"
+            echo "DB_USERNAME: $DB_USERNAME"
+            exit 1
+        fi
+    done
 fi
 
 # データベースマイグレーション（最優先で実行）
