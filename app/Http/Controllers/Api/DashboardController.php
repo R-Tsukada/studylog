@@ -207,24 +207,58 @@ class DashboardController extends Controller
     }
 
     /**
-     * 最近学習した分野を取得
+     * 最近学習した分野を取得（学習セッション＋ポモドーロ統合）
      */
     private function getRecentSubjects(int $userId): array
     {
-        $recentSessions = StudySession::completed()
+        // 学習セッション取得
+        $studySessions = StudySession::completed()
             ->forUser($userId)
-            ->with('subjectArea')
+            ->with('subjectArea.examType')
             ->orderBy('started_at', 'desc')
-            ->limit(3)
-            ->get();
+            ->limit(10) // 多めに取得して後でフィルタ
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'study_session',
+                    'subject_area_name' => $session->subjectArea->name,
+                    'exam_type_name' => $session->subjectArea->examType->name,
+                    'started_at' => $session->started_at,
+                    'last_studied_at' => $session->started_at->format('Y-m-d'),
+                    'duration_minutes' => $session->duration_minutes,
+                    'notes' => $session->study_comment // 学習セッションのコメントをnotesとして統一
+                ];
+            });
 
-        return $recentSessions->map(function ($session) {
-            return [
-                'subject_area_name' => $session->subjectArea->name,
-                'last_studied_at' => $session->started_at->format('Y-m-d'),
-                'duration_minutes' => $session->duration_minutes
-            ];
-        })->unique('subject_area_name')->values()->toArray();
+        // ポモドーロセッション取得（完了したfocusセッションのみ）
+        $pomodoroSessions = \App\Models\PomodoroSession::where('user_id', $userId)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->with('subjectArea.examType') // リレーションも取得
+            ->orderBy('started_at', 'desc')
+            ->limit(10) // 多めに取得して後でフィルタ
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'pomodoro_session',
+                    'subject_area_name' => $session->subjectArea ? $session->subjectArea->name : 'ポモドーロ学習',
+                    'exam_type_name' => $session->subjectArea && $session->subjectArea->examType ? $session->subjectArea->examType->name : null,
+                    'started_at' => $session->started_at,
+                    'last_studied_at' => $session->started_at->format('Y-m-d'),
+                    'duration_minutes' => $session->actual_duration,
+                    'notes' => $session->notes // メモを追加
+                ];
+            });
+
+        // 両方を統合して時系列でソート
+        $allSessions = $studySessions->concat($pomodoroSessions)
+            ->sortByDesc('started_at')
+            ->take(5) // 最新5件を取得
+            ->values();
+
+        return $allSessions->toArray();
     }
 
     /**

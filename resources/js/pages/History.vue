@@ -57,6 +57,13 @@
                 ✏️ 編集
               </button>
               <button 
+                v-if="session.type === 'pomodoro'"
+                @click="editPomodoroNotes(session)"
+                class="text-orange-600 hover:text-orange-800 text-xs cursor-pointer"
+              >
+                📝 メモ編集
+              </button>
+              <button 
                 @click="deleteSession(session)"
                 class="text-red-600 hover:text-red-800 text-xs cursor-pointer"
               >
@@ -153,8 +160,8 @@
           <div class="bg-gray-50 p-3 rounded-lg mb-6">
             <div class="font-medium">{{ deletingSession.subject_area_name }}</div>
             <div class="text-sm text-gray-600">{{ deletingSession.exam_type_name }}</div>
-            <div class="text-sm text-gray-600">{{ formatDate(deletingSession.date) }} • {{ deletingSession.duration_minutes }}分</div>
-            <div class="text-xs text-gray-500 mt-1">{{ deletingSession.study_comment }}</div>
+            <div class="text-sm text-gray-600">{{ formatDate(deletingSession.started_at) }} • {{ deletingSession.duration_minutes }}分</div>
+            <div v-if="deletingSession.notes" class="text-xs text-gray-500 mt-1">{{ deletingSession.notes }}</div>
           </div>
           <p class="text-sm text-red-600 mb-6">⚠️ この操作は取り消せません</p>
           
@@ -173,6 +180,53 @@
               キャンセル
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ポモドーロメモ編集モーダル -->
+    <div v-if="pomodoroNotesModal.isOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="closePomodoroNotesModal">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4" @click.stop>
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">🍅 ポモドーロメモ編集</h3>
+          <button @click="closePomodoroNotesModal" class="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        </div>
+        
+        <div class="mb-4">
+          <div class="text-sm text-gray-600 mb-2">
+            {{ pomodoroNotesModal.session?.subject_area_name }} - {{ pomodoroNotesModal.session?.duration_minutes }}分
+          </div>
+          <div class="text-xs text-gray-500">
+            {{ formatDate(pomodoroNotesModal.session?.started_at) }}
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">メモ</label>
+          <textarea
+            v-model="pomodoroNotesModal.notes"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            rows="4"
+            placeholder="ポモドーロセッションでのメモを入力してください..."
+          ></textarea>
+        </div>
+        
+        <div class="flex gap-3">
+          <button
+            @click="closePomodoroNotesModal"
+            class="flex-1 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+          >
+            キャンセル
+          </button>
+          <button
+            @click="savePomodoroNotes"
+            :disabled="pomodoroNotesModal.saving"
+            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          >
+            {{ pomodoroNotesModal.saving ? '保存中...' : '保存' }}
+          </button>
         </div>
       </div>
     </div>
@@ -203,7 +257,15 @@ export default {
       },
       
       // 削除関連
-      deletingSession: null
+      deletingSession: null,
+      
+      // ポモドーロメモ編集関連
+      pomodoroNotesModal: {
+        isOpen: false,
+        session: null,
+        notes: '',
+        saving: false
+      }
     }
   },
   async mounted() {
@@ -335,7 +397,9 @@ export default {
     },
     
     formatDate(dateString) {
+      if (!dateString) return '不明な日付'
       const date = new Date(dateString)
+      if (isNaN(date.getTime())) return '不明な日付'
       return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
     },
     
@@ -365,6 +429,50 @@ export default {
     
     getSessionTypeLabel(type) {
       return type === 'pomodoro' ? 'ポモドーロ' : '時間計測'
+    },
+    
+    // ポモドーロメモ編集関連
+    editPomodoroNotes(session) {
+      this.pomodoroNotesModal.session = session
+      this.pomodoroNotesModal.notes = session.notes || ''
+      this.pomodoroNotesModal.isOpen = true
+    },
+    
+    closePomodoroNotesModal() {
+      this.pomodoroNotesModal.isOpen = false
+      this.pomodoroNotesModal.session = null
+      this.pomodoroNotesModal.notes = ''
+      this.pomodoroNotesModal.saving = false
+    },
+    
+    async savePomodoroNotes() {
+      if (!this.pomodoroNotesModal.session) return
+      
+      this.pomodoroNotesModal.saving = true
+      
+      try {
+        const response = await axios.put(`/api/pomodoro/${this.pomodoroNotesModal.session.id}`, {
+          notes: this.pomodoroNotesModal.notes
+        })
+        
+        if (response.data.success) {
+          // セッションリストを更新
+          const sessionIndex = this.sessions.findIndex(s => 
+            s.type === 'pomodoro' && s.id === this.pomodoroNotesModal.session.id
+          )
+          if (sessionIndex !== -1) {
+            this.sessions[sessionIndex].notes = this.pomodoroNotesModal.notes
+          }
+          
+          alert('メモを保存しました')
+          this.closePomodoroNotesModal()
+        }
+      } catch (error) {
+        console.error('メモ保存エラー:', error)
+        alert('メモの保存に失敗しました')
+      } finally {
+        this.pomodoroNotesModal.saving = false
+      }
     }
   }
 }
