@@ -8,4 +8,39 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* Study Log くすみカラーパレット */
+    --color-muted-blue: #7ba7bc;
+    --color-muted-blue-light: #9cc2d1;
+    --color-muted-blue-dark: #5f8da8;
+    
+    --color-muted-green: #9caf88;
+    --color-muted-green-light: #b5c7a0;
+    --color-muted-green-dark: #7d9270;
+    
+    --color-muted-purple: #a498b0;
+    --color-muted-purple-light: #bbb1c4;
+    --color-muted-purple-dark: #877c96;
+    
+    --color-muted-pink: #d4a5a5;
+    --color-muted-pink-light: #e1baba;
+    --color-muted-pink-dark: #c68f8f;
+    
+    --color-muted-yellow: #e6d690;
+    --color-muted-yellow-light: #f0e4a8;
+    --color-muted-yellow-dark: #d9c778;
+    
+    --color-muted-orange: #d9b08a;
+    --color-muted-orange-light: #e6c5a2;
+    --color-muted-orange-dark: #cc9b72;
+    
+    --color-muted-white: #faf9f7;
+    --color-muted-gray: #e8e6e3;
+    --color-muted-gray-dark: #d1cfc9;
+    
+    /* 草表示用グリーングラデーション */
+    --color-grass-0: #f5f5f5;
+    --color-grass-1: #d4edda;
+    --color-grass-2: #9caf88;
+    --color-grass-3: #7d9270;
 }

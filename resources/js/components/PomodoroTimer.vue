@@ -2,22 +2,23 @@
   <div class="pomodoro-timer">
     <!-- セッション設定 -->
     <div v-if="!isActive && !currentSession" class="setup-section mb-6">
-      <h2 class="text-lg font-semibold mb-4 text-gray-800">🍅 ポモドーロタイマー</h2>
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🍅 ポモドーロタイマー</h2>
       
       <!-- セッションタイプ選択 -->
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">セッションタイプ</label>
+        <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">セッションタイプ</label>
         <div class="grid grid-cols-3 gap-2">
           <button
             v-for="type in sessionTypes"
             :key="type.value"
             @click="selectedType = type.value"
-            :class="[
-              'py-2 px-3 rounded-lg text-sm font-medium transition-colors',
-              selectedType === type.value
-                ? 'bg-red-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            ]"
+            :class="['py-2 px-3 rounded-lg text-sm font-medium transition-colors']"
+            :style="{
+              backgroundColor: selectedType === type.value ? 'var(--color-muted-pink)' : 'var(--color-muted-gray)',
+              color: selectedType === type.value ? 'white' : 'var(--color-muted-gray-dark)'
+            }"
+            @mouseover="handleSessionTypeHover($event, type.value, true)"
+            @mouseout="handleSessionTypeHover($event, type.value, false)"
           >
             {{ type.label }}
           </button>
@@ -26,7 +27,7 @@
 
       <!-- 時間選択 -->
       <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
+        <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">
           {{ selectedType === 'focus' ? '集中時間' : '休憩時間' }}
         </label>
         <div class="grid grid-cols-3 gap-2">
@@ -34,12 +35,13 @@
             v-for="duration in availableDurations"
             :key="duration"
             @click="selectedDuration = duration"
-            :class="[
-              'py-2 px-3 rounded-lg text-sm font-medium transition-colors',
-              selectedDuration === duration
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            ]"
+            :class="['py-2 px-3 rounded-lg text-sm font-medium transition-colors']"
+            :style="{
+              backgroundColor: selectedDuration === duration ? 'var(--color-muted-blue)' : 'var(--color-muted-gray)',
+              color: selectedDuration === duration ? 'white' : 'var(--color-muted-gray-dark)'
+            }"
+            @mouseover="handleDurationHover($event, duration, true)"
+            @mouseout="handleDurationHover($event, duration, false)"
           >
             {{ duration }}分
           </button>
@@ -48,11 +50,14 @@
 
       <!-- 学習分野選択 -->
       <div v-if="selectedType === 'focus'" class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">学習分野</label>
+        <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">学習分野</label>
         <select
           v-model="selectedSubjectArea"
           required
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          class="w-full px-3 py-2 rounded-lg"
+          style="border: 1px solid var(--color-muted-gray); background-color: white;"
+          @focus="handleInputFocus($event)"
+          @blur="handleInputBlur($event)"
         >
           <option value="">学習分野を選択してください</option>
           <option
@@ -68,13 +73,13 @@
       <!-- 設定オプション -->
       <div class="mb-6">
         <div class="flex items-center justify-between mb-2">
-          <label class="text-sm font-medium text-gray-700">音声通知</label>
+          <label class="text-sm font-medium" style="color: var(--color-muted-blue-dark);">音声通知</label>
           <button
             @click="settings.sound_enabled = !settings.sound_enabled"
-            :class="[
-              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-              settings.sound_enabled ? 'bg-blue-500' : 'bg-gray-300'
-            ]"
+            :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors']"
+            :style="{
+              backgroundColor: settings.sound_enabled ? 'var(--color-muted-blue)' : 'var(--color-muted-gray)'
+            }"
           >
             <span
               :class="[
@@ -85,13 +90,13 @@
           </button>
         </div>
         <div class="flex items-center justify-between">
-          <label class="text-sm font-medium text-gray-700">自動で次のセッションを開始</label>
+          <label class="text-sm font-medium" style="color: var(--color-muted-blue-dark);">自動で次のセッションを開始</label>
           <button
             @click="settings.auto_start = !settings.auto_start"
-            :class="[
-              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-              settings.auto_start ? 'bg-blue-500' : 'bg-gray-300'
-            ]"
+            :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors']"
+            :style="{
+              backgroundColor: settings.auto_start ? 'var(--color-muted-blue)' : 'var(--color-muted-gray)'
+            }"
           >
             <span
               :class="[
@@ -107,7 +112,13 @@
       <button
         @click="startSession"
         :disabled="!selectedType || !selectedDuration || (selectedType === 'focus' && !selectedSubjectArea)"
-        class="w-full py-3 px-4 bg-red-500 text-white font-bold rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        class="w-full py-3 px-4 text-white font-bold rounded-lg transition-colors"
+        :style="{
+          backgroundColor: (!selectedType || !selectedDuration || (selectedType === 'focus' && !selectedSubjectArea)) ? 'var(--color-muted-gray)' : 'var(--color-muted-pink)',
+          cursor: (!selectedType || !selectedDuration || (selectedType === 'focus' && !selectedSubjectArea)) ? 'not-allowed' : 'pointer'
+        }"
+        @mouseover="handleStartButtonHover($event, true)"
+        @mouseout="handleStartButtonHover($event, false)"
       >
         セッション開始
       </button>
@@ -117,10 +128,10 @@
     <!-- アクティブセッション表示 -->
     <div v-else-if="isActive || currentSession" class="active-session text-center">
       <div class="mb-4">
-        <h3 class="text-2xl font-bold text-gray-800 mb-2">
+        <h3 class="text-2xl font-bold mb-2" style="color: var(--color-muted-blue-dark);">
           {{ currentSessionTypeLabel }}
         </h3>
-        <div class="text-sm text-gray-600">
+        <div class="text-sm" style="color: var(--color-muted-gray-dark);">
           {{ formatDateTime(currentSession?.started_at) }}
         </div>
       </div>
@@ -128,26 +139,26 @@
       <!-- タイマー表示 -->
       <div class="timer-display mb-6">
         <div
-          :class="[
-            'text-6xl font-mono font-bold mb-4',
-            timeRemaining <= 60 ? 'text-red-500' : 'text-gray-800'
-          ]"
+          :class="['text-6xl font-mono font-bold mb-4']"
+          :style="{
+            color: timeRemaining <= 60 ? 'var(--color-muted-pink)' : 'var(--color-muted-blue-dark)'
+          }"
         >
           {{ formatTime(globalPomodoroTimer.timeRemaining) }}
         </div>
         
         <!-- プログレスバー -->
-        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+        <div class="w-full rounded-full h-2 mb-4" style="background-color: var(--color-muted-gray);">
           <div
-            :class="[
-              'h-2 rounded-full transition-all duration-1000',
-              currentSession?.session_type === 'focus' ? 'bg-red-500' : 'bg-green-500'
-            ]"
-            :style="{ width: `${progressPercentage}%` }"
+            class="h-2 rounded-full transition-all duration-1000"
+            :style="{
+              width: `${progressPercentage}%`,
+              backgroundColor: currentSession?.session_type === 'focus' ? 'var(--color-muted-pink)' : 'var(--color-muted-green)'
+            }"
           ></div>
         </div>
 
-        <div class="text-sm text-gray-600">
+        <div class="text-sm" style="color: var(--color-muted-gray-dark);">
           残り時間: {{ Math.floor(timeRemaining / 60) }}分{{ timeRemaining % 60 }}秒
         </div>
       </div>
@@ -158,21 +169,30 @@
         <button
           @click="pauseSession"
           v-if="!isPaused"
-          class="py-2 px-4 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors"
+          class="py-2 px-4 text-white font-medium rounded-lg transition-colors"
+          style="background-color: var(--color-muted-yellow);"
+          @mouseover="handleControlButtonHover($event, 'var(--color-muted-yellow-dark)')"
+          @mouseout="handleControlButtonHover($event, 'var(--color-muted-yellow)')"
         >
           一時停止
         </button>
         <button
           @click="resumeSession"
           v-else
-          class="py-2 px-4 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
+          class="py-2 px-4 text-white font-medium rounded-lg transition-colors"
+          style="background-color: var(--color-muted-green);"
+          @mouseover="handleControlButtonHover($event, 'var(--color-muted-green-dark)')"
+          @mouseout="handleControlButtonHover($event, 'var(--color-muted-green)')"
         >
           再開
         </button>
         
         <button
           @click="completeSession"
-          class="py-2 px-4 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors"
+          class="py-2 px-4 text-white font-medium rounded-lg transition-colors"
+          style="background-color: var(--color-muted-blue);"
+          @mouseover="handleControlButtonHover($event, 'var(--color-muted-blue-dark)')"
+          @mouseout="handleControlButtonHover($event, 'var(--color-muted-blue)')"
         >
           完了
         </button>
@@ -180,33 +200,39 @@
 
       <button
         @click="stopSession"
-        class="w-full py-2 px-4 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors"
+        class="w-full py-2 px-4 text-white font-medium rounded-lg transition-colors"
+        style="background-color: var(--color-muted-pink);"
+        @mouseover="handleControlButtonHover($event, 'var(--color-muted-pink-dark)')"
+        @mouseout="handleControlButtonHover($event, 'var(--color-muted-pink)')"
       >
         セッション中止
       </button>
 
       <!-- ノート入力 -->
       <div class="mt-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">メモ（オプション）</label>
+        <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">メモ（オプション）</label>
         <textarea
           v-model="sessionNotes"
           placeholder="セッションについてのメモを入力..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+          class="w-full px-3 py-2 rounded-lg text-sm"
+          style="border: 1px solid var(--color-muted-gray); background-color: white;"
+          @focus="handleInputFocus($event)"
+          @blur="handleInputBlur($event)"
           rows="2"
         ></textarea>
       </div>
     </div>
 
     <!-- 今日の統計 -->
-    <div v-if="!isActive && !currentSession && todayStats" class="stats-section mt-6 p-4 bg-gray-50 rounded-lg">
-      <h4 class="font-semibold text-gray-800 mb-3">今日の統計</h4>
+    <div v-if="!isActive && !currentSession && todayStats" class="stats-section mt-6 p-4 rounded-lg" style="background-color: var(--color-muted-white); border: 1px solid var(--color-muted-gray);">
+      <h4 class="font-semibold mb-3" style="color: var(--color-muted-blue-dark);">今日の統計</h4>
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <div class="text-gray-600">完了セッション</div>
+          <div style="color: var(--color-muted-gray-dark);">完了セッション</div>
           <div class="font-bold text-lg">{{ todayStats.total_sessions }}</div>
         </div>
         <div>
-          <div class="text-gray-600">集中時間</div>
+          <div style="color: var(--color-muted-gray-dark);">集中時間</div>
           <div class="font-bold text-lg">{{ Math.floor(todayStats.total_focus_time / 60) }}h {{ todayStats.total_focus_time % 60 }}m</div>
         </div>
       </div>
@@ -617,6 +643,39 @@ export default {
         event.returnValue = '';
       }
     },
+    
+    // マウスイベントハンドラー
+    handleSessionTypeHover(event, typeValue, isHover) {
+      if (this.selectedType !== typeValue) {
+        event.target.style.backgroundColor = isHover ? 'var(--color-muted-gray-dark)' : 'var(--color-muted-gray)';
+      }
+    },
+    
+    handleDurationHover(event, duration, isHover) {
+      if (this.selectedDuration !== duration) {
+        event.target.style.backgroundColor = isHover ? 'var(--color-muted-gray-dark)' : 'var(--color-muted-gray)';
+      }
+    },
+    
+    handleStartButtonHover(event, isHover) {
+      if (!event.target.disabled) {
+        event.target.style.backgroundColor = isHover ? 'var(--color-muted-pink-dark)' : 'var(--color-muted-pink)';
+      }
+    },
+    
+    handleControlButtonHover(event, hoverColor) {
+      event.target.style.backgroundColor = hoverColor;
+    },
+    
+    handleInputFocus(event) {
+      event.target.style.borderColor = 'var(--color-muted-blue)';
+      event.target.style.boxShadow = '0 0 0 2px rgba(123, 167, 188, 0.2)';
+    },
+    
+    handleInputBlur(event) {
+      event.target.style.borderColor = 'var(--color-muted-gray)';
+      event.target.style.boxShadow = 'none';
+    }
     
   }
 }
