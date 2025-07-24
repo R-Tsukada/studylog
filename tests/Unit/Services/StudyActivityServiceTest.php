@@ -429,4 +429,127 @@ class StudyActivityServiceTest extends TestCase
         
         $this->assertTrue($hasCompletionRateInsight);
     }
+
+    /**
+     * @test
+     */
+    public function can_get_grass_data_correctly()
+    {
+        // テストデータ作成
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        
+        // 今日のデータ
+        $studySession = StudySession::factory()->create([
+            'user_id' => $this->user->id,
+            'started_at' => $today->copy()->addHours(9),
+            'ended_at' => $today->copy()->addHours(10)->addMinutes(30),
+            'duration_minutes' => 90
+        ]);
+        
+        $this->service->updateDailySummaryFromStudySession($studySession);
+
+        // 昨日のデータ
+        $this->service->updateDailySummaryFromPomodoro(
+            PomodoroSession::factory()->create([
+                'user_id' => $this->user->id,
+                'started_at' => $yesterday->copy()->addHours(14),
+                'completed_at' => $yesterday->copy()->addHours(14)->addMinutes(25),
+                'is_completed' => true,
+                'actual_duration' => 25
+            ])
+        );
+
+        $result = $this->service->getGrassData(
+            $this->user->id,
+            $yesterday->format('Y-m-d'),
+            $today->format('Y-m-d')
+        );
+
+        $this->assertTrue($result['success']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('stats', $result);
+        
+        $this->assertCount(2, $result['data']);
+        
+        // 統計の確認
+        $stats = $result['stats'];
+        $this->assertEquals(2, $stats['studyDays']);
+        $this->assertEquals(1.9, $stats['totalHours']); // 115分 = 1.9時間
+    }
+
+    /**
+     * @test
+     */
+    public function grass_level_calculation_is_correct()
+    {
+        $testCases = [
+            [0, 0],    // 学習なし
+            [30, 1],   // 30分 = レベル1
+            [60, 1],   // 60分 = レベル1
+            [90, 2],   // 90分 = レベル2
+            [120, 2],  // 120分 = レベル2
+            [150, 3],  // 150分 = レベル3
+            [300, 3]   // 300分 = レベル3
+        ];
+
+        $model = new \App\Models\DailyStudySummary();
+        
+        foreach ($testCases as [$minutes, $expectedLevel]) {
+            $actualLevel = $model->calculateGrassLevel($minutes);
+            $this->assertEquals(
+                $expectedLevel, 
+                $actualLevel, 
+                "失敗: {$minutes}分の場合、レベル{$expectedLevel}であるべきですが、{$actualLevel}でした"
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function can_build_grass_data_for_year()
+    {
+        $year = 2024;
+        
+        // 複数の日付でデータ作成
+        $dates = [
+            '2024-01-15' => 60,   // レベル1
+            '2024-03-20' => 120,  // レベル2
+            '2024-06-10' => 180,  // レベル3
+            '2024-12-25' => 30    // レベル1
+        ];
+
+        foreach ($dates as $date => $minutes) {
+            $model = new \App\Models\DailyStudySummary();
+            \App\Models\DailyStudySummary::create([
+                'user_id' => $this->user->id,
+                'study_date' => $date,
+                'total_minutes' => $minutes,
+                'study_session_minutes' => $minutes,
+                'pomodoro_minutes' => 0,
+                'session_count' => 1,
+                'total_focus_sessions' => 0,
+                'grass_level' => $model->calculateGrassLevel($minutes),
+                'subject_breakdown' => []
+            ]);
+        }
+
+        $result = $this->service->getGrassData(
+            $this->user->id,
+            "{$year}-01-01",
+            "{$year}-12-31"
+        );
+
+        $this->assertTrue($result['success']);
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('stats', $result);
+        
+        $this->assertCount(4, $result['data']);
+        
+        // 統計データの確認
+        $stats = $result['stats'];
+        $this->assertEquals(4, $stats['studyDays']);
+        $this->assertEquals(6.5, $stats['totalHours']); // 390分 = 6.5時間
+    }
 }

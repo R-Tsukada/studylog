@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Models\StudySession;
 use App\Models\PomodoroSession;
+use App\Models\DailyStudySummary;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class StudyActivityService
@@ -409,5 +412,307 @@ class StudyActivityService
         }
 
         return $insights;
+    }
+
+    // 草表示機能メソッド
+
+    /**
+     * 学習セッション完了時のデイリーサマリー更新
+     */
+    public function updateDailySummaryFromStudySession(StudySession $studySession): DailyStudySummary
+    {
+        $studyDate = $studySession->started_at->toDateString();
+        
+        $summary = DailyStudySummary::firstOrCreate([
+            'user_id' => $studySession->user_id,
+            'study_date' => $studyDate,
+        ], [
+            'total_minutes' => 0,
+            'session_count' => 0,
+            'study_session_minutes' => 0,
+            'pomodoro_minutes' => 0,
+            'total_focus_sessions' => 0,
+            'grass_level' => 0,
+            'subject_breakdown' => [],
+        ]);
+
+        $summary->updateFromStudySession($studySession);
+        $summary->session_count += 1;
+        $summary->save();
+
+        // キャッシュクリア
+        $this->clearUserGrassCache($studySession->user_id);
+
+        return $summary;
+    }
+
+    /**
+     * ポモドーロセッション完了時のデイリーサマリー更新
+     */
+    public function updateDailySummaryFromPomodoro(PomodoroSession $pomodoroSession): DailyStudySummary
+    {
+        $studyDate = $pomodoroSession->started_at->toDateString();
+        
+        $summary = DailyStudySummary::firstOrCreate([
+            'user_id' => $pomodoroSession->user_id,
+            'study_date' => $studyDate,
+        ], [
+            'total_minutes' => 0,
+            'session_count' => 0,
+            'study_session_minutes' => 0,
+            'pomodoro_minutes' => 0,
+            'total_focus_sessions' => 0,
+            'grass_level' => 0,
+            'subject_breakdown' => [],
+        ]);
+
+        $summary->updateFromPomodoroSession($pomodoroSession);
+        $summary->session_count += 1;
+        $summary->save();
+
+        // キャッシュクリア
+        $this->clearUserGrassCache($pomodoroSession->user_id);
+
+        return $summary;
+    }
+
+    /**
+     * 草表示データ取得（期間指定）
+     */
+    public function getGrassData(int $userId, ?string $startDate = null, ?string $endDate = null): array
+    {
+        $startDate = $startDate ?? Carbon::now()->subYear()->toDateString();
+        $endDate = $endDate ?? Carbon::now()->toDateString();
+        
+        $cacheKey = "grass_data:{$userId}:{$startDate}:{$endDate}";
+        
+        return Cache::remember($cacheKey, now()->addHours(1), function () use ($userId, $startDate, $endDate) {
+            return $this->buildGrassData($userId, $startDate, $endDate);
+        });
+    }
+
+    /**
+     * 草表示データの構築
+     */
+    private function buildGrassData(int $userId, string $startDate, string $endDate): array
+    {
+        $summaries = DailyStudySummary::byUser($userId)
+            ->dateRange($startDate, $endDate)
+            ->orderBy('study_date')
+            ->get()
+            ->keyBy('study_date');
+
+        $grassData = [];
+        $current = Carbon::parse($startDate);
+        $end = Carbon::parse($endDate);
+
+        while ($current <= $end) {
+            $dateKey = $current->toDateString();
+            $summary = $summaries->get($dateKey);
+
+            if ($summary) {
+                $grassData[] = $summary->toGrassData();
+            } else {
+                $grassData[] = [
+                    'date' => $dateKey,
+                    'total_minutes' => 0,
+                    'level' => 0,
+                    'study_session_minutes' => 0,
+                    'pomodoro_minutes' => 0,
+                    'session_count' => 0,
+                    'focus_sessions' => 0,
+                ];
+            }
+            
+            $current->addDay();
+        }
+
+        return [
+            'data' => $grassData,
+            'period' => [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+            ],
+            'stats' => $this->calculateGrassStats($grassData),
+        ];
+    }
+
+    /**
+     * 月別統計データ取得
+     */
+    public function getMonthlyStats(int $userId, int $year, int $month): array
+    {
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+        
+        $cacheKey = "monthly_stats:{$userId}:{$year}:{$month}";
+        
+        return Cache::remember($cacheKey, now()->addHours(6), function () use ($userId, $startDate, $endDate) {
+            $summaries = DailyStudySummary::byUser($userId)
+                ->dateRange($startDate->toDateString(), $endDate->toDateString())
+                ->get();
+
+            $totalMinutes = $summaries->sum('total_minutes');
+            $studyDays = $summaries->where('total_minutes', '>', 0)->count();
+            
+            return [
+                'year' => $startDate->year,
+                'month' => $startDate->month,
+                'total_study_time' => $totalMinutes,
+                'study_days' => $studyDays,
+                'average_daily_time' => $studyDays > 0 ? round($totalMinutes / $studyDays, 1) : 0,
+                'grass_level_distribution' => $summaries->groupBy('grass_level')->map->count(),
+                'best_day' => $summaries->sortByDesc('total_minutes')->first()?->toGrassData(),
+            ];
+        });
+    }
+
+    /**
+     * 特定日の詳細データ取得
+     */
+    public function getDayDetail(int $userId, string $date): array
+    {
+        $summary = DailyStudySummary::byUser($userId)
+            ->where('study_date', $date)
+            ->first();
+
+        if (!$summary) {
+            return [
+                'date' => $date,
+                'summary' => null,
+                'sessions' => [],
+                'pomodoro_sessions' => [],
+            ];
+        }
+
+        // その日の学習セッション詳細
+        $sessions = StudySession::byUser($userId)
+            ->whereDate('started_at', $date)
+            ->with('subjectArea.examType')
+            ->orderBy('started_at')
+            ->get();
+
+        // その日のポモドーロセッション詳細
+        $pomodoroSessions = PomodoroSession::byUser($userId)
+            ->whereDate('started_at', $date)
+            ->where('session_type', 'focus')
+            ->where('is_completed', true)
+            ->with('subjectArea.examType')
+            ->orderBy('started_at')
+            ->get();
+
+        return [
+            'date' => $date,
+            'summary' => $summary->toGrassData(),
+            'sessions' => $sessions->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'study_session',
+                    'subject_area' => $session->subjectArea?->name,
+                    'exam_type' => $session->subjectArea?->examType?->name,
+                    'duration_minutes' => $session->duration_minutes,
+                    'started_at' => $session->started_at,
+                    'ended_at' => $session->ended_at,
+                    'notes' => $session->study_comment,
+                ];
+            }),
+            'pomodoro_sessions' => $pomodoroSessions->map(function ($session) {
+                return [
+                    'id' => $session->id,
+                    'type' => 'pomodoro',
+                    'subject_area' => $session->subjectArea?->name,
+                    'exam_type' => $session->subjectArea?->examType?->name,
+                    'duration_minutes' => $session->actual_duration,
+                    'started_at' => $session->started_at,
+                    'completed_at' => $session->completed_at,
+                    'notes' => $session->notes,
+                ];
+            }),
+        ];
+    }
+
+    /**
+     * ユーザーの草表示キャッシュクリア
+     */
+    public function clearUserGrassCache(int $userId): void
+    {
+        $patterns = [
+            "grass_data:{$userId}:*",
+            "monthly_stats:{$userId}:*",
+        ];
+
+        foreach ($patterns as $pattern) {
+            $keys = Cache::getRedis()->keys($pattern);
+            if (!empty($keys)) {
+                Cache::deleteMultiple($keys);
+            }
+        }
+    }
+
+    /**
+     * 草表示統計計算
+     */
+    private function calculateGrassStats(array $grassData): array
+    {
+        $totalDays = count($grassData);
+        $studyDays = count(array_filter($grassData, fn($day) => $day['total_minutes'] > 0));
+        $totalMinutes = array_sum(array_column($grassData, 'total_minutes'));
+        
+        $levelCounts = array_count_values(array_column($grassData, 'level'));
+        
+        return [
+            'total_days' => $totalDays,
+            'study_days' => $studyDays,
+            'study_rate' => $totalDays > 0 ? round(($studyDays / $totalDays) * 100, 1) : 0,
+            'total_study_time' => $totalMinutes,
+            'average_daily_time' => $studyDays > 0 ? round($totalMinutes / $studyDays, 1) : 0,
+            'level_distribution' => [
+                'level_0' => $levelCounts[0] ?? 0,
+                'level_1' => $levelCounts[1] ?? 0,
+                'level_2' => $levelCounts[2] ?? 0,
+                'level_3' => $levelCounts[3] ?? 0,
+            ],
+            'longest_streak' => $this->calculateLongestStreak($grassData),
+            'current_streak' => $this->calculateCurrentStreak($grassData),
+        ];
+    }
+
+    /**
+     * 最長連続学習日数計算
+     */
+    private function calculateLongestStreak(array $grassData): int
+    {
+        $maxStreak = 0;
+        $currentStreak = 0;
+        
+        foreach ($grassData as $day) {
+            if ($day['total_minutes'] > 0) {
+                $currentStreak++;
+                $maxStreak = max($maxStreak, $currentStreak);
+            } else {
+                $currentStreak = 0;
+            }
+        }
+        
+        return $maxStreak;
+    }
+
+    /**
+     * 現在の連続学習日数計算
+     */
+    private function calculateCurrentStreak(array $grassData): int
+    {
+        $streak = 0;
+        
+        // 最新の日から遡って計算
+        for ($i = count($grassData) - 1; $i >= 0; $i--) {
+            if ($grassData[$i]['total_minutes'] > 0) {
+                $streak++;
+            } else {
+                break;
+            }
+        }
+        
+        return $streak;
     }
 }

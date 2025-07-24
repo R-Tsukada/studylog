@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\PomodoroController;
-use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\StudyAnalyticsController;
 use App\Http\Controllers\Api\StudyGoalController;
 
 // 認証が不要なエンドポイント
@@ -60,11 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Study Analytics API（統合分析）
     Route::prefix('analytics')->group(function () {
-        Route::get('/history', [AnalyticsController::class, 'history']);
-        Route::get('/stats', [AnalyticsController::class, 'stats']);
-        Route::get('/insights', [AnalyticsController::class, 'insights']);
-        Route::get('/suggest', [AnalyticsController::class, 'suggest']);
-        Route::get('/comparison', [AnalyticsController::class, 'comparison']);
+        Route::get('/history', [StudyAnalyticsController::class, 'history']);
+        Route::get('/stats', [StudyAnalyticsController::class, 'stats']);
+        Route::get('/insights', [StudyAnalyticsController::class, 'insights']);
+        Route::get('/suggest', [StudyAnalyticsController::class, 'suggest']);
+        Route::get('/comparison', [StudyAnalyticsController::class, 'comparison']);
+        
+        // 草表示機能
+        Route::get('/grass-data', [StudyAnalyticsController::class, 'grassData']);
+        Route::get('/monthly-stats', [StudyAnalyticsController::class, 'monthlyStats']);
+        Route::get('/day-detail', [StudyAnalyticsController::class, 'dayDetail']);
+        Route::post('/clear-grass-cache', [StudyAnalyticsController::class, 'clearGrassCache']);
     });
     
     // Study Goal API（学習目標設定）

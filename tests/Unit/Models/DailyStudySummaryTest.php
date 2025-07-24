@@ -23,7 +23,18 @@ class DailyStudySummaryTest extends TestCase
     public function daily_study_summary_has_correct_fillable_attributes()
     {
         $summary = new DailyStudySummary();
-        $expected = ['user_id', 'study_date', 'total_minutes', 'session_count', 'subject_breakdown'];
+        $expected = [
+            'user_id', 
+            'study_date', 
+            'total_minutes', 
+            'session_count', 
+            'subject_breakdown',
+            'study_session_minutes',
+            'pomodoro_minutes',
+            'total_focus_sessions',
+            'grass_level',
+            'streak_days'
+        ];
         
         $this->assertEquals($expected, $summary->getFillable());
     }

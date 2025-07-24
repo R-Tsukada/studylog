@@ -1,5 +1,16 @@
 <template>
   <div>
+    <!-- GitHub風草表示 -->
+    <section class="bg-white rounded-lg shadow p-6 mb-6">
+      <StudyGrassChart
+        :auto-load="true"
+        @dayClick="handleGrassDayClick"
+        @dataLoaded="handleGrassDataLoaded"
+        @error="handleGrassError"
+        class="w-full"
+      />
+    </section>
+
     <!-- 現在のセッション状態 -->
     <section v-if="currentSession" class="bg-red-50 border border-red-200 rounded-lg shadow p-6 mb-6">
       <h2 class="text-lg font-semibold mb-4 text-red-800">🔥 学習中</h2>
@@ -222,12 +233,14 @@
 <script>
 import axios from 'axios'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
+import StudyGrassChart from '../components/StudyGrassChart.vue'
 
 export default {
   name: 'Dashboard',
   inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
   components: {
     PomodoroTimer,
+    StudyGrassChart,
   },
   data() {
     return {
@@ -523,6 +536,24 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 5000)
+    },
+
+    // 草表示関連のイベントハンドラー
+    handleGrassDayClick(day) {
+      console.log('草表示の日付がクリックされました:', day)
+      // 特定の日の詳細表示や学習履歴画面への遷移など
+      // 今後の機能として実装可能
+    },
+
+    handleGrassDataLoaded(grassData) {
+      console.log('草表示データが読み込まれました:', grassData)
+      // 必要に応じて他の統計データと連携
+    },
+
+    handleGrassError(error) {
+      console.error('草表示でエラーが発生しました:', error)
+      // エラーメッセージの表示は StudyGrassChart コンポーネント内で処理されるため、
+      // こちらでは特別な処理は不要
     },
 
   }
