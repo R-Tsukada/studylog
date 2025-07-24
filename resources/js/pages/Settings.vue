@@ -12,7 +12,10 @@
         <h3 class="text-lg font-semibold text-gray-800">📅 試験予定日の管理</h3>
         <button 
           @click="showAddExamModal = true"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+          @mouseover="handleButtonHover($event, 'green', true)"
+          @mouseout="handleButtonHover($event, 'green', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+          style="background-color: var(--color-muted-green);"
         >
           + 試験追加
         </button>
@@ -26,7 +29,10 @@
         <div class="text-gray-500 mb-4">まだ試験が登録されていません</div>
         <button 
           @click="showAddExamModal = true"
-          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg"
+          @mouseover="handleButtonHover($event, 'green', true)"
+          @mouseout="handleButtonHover($event, 'green', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          style="background-color: var(--color-muted-green);"
         >
           📅 最初の試験を追加
         </button>
@@ -43,7 +49,10 @@
                 ></div>
                 <div class="font-medium text-lg">{{ exam.name }}</div>
                 <div v-if="exam.exam_date" class="text-sm">
-                  <span :class="getDaysUntilExam(exam.exam_date) <= 7 ? 'text-red-600 font-bold' : 'text-gray-600'">
+                  <span :style="{
+                    color: getDaysUntilExam(exam.exam_date) <= 7 ? 'var(--color-muted-pink-dark)' : 'var(--color-muted-gray-dark)',
+                    fontWeight: getDaysUntilExam(exam.exam_date) <= 7 ? 'bold' : 'normal'
+                  }">
                     {{ formatExamDate(exam.exam_date) }}
                   </span>
                 </div>
@@ -54,13 +63,19 @@
             <div class="flex gap-2">
               <button 
                 @click="editExam(exam)"
-                class="text-blue-600 hover:text-blue-800 text-sm"
+                @mouseover="handleTextHover($event, 'blue', true)"
+                @mouseout="handleTextHover($event, 'blue', false)"
+                class="text-sm transition-colors"
+                style="color: var(--color-muted-blue);"
               >
                 ✏️ 編集
               </button>
               <button 
                 @click="deleteExam(exam)"
-                class="text-red-600 hover:text-red-800 text-sm"
+                @mouseover="handleTextHover($event, 'pink', true)"
+                @mouseout="handleTextHover($event, 'pink', false)"
+                class="text-sm transition-colors"
+                style="color: var(--color-muted-pink);"
               >
                 🗑️ 削除
               </button>
@@ -76,7 +91,10 @@
         <h3 class="text-lg font-semibold text-gray-800">📚 学習分野の管理</h3>
         <button 
           @click="showAddSubjectModal = true"
-          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm"
+          @mouseover="handleButtonHover($event, 'blue', true)"
+          @mouseout="handleButtonHover($event, 'blue', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+          style="background-color: var(--color-muted-blue);"
         >
           + 新規追加
         </button>
@@ -90,7 +108,10 @@
         <div class="text-gray-500 mb-4">まだ学習分野が登録されていません</div>
         <button 
           @click="showAddSubjectModal = true"
-          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg"
+          @mouseover="handleButtonHover($event, 'blue', true)"
+          @mouseout="handleButtonHover($event, 'blue', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg transition-colors"
+          style="background-color: var(--color-muted-blue);"
         >
           📚 最初の分野を追加
         </button>
@@ -106,13 +127,19 @@
             <div class="flex gap-2">
               <button 
                 @click="editSubject(subject)"
-                class="text-blue-600 hover:text-blue-800 text-sm"
+                @mouseover="handleTextHover($event, 'blue', true)"
+                @mouseout="handleTextHover($event, 'blue', false)"
+                class="text-sm transition-colors"
+                style="color: var(--color-muted-blue);"
               >
                 ✏️ 編集
               </button>
               <button 
                 @click="deleteSubject(subject)"
-                class="text-red-600 hover:text-red-800 text-sm"
+                @mouseover="handleTextHover($event, 'pink', true)"
+                @mouseout="handleTextHover($event, 'pink', false)"
+                class="text-sm transition-colors"
+                style="color: var(--color-muted-pink);"
               >
                 🗑️ 削除
               </button>
@@ -127,9 +154,9 @@
       <h3 class="text-lg font-semibold text-gray-800 mb-4">🎯 学習目標設定</h3>
       
       <!-- 現在のアクティブ目標表示 -->
-      <div v-if="activeGoal && !editGoalMode" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <h4 class="font-medium text-blue-800 mb-2">現在の目標</h4>
-        <div class="text-sm text-blue-700 space-y-1">
+      <div v-if="activeGoal && !editGoalMode" class="mb-6 p-4 rounded-lg" style="background-color: var(--color-muted-blue-light); border: 1px solid var(--color-muted-blue);">
+        <h4 class="font-medium mb-2" style="color: var(--color-muted-blue-dark);">現在の目標</h4>
+        <div class="text-sm space-y-1" style="color: var(--color-muted-blue-dark);">
           <p><strong>日次目標:</strong> {{ activeGoal.daily_minutes_goal }}分 ({{ formatHours(activeGoal.daily_minutes_goal) }})</p>
           <p v-if="activeGoal.weekly_minutes_goal"><strong>週次目標:</strong> {{ activeGoal.weekly_minutes_goal }}分 ({{ formatHours(activeGoal.weekly_minutes_goal) }})</p>
           <p v-if="activeGoal.exam_type_name"><strong>対象試験:</strong> {{ activeGoal.exam_type_name }}</p>
@@ -137,7 +164,10 @@
         </div>
         <button 
           @click="editGoalMode = true"
-          class="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium"
+          @mouseover="handleTextHover($event, 'blue', true)"
+          @mouseout="handleTextHover($event, 'blue', false)"
+          class="mt-2 text-sm font-medium transition-colors"
+          style="color: var(--color-muted-blue);"
         >
           ✏️ 目標を編集
         </button>
@@ -158,7 +188,10 @@
                 min="1"
                 max="1440"
                 required
-                class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-24 p-2 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
               />
               <span class="text-sm text-gray-600">分/日</span>
               <span class="text-xs text-gray-500">
@@ -181,7 +214,10 @@
                 type="number"
                 min="1"
                 max="10080"
-                class="w-32 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-32 p-2 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
               />
               <span class="text-sm text-gray-600">分/週</span>
               <span class="text-xs text-gray-500">
@@ -197,7 +233,10 @@
             </label>
             <select
               v-model="goalForm.exam_type_id"
-              class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full p-2 rounded-lg"
+              style="border: 1px solid var(--color-muted-gray); background-color: white;"
+              @focus="handleInputFocus($event)"
+              @blur="handleInputBlur($event)"
             >
               <option value="">試験を選択してください</option>
               <option
@@ -219,7 +258,10 @@
               v-model="goalForm.exam_date"
               type="date"
               :min="tomorrow"
-              class="p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="p-2 rounded-lg"
+              style="border: 1px solid var(--color-muted-gray); background-color: white;"
+              @focus="handleInputFocus($event)"
+              @blur="handleInputBlur($event)"
             />
           </div>
 
@@ -228,7 +270,13 @@
             <button
               type="submit"
               :disabled="loadingGoal || !goalForm.daily_minutes_goal"
-              class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              @mouseover="handleButtonHover($event, 'blue', true)"
+              @mouseout="handleButtonHover($event, 'blue', false)"
+              class="text-white font-medium py-2 px-6 rounded-lg transition-colors"
+              :style="{
+                backgroundColor: (loadingGoal || !goalForm.daily_minutes_goal) ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
+                cursor: (loadingGoal || !goalForm.daily_minutes_goal) ? 'not-allowed' : 'pointer'
+              }"
             >
               {{ loadingGoal ? '保存中...' : activeGoal ? '目標を更新' : '目標を設定' }}
             </button>
@@ -236,7 +284,10 @@
               v-if="editGoalMode"
               type="button"
               @click="cancelGoalEdit"
-              class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
+              @mouseover="handleButtonHover($event, 'gray', true)"
+              @mouseout="handleButtonHover($event, 'gray', false)"
+              class="font-medium py-2 px-4 rounded-lg transition-colors"
+              style="background-color: var(--color-muted-gray); color: var(--color-muted-gray-dark);"
             >
               キャンセル
             </button>
@@ -244,7 +295,10 @@
               v-if="activeGoal && editGoalMode"
               type="button"
               @click="deleteGoal"
-              class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              @mouseover="handleButtonHover($event, 'pink', true)"
+              @mouseout="handleButtonHover($event, 'pink', false)"
+              class="text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              style="background-color: var(--color-muted-pink);"
             >
               目標を削除
             </button>
@@ -276,7 +330,10 @@
               <select 
                 v-model="subjectForm.exam_type_id" 
                 required
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
               >
                 <option value="">試験タイプを選択</option>
                 <option v-for="exam in userExamTypes" :key="exam.id" :value="exam.id">
@@ -291,7 +348,10 @@
                 type="text" 
                 v-model="subjectForm.name"
                 required
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
                 placeholder="例：データベース設計、アルゴリズム など"
               />
             </div>
@@ -300,14 +360,23 @@
               <button 
                 type="submit" 
                 :disabled="loading"
-                class="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg"
+                @mouseover="handleButtonHover($event, 'blue', true)"
+                @mouseout="handleButtonHover($event, 'blue', false)"
+                class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                :style="{
+                  backgroundColor: loading ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
+                  cursor: loading ? 'not-allowed' : 'pointer'
+                }"
               >
                 {{ editingSubject ? '💾 更新' : '📚 追加' }}
               </button>
               <button 
                 type="button"
                 @click="cancelSubjectEdit"
-                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+                @mouseover="handleButtonHover($event, 'grayDark', true)"
+                @mouseout="handleButtonHover($event, 'grayDark', false)"
+                class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                style="background-color: var(--color-muted-gray-dark);"
               >
                 キャンセル
               </button>
@@ -330,7 +399,10 @@
                 type="text" 
                 v-model="examForm.name"
                 required
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
                 placeholder="例：基本情報技術者試験、JSTQB Foundation Level など"
               />
             </div>
@@ -339,7 +411,10 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">説明</label>
               <textarea 
                 v-model="examForm.description"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
                 rows="2"
                 placeholder="試験の概要や目的など"
               ></textarea>
@@ -350,7 +425,10 @@
               <input 
                 type="date" 
                 v-model="examForm.exam_date"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
               />
             </div>
 
@@ -370,7 +448,10 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">メモ</label>
               <textarea 
                 v-model="examForm.exam_notes"
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full p-3 rounded-lg"
+                style="border: 1px solid var(--color-muted-gray); background-color: white;"
+                @focus="handleInputFocus($event)"
+                @blur="handleInputBlur($event)"
                 rows="3"
                 placeholder="学習計画や注意事項など"
               ></textarea>
@@ -380,14 +461,23 @@
               <button 
                 type="submit" 
                 :disabled="loading"
-                class="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg"
+                @mouseover="handleButtonHover($event, 'green', true)"
+                @mouseout="handleButtonHover($event, 'green', false)"
+                class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                :style="{
+                  backgroundColor: loading ? 'var(--color-muted-gray)' : 'var(--color-muted-green)',
+                  cursor: loading ? 'not-allowed' : 'pointer'
+                }"
               >
                 {{ editingExam ? '💾 更新' : '📅 追加' }}
               </button>
               <button 
                 type="button"
                 @click="cancelExamEdit"
-                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg"
+                @mouseover="handleButtonHover($event, 'grayDark', true)"
+                @mouseout="handleButtonHover($event, 'grayDark', false)"
+                class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                style="background-color: var(--color-muted-gray-dark);"
               >
                 キャンセル
               </button>
@@ -398,12 +488,12 @@
     </div>
 
     <!-- エラーメッセージ -->
-    <div v-if="errorMessage" class="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50">
+    <div v-if="errorMessage" class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50" style="background-color: var(--color-muted-pink-light); border: 1px solid var(--color-muted-pink); color: var(--color-muted-pink-dark);">
       {{ errorMessage }}
     </div>
 
     <!-- 成功メッセージ -->
-    <div v-if="successMessage" class="fixed bottom-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50">
+    <div v-if="successMessage" class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50" style="background-color: var(--color-muted-green-light); border: 1px solid var(--color-muted-green); color: var(--color-muted-green-dark);">
       {{ successMessage }}
     </div>
   </div>
@@ -822,6 +912,67 @@ export default {
     clearMessages() {
       this.errorMessage = ''
       this.successMessage = ''
+    },
+
+    // ホバーイベントハンドラー
+    handleButtonHover(event, colorType, isHover) {
+      const colorMap = {
+        green: {
+          default: 'var(--color-muted-green)',
+          hover: 'var(--color-muted-green-dark)'
+        },
+        blue: {
+          default: 'var(--color-muted-blue)',
+          hover: 'var(--color-muted-blue-dark)'
+        },
+        pink: {
+          default: 'var(--color-muted-pink)',
+          hover: 'var(--color-muted-pink-dark)'
+        },
+        gray: {
+          default: 'var(--color-muted-gray)',
+          hover: 'var(--color-muted-gray-dark)'
+        },
+        grayDark: {
+          default: 'var(--color-muted-gray-dark)',
+          hover: 'var(--color-muted-gray)'
+        }
+      }
+      
+      if (!event.target.disabled && colorMap[colorType]) {
+        event.target.style.backgroundColor = isHover 
+          ? colorMap[colorType].hover 
+          : colorMap[colorType].default
+      }
+    },
+
+    handleTextHover(event, colorType, isHover) {
+      const colorMap = {
+        blue: {
+          default: 'var(--color-muted-blue)',
+          hover: 'var(--color-muted-blue-dark)'
+        },
+        pink: {
+          default: 'var(--color-muted-pink)',
+          hover: 'var(--color-muted-pink-dark)'
+        }
+      }
+      
+      if (colorMap[colorType]) {
+        event.target.style.color = isHover 
+          ? colorMap[colorType].hover 
+          : colorMap[colorType].default
+      }
+    },
+
+    handleInputFocus(event) {
+      event.target.style.borderColor = 'var(--color-muted-blue)'
+      event.target.style.boxShadow = '0 0 0 2px var(--color-muted-blue-alpha)'
+    },
+
+    handleInputBlur(event) {
+      event.target.style.borderColor = 'var(--color-muted-gray)'
+      event.target.style.boxShadow = 'none'
     }
   }
 }
