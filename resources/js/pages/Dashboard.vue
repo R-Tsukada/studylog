@@ -89,7 +89,7 @@
             required
             class="w-full p-3 rounded-lg"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px rgba(123, 167, 188, 0.2)'"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
             onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
           >
             <option value="">分野を選択してください</option>
@@ -113,7 +113,7 @@
             required
             class="w-full p-3 rounded-lg"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px rgba(123, 167, 188, 0.2)'"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
             onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="3"
             placeholder="今日学習する内容を簡単に記入してください"
@@ -227,7 +227,7 @@
             v-model="editNotesModal.notes"
             class="w-full p-3 rounded-lg"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px rgba(123, 167, 188, 0.2)'"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
             onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="4"
             placeholder="ポモドーロセッションでのメモを入力してください..."

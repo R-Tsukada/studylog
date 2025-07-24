@@ -669,7 +669,7 @@ export default {
     
     handleInputFocus(event) {
       event.target.style.borderColor = 'var(--color-muted-blue)';
-      event.target.style.boxShadow = '0 0 0 2px rgba(123, 167, 188, 0.2)';
+      event.target.style.boxShadow = '0 0 0 2px var(--color-muted-blue-alpha)';
     },
     
     handleInputBlur(event) {

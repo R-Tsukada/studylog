@@ -569,7 +569,7 @@ export default {
 }
 
 .grass-cell:hover {
-  box-shadow: 0 0 0 2px var(--color-muted-blue), 0 0 0 4px rgba(123, 167, 188, 0.3);
+  box-shadow: 0 0 0 2px var(--color-muted-blue), 0 0 0 4px var(--color-muted-blue-alpha-hover);
 }
 
 .grass-empty {

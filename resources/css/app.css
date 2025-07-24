@@ -43,4 +43,8 @@
     --color-grass-1: #d4edda;
     --color-grass-2: #9caf88;
     --color-grass-3: #7d9270;
+    
+    /* フォーカス・ホバー効果用の透明度付き色 */
+    --color-muted-blue-alpha: rgba(123, 167, 188, 0.2);
+    --color-muted-blue-alpha-hover: rgba(123, 167, 188, 0.3);
 }

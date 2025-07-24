@@ -5,7 +5,7 @@
       <!-- ヘッダー -->
       <header class="text-white px-4 py-3" style="background-color: var(--color-muted-blue)">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-          <router-link to="/dashboard" class="text-xl font-bold transition-colors" style="color: white;" onmouseover="this.style.color='var(--color-muted-blue-light)'" onmouseout="this.style.color='white'">
+          <router-link to="/dashboard" class="text-xl font-bold transition-colors text-white" @mouseover="handleHeaderLinkHover($event, true)" @mouseout="handleHeaderLinkHover($event, false)">
             📚 Study Log - すたログ
           </router-link>
           <div class="flex items-center gap-4">
@@ -16,8 +16,8 @@
               @click="logout"
               class="text-xs px-3 py-1 rounded transition-colors text-white"
               style="background-color: var(--color-muted-blue-dark);"
-              onmouseover="this.style.backgroundColor='var(--color-muted-blue-light)'"
-              onmouseout="this.style.backgroundColor='var(--color-muted-blue-dark)'"
+              @mouseover="handleLogoutButtonHover($event, true)"
+              @mouseout="handleLogoutButtonHover($event, false)"
             >
               ログアウト
             </button>
@@ -69,7 +69,8 @@
         
         <!-- 時間計測タイマー -->
         <div v-if="globalStudyTimer.isActive"
-             class="text-white text-xs text-center py-1 mb-2 rounded bg-blue-500"
+             class="text-white text-xs text-center py-1 mb-2 rounded"
+             style="background-color: var(--color-muted-blue);"
         >
           ⏰ {{ formatElapsedTime(globalStudyTimer.elapsedMinutes) }} - 学習中 ({{ globalStudyTimer.currentSession?.subject_area_name || '時間計測' }})
         </div>
@@ -78,12 +79,9 @@
           <router-link 
             to="/dashboard" 
             class="flex flex-col items-center py-1 px-2 rounded-lg transition-colors"
-            :style="{
-              color: $route.name === 'Dashboard' ? 'var(--color-muted-blue-dark)' : 'var(--color-muted-gray-dark)',
-              backgroundColor: $route.name === 'Dashboard' ? 'var(--color-muted-blue-light)' : 'transparent'
-            }"
-            onmouseover="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-blue)'"
-            onmouseout="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-gray-dark)'"
+            :style="getNavLinkStyle('Dashboard')"
+            @mouseover="handleNavHover($event, 'Dashboard', true)"
+            @mouseout="handleNavHover($event, 'Dashboard', false)"
           >
             <span class="text-lg">📊</span>
             <span class="text-xs mt-1">ダッシュボード</span>
@@ -93,12 +91,9 @@
           <router-link 
             to="/history" 
             class="flex flex-col items-center py-1 px-2 rounded-lg transition-colors"
-            :style="{
-              color: $route.name === 'History' ? 'var(--color-muted-blue-dark)' : 'var(--color-muted-gray-dark)',
-              backgroundColor: $route.name === 'History' ? 'var(--color-muted-blue-light)' : 'transparent'
-            }"
-            onmouseover="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-blue)'"
-            onmouseout="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-gray-dark)'"
+            :style="getNavLinkStyle('History')"
+            @mouseover="handleNavHover($event, 'History', true)"
+            @mouseout="handleNavHover($event, 'History', false)"
           >
             <span class="text-lg">📚</span>
             <span class="text-xs mt-1">学習履歴</span>
@@ -107,12 +102,9 @@
           <router-link 
             to="/settings" 
             class="flex flex-col items-center py-1 px-2 rounded-lg transition-colors"
-            :style="{
-              color: $route.name === 'Settings' ? 'var(--color-muted-blue-dark)' : 'var(--color-muted-gray-dark)',
-              backgroundColor: $route.name === 'Settings' ? 'var(--color-muted-blue-light)' : 'transparent'
-            }"
-            onmouseover="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-blue)'"
-            onmouseout="if (this.getAttribute('aria-current') !== 'page') this.style.color='var(--color-muted-gray-dark)'"
+            :style="getNavLinkStyle('Settings')"
+            @mouseover="handleNavHover($event, 'Settings', true)"
+            @mouseout="handleNavHover($event, 'Settings', false)"
           >
             <span class="text-lg">⚙️</span>
             <span class="text-xs mt-1">設定</span>
@@ -624,6 +616,32 @@ export default {
       } else {
         return `${mins}分`
       }
+    },
+
+    // ナビゲーションリンクのスタイル取得
+    getNavLinkStyle(routeName) {
+      const isActive = this.$route.name === routeName
+      return {
+        color: isActive ? 'var(--color-muted-blue-dark)' : 'var(--color-muted-gray-dark)',
+        backgroundColor: isActive ? 'var(--color-muted-blue-light)' : 'transparent'
+      }
+    },
+
+    // ナビゲーションホバーハンドラー
+    handleNavHover(event, routeName, isHover) {
+      if (this.$route.name !== routeName) {
+        event.target.style.color = isHover ? 'var(--color-muted-blue)' : 'var(--color-muted-gray-dark)'
+      }
+    },
+
+    // ヘッダーリンクホバーハンドラー
+    handleHeaderLinkHover(event, isHover) {
+      event.target.style.color = isHover ? 'var(--color-muted-blue-light)' : 'white'
+    },
+
+    // ログアウトボタンホバーハンドラー
+    handleLogoutButtonHover(event, isHover) {
+      event.target.style.backgroundColor = isHover ? 'var(--color-muted-blue-light)' : 'var(--color-muted-blue-dark)'
     }
   },
   
