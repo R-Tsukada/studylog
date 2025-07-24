@@ -423,27 +423,29 @@ class StudyActivityService
     {
         $studyDate = $studySession->started_at->toDateString();
         
-        $summary = DailyStudySummary::firstOrCreate([
-            'user_id' => $studySession->user_id,
-            'study_date' => $studyDate,
-        ], [
-            'total_minutes' => 0,
-            'session_count' => 0,
-            'study_session_minutes' => 0,
-            'pomodoro_minutes' => 0,
-            'total_focus_sessions' => 0,
-            'grass_level' => 0,
-            'subject_breakdown' => [],
-        ]);
+        return DB::transaction(function () use ($studySession, $studyDate) {
+            $summary = DailyStudySummary::firstOrCreate([
+                'user_id' => $studySession->user_id,
+                'study_date' => $studyDate,
+            ], [
+                'total_minutes' => 0,
+                'session_count' => 0,
+                'study_session_minutes' => 0,
+                'pomodoro_minutes' => 0,
+                'total_focus_sessions' => 0,
+                'grass_level' => 0,
+                'subject_breakdown' => [],
+            ]);
 
-        $summary->updateFromStudySession($studySession);
-        $summary->session_count += 1;
-        $summary->save();
+            $summary->updateFromStudySession($studySession);
+            $summary->increment('session_count');
+            $summary->save();
 
-        // キャッシュクリア
-        $this->clearUserGrassCache($studySession->user_id);
+            // キャッシュクリア
+            $this->clearUserGrassCache($studySession->user_id);
 
-        return $summary;
+            return $summary;
+        });
     }
 
     /**
@@ -453,27 +455,29 @@ class StudyActivityService
     {
         $studyDate = $pomodoroSession->started_at->toDateString();
         
-        $summary = DailyStudySummary::firstOrCreate([
-            'user_id' => $pomodoroSession->user_id,
-            'study_date' => $studyDate,
-        ], [
-            'total_minutes' => 0,
-            'session_count' => 0,
-            'study_session_minutes' => 0,
-            'pomodoro_minutes' => 0,
-            'total_focus_sessions' => 0,
-            'grass_level' => 0,
-            'subject_breakdown' => [],
-        ]);
+        return DB::transaction(function () use ($pomodoroSession, $studyDate) {
+            $summary = DailyStudySummary::firstOrCreate([
+                'user_id' => $pomodoroSession->user_id,
+                'study_date' => $studyDate,
+            ], [
+                'total_minutes' => 0,
+                'session_count' => 0,
+                'study_session_minutes' => 0,
+                'pomodoro_minutes' => 0,
+                'total_focus_sessions' => 0,
+                'grass_level' => 0,
+                'subject_breakdown' => [],
+            ]);
 
-        $summary->updateFromPomodoroSession($pomodoroSession);
-        $summary->session_count += 1;
-        $summary->save();
+            $summary->updateFromPomodoroSession($pomodoroSession);
+            $summary->increment('session_count');
+            $summary->save();
 
-        // キャッシュクリア
-        $this->clearUserGrassCache($pomodoroSession->user_id);
+            // キャッシュクリア
+            $this->clearUserGrassCache($pomodoroSession->user_id);
 
-        return $summary;
+            return $summary;
+        });
     }
 
     /**
@@ -496,15 +500,33 @@ class StudyActivityService
      */
     private function buildGrassData(int $userId, string $startDate, string $endDate): array
     {
+        // 入力検証
+        try {
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('Invalid date format provided');
+        }
+        
+        if ($start > $end) {
+            throw new \InvalidArgumentException('Start date cannot be after end date');
+        }
+        
+        // 期間制限（最大1年間）
+        if ($start->diffInDays($end) > 365) {
+            throw new \InvalidArgumentException('Date range cannot exceed 365 days');
+        }
+
         $summaries = DailyStudySummary::byUser($userId)
             ->dateRange($startDate, $endDate)
             ->orderBy('study_date')
             ->get()
-            ->keyBy('study_date');
+            ->keyBy(function ($item) {
+                return $item->study_date->format('Y-m-d');
+            });
 
         $grassData = [];
-        $current = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
+        $current = $start;
 
         while ($current <= $end) {
             $dateKey = $current->toDateString();
@@ -636,16 +658,47 @@ class StudyActivityService
      */
     public function clearUserGrassCache(int $userId): void
     {
-        $patterns = [
-            "grass_data:{$userId}:*",
-            "monthly_stats:{$userId}:*",
-        ];
+        try {
+            // Redis使用時のパターンベースクリア
+            if (Cache::getStore() instanceof \Illuminate\Cache\RedisStore) {
+                $patterns = [
+                    "grass_data:{$userId}:*",
+                    "monthly_stats:{$userId}:*",
+                ];
 
-        foreach ($patterns as $pattern) {
-            $keys = Cache::getRedis()->keys($pattern);
-            if (!empty($keys)) {
-                Cache::deleteMultiple($keys);
+                foreach ($patterns as $pattern) {
+                    $keys = Cache::getRedis()->keys($pattern);
+                    if (!empty($keys)) {
+                        Cache::deleteMultiple($keys);
+                    }
+                }
+            } else {
+                // 他のキャッシュドライバー用の個別削除
+                $dateRanges = [
+                    Carbon::now()->subYear()->format('Y-m-d'),
+                    Carbon::now()->format('Y-m-d')
+                ];
+                
+                // よく使われるキャッシュキーを個別に削除
+                foreach ($dateRanges as $startDate) {
+                    foreach ($dateRanges as $endDate) {
+                        Cache::forget("grass_data:{$userId}:{$startDate}:{$endDate}");
+                    }
+                }
+                
+                // 月別統計のキャッシュクリア
+                for ($year = Carbon::now()->year - 1; $year <= Carbon::now()->year; $year++) {
+                    for ($month = 1; $month <= 12; $month++) {
+                        Cache::forget("monthly_stats:{$userId}:{$year}:{$month}");
+                    }
+                }
             }
+        } catch (\Exception $e) {
+            // キャッシュクリアに失敗してもメイン機能には影響させない
+            \Log::warning('草表示キャッシュクリアに失敗しました:', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -663,9 +716,11 @@ class StudyActivityService
         return [
             'total_days' => $totalDays,
             'study_days' => $studyDays,
-            'study_rate' => $totalDays > 0 ? round(($studyDays / $totalDays) * 100, 1) : 0,
+            'study_rate' => $totalDays > 0 ? round(($studyDays / $totalDays) * 100, 1) : 0.0,
             'total_study_time' => $totalMinutes,
-            'average_daily_time' => $studyDays > 0 ? round($totalMinutes / $studyDays, 1) : 0,
+            'totalHours' => round($totalMinutes / 60, 1), // フロントエンド互換
+            'average_daily_time' => $studyDays > 0 ? round($totalMinutes / $studyDays, 1) : 0.0,
+            'studyDays' => $studyDays, // フロントエンド互換
             'level_distribution' => [
                 'level_0' => $levelCounts[0] ?? 0,
                 'level_1' => $levelCounts[1] ?? 0,
@@ -674,6 +729,8 @@ class StudyActivityService
             ],
             'longest_streak' => $this->calculateLongestStreak($grassData),
             'current_streak' => $this->calculateCurrentStreak($grassData),
+            'longestStreak' => $this->calculateLongestStreak($grassData), // フロントエンド互換
+            'currentStreak' => $this->calculateCurrentStreak($grassData), // フロントエンド互換
         ];
     }
 

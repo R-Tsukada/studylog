@@ -140,7 +140,7 @@ class DailyStudySummary extends Model
 
     public function calculateGrassLevel(int $totalMinutes): int
     {
-        if ($totalMinutes == 0) return 0;
+        if ($totalMinutes === 0) return 0;
         if ($totalMinutes <= 60) return 1;
         if ($totalMinutes <= 120) return 2;
         return 3;

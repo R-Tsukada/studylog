@@ -119,11 +119,11 @@ class MigrateGrassDisplayData extends Command
 
         // 更新が必要かチェック
         $needsUpdate = (
-            $summary->study_session_minutes != $studySessionMinutes ||
-            $summary->pomodoro_minutes != $pomodoroMinutes ||
-            $summary->total_focus_sessions != $focusSessions ||
-            $summary->grass_level != $grassLevel ||
-            $summary->total_minutes != $newTotalMinutes
+            $summary->study_session_minutes !== $studySessionMinutes ||
+            $summary->pomodoro_minutes !== $pomodoroMinutes ||
+            $summary->total_focus_sessions !== $focusSessions ||
+            $summary->grass_level !== $grassLevel ||
+            $summary->total_minutes !== $newTotalMinutes
         );
 
         if ($needsUpdate && !$dryRun) {
@@ -141,7 +141,7 @@ class MigrateGrassDisplayData extends Command
 
     private function calculateGrassLevel(int $totalMinutes): int
     {
-        if ($totalMinutes == 0) return 0;
+        if ($totalMinutes === 0) return 0;
         if ($totalMinutes <= 60) return 1;
         if ($totalMinutes <= 120) return 2;
         return 3;
