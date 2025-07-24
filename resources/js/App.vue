@@ -10,7 +10,7 @@
           </router-link>
           <div class="flex items-center gap-4">
             <div class="text-sm">
-              👤 {{ user.name }}
+              👤 {{ user.nickname }}
             </div>
             <button 
               @click="logout"

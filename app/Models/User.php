@@ -20,7 +20,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nickname',
         'email',
         'password',
         'google_id',
@@ -60,6 +60,16 @@ class User extends Authenticatable
     public function studyGoals(): HasMany
     {
         return $this->hasMany(StudyGoal::class);
+    }
+
+    public function pomodoroSessions(): HasMany
+    {
+        return $this->hasMany(PomodoroSession::class);
+    }
+
+    public function dailyStudySummaries(): HasMany
+    {
+        return $this->hasMany(DailyStudySummary::class);
     }
 
     // ヘルパーメソッド

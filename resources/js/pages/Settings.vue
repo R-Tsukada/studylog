@@ -487,6 +487,94 @@
       </div>
     </div>
 
+    <!-- 危険エリア：アカウント削除 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">⚠️ 危険エリア</h3>
+      
+      <div class="border-2 border-red-300 rounded-lg p-4" style="border-color: var(--color-muted-pink);">
+        <h4 class="font-semibold mb-2" style="color: var(--color-muted-pink-dark);">アカウント削除</h4>
+        <p class="text-sm mb-4" style="color: var(--color-muted-gray-dark);">
+          アカウントを削除すると、すべての学習データ、目標、セッション履歴が永久に失われます。この操作は取り消すことができません。
+        </p>
+        
+        <button 
+          @click="showDeleteAccountModal = true"
+          @mouseover="handleButtonHover($event, 'pink', true)"
+          @mouseout="handleButtonHover($event, 'pink', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+          style="background-color: var(--color-muted-pink);"
+        >
+          🗑️ アカウントを削除
+        </button>
+      </div>
+    </div>
+
+    <!-- アカウント削除モーダル -->
+    <div v-if="showDeleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4" style="color: var(--color-muted-pink-dark);">⚠️ アカウント削除の確認</h3>
+        
+        <div class="mb-4 p-4 rounded-lg" style="background-color: var(--color-muted-pink-light); border: 1px solid var(--color-muted-pink);">
+          <p class="text-sm font-semibold mb-2" style="color: var(--color-muted-pink-dark);">⚠️ 重要な警告</p>
+          <ul class="text-sm list-disc pl-4 space-y-1" style="color: var(--color-muted-pink-dark);">
+            <li>すべての学習履歴が削除されます</li>
+            <li>ポモドーロセッション記録が削除されます</li>
+            <li>設定した学習目標が削除されます</li>
+            <li>この操作は取り消すことができません</li>
+          </ul>
+        </div>
+        
+        <form @submit.prevent="handleDeleteAccount">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">現在のパスワードを入力してください</label>
+            <input 
+              type="password" 
+              v-model="deleteAccountForm.password"
+              required
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-blue-500"
+              style="focus:ring-color: var(--color-muted-blue); focus:border-color: var(--color-muted-blue);"
+              placeholder="パスワード"
+            />
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">削除を確認するため「削除します」と入力してください</label>
+            <input 
+              type="text" 
+              v-model="deleteAccountForm.confirmation_text"
+              required
+              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-blue-500"
+              style="focus:ring-color: var(--color-muted-pink); focus:border-color: var(--color-muted-pink);"
+              placeholder="削除します"
+            />
+          </div>
+          
+          <div class="flex gap-4">
+            <button 
+              type="button"
+              @click="cancelDeleteAccount"
+              @mouseover="handleButtonHover($event, 'gray', true)"
+              @mouseout="handleButtonHover($event, 'gray', false)"
+              class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              style="background-color: var(--color-muted-gray);"
+            >
+              キャンセル
+            </button>
+            <button 
+              type="submit"
+              :disabled="loadingDeleteAccount || !canDeleteAccount"
+              @mouseover="handleButtonHover($event, 'pink', true)"
+              @mouseout="handleButtonHover($event, 'pink', false)"
+              class="flex-1 text-white font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50"
+              style="background-color: var(--color-muted-pink);"
+            >
+              {{ loadingDeleteAccount ? '削除中...' : 'アカウントを完全に削除' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- エラーメッセージ -->
     <div v-if="errorMessage" class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50" style="background-color: var(--color-muted-pink-light); border: 1px solid var(--color-muted-pink); color: var(--color-muted-pink-dark);">
       {{ errorMessage }}
@@ -516,10 +604,12 @@ export default {
       loadingExams: false,
       loadingSubjects: false,
       loadingGoal: false,
+      loadingDeleteAccount: false,
       
       // モーダル表示状態
       showAddExamModal: false,
       showAddSubjectModal: false,
+      showDeleteAccountModal: false,
       editGoalMode: false,
       
       // 編集中のデータ
@@ -545,6 +635,10 @@ export default {
         exam_date: '',
         is_active: true
       },
+      deleteAccountForm: {
+        password: '',
+        confirmation_text: ''
+      },
       
       // メッセージ
       errorMessage: '',
@@ -557,6 +651,11 @@ export default {
       const date = new Date()
       date.setDate(date.getDate() + 1)
       return date.toISOString().split('T')[0]
+    },
+    
+    canDeleteAccount() {
+      return this.deleteAccountForm.password.length > 0 && 
+             this.deleteAccountForm.confirmation_text === '削除します'
     }
   },
   async mounted() {
@@ -973,6 +1072,54 @@ export default {
     handleInputBlur(event) {
       event.target.style.borderColor = 'var(--color-muted-gray)'
       event.target.style.boxShadow = 'none'
+    },
+
+    // アカウント削除関連メソッド
+    async handleDeleteAccount() {
+      this.loadingDeleteAccount = true
+      this.clearMessages()
+      
+      try {
+        const response = await axios.delete('/api/auth/delete-account', {
+          data: this.deleteAccountForm,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          // 成功時はローカルストレージをクリアしてログイン画面にリダイレクト
+          localStorage.removeItem('auth_token')
+          localStorage.removeItem('user')
+          
+          // 最終メッセージを表示してからリダイレクト
+          alert('アカウントの削除が完了しました。ご利用ありがとうございました。')
+          
+          // ログイン画面にリダイレクト
+          window.location.href = '/login'
+        } else {
+          this.showError(response.data.message || 'アカウント削除に失敗しました')
+        }
+      } catch (error) {
+        console.error('アカウント削除エラー:', error)
+        if (error.response?.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat()
+          this.showError(errors.join(', '))
+        } else {
+          this.showError(error.response?.data?.message || 'アカウント削除中にエラーが発生しました')
+        }
+      } finally {
+        this.loadingDeleteAccount = false
+      }
+    },
+
+    cancelDeleteAccount() {
+      this.showDeleteAccountModal = false
+      this.deleteAccountForm = {
+        password: '',
+        confirmation_text: ''
+      }
+      this.clearMessages()
     }
   }
 }

@@ -13,9 +13,19 @@ class GoogleAuthController extends Controller
 {
     /**
      * GoogleへのOAuth認証リダイレクト
+     * 現在は一時的に無効化されています
      */
     public function redirectToGoogle(): JsonResponse
     {
+        // Google認証機能は現在準備中のため無効化
+        return response()->json([
+            'success' => false,
+            'message' => 'Google認証機能は現在準備中です。通常のメール・パスワードでのログインをご利用ください。',
+            'available_from' => '近日公開予定'
+        ], 503);
+
+        // 以下のコードは将来の実装時に使用予定
+        /*
         try {
             // Google OAuth設定チェック
             if (!config('services.google.client_id') || !config('services.google.client_secret')) {
@@ -40,6 +50,7 @@ class GoogleAuthController extends Controller
                 'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
+        */
     }
 
     /**
@@ -87,7 +98,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Google認証でログインしました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -150,7 +161,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Googleアカウントと連携しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -201,7 +212,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Googleアカウントとの連携を解除しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),

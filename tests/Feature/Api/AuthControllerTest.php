@@ -18,7 +18,7 @@ class AuthControllerTest extends TestCase
     public function it_can_register_a_new_user()
     {
         $userData = [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -33,13 +33,13 @@ class AuthControllerTest extends TestCase
                 ])
                 ->assertJsonStructure([
                     'user' => [
-                        'id', 'name', 'email', 'avatar_url', 'is_google_user'
+                        'id', 'nickname', 'email', 'avatar_url', 'is_google_user'
                     ],
                     'token'
                 ]);
 
         $this->assertDatabaseHas('users', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'google_id' => null,
         ]);
@@ -60,11 +60,11 @@ class AuthControllerTest extends TestCase
                     'success' => false,
                     'message' => 'バリデーションエラー',
                 ])
-                ->assertJsonValidationErrors(['name', 'email', 'password']);
+                ->assertJsonValidationErrors(['nickname', 'email', 'password']);
 
         // 不正なメールアドレス
         $response = $this->postJson('/api/auth/register', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'invalid-email',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -75,7 +75,7 @@ class AuthControllerTest extends TestCase
 
         // パスワード確認が一致しない
         $response = $this->postJson('/api/auth/register', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'different_password',
@@ -86,7 +86,7 @@ class AuthControllerTest extends TestCase
 
         // 短すぎるパスワード
         $response = $this->postJson('/api/auth/register', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => '12345',
             'password_confirmation' => '12345',
@@ -105,7 +105,7 @@ class AuthControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/auth/register', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'existing@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -135,7 +135,7 @@ class AuthControllerTest extends TestCase
                 ])
                 ->assertJsonStructure([
                     'user' => [
-                        'id', 'name', 'email', 'avatar_url', 'is_google_user'
+                        'id', 'nickname', 'email', 'avatar_url', 'is_google_user'
                     ],
                     'token'
                 ]);
@@ -216,7 +216,7 @@ class AuthControllerTest extends TestCase
                 ])
                 ->assertJsonStructure([
                     'user' => [
-                        'id', 'name', 'email', 'avatar_url', 'is_google_user'
+                        'id', 'nickname', 'email', 'avatar_url', 'is_google_user'
                     ]
                 ]);
 
@@ -252,13 +252,13 @@ class AuthControllerTest extends TestCase
     public function it_can_update_user_profile()
     {
         $user = User::factory()->create([
-            'name' => '旧名前',
+            'nickname' => '旧名前',
             'email' => 'old@example.com',
         ]);
         Sanctum::actingAs($user);
 
         $updateData = [
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'new@example.com',
         ];
 
@@ -272,7 +272,7 @@ class AuthControllerTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'new@example.com',
         ]);
     }
@@ -294,7 +294,7 @@ class AuthControllerTest extends TestCase
 
         // 不正なメールアドレス
         $response = $this->putJson('/api/auth/profile', [
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'invalid-email',
         ]);
 
@@ -312,7 +312,7 @@ class AuthControllerTest extends TestCase
 
         // user2のメールアドレスに変更を試行
         $response = $this->putJson('/api/auth/profile', [
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'user2@example.com',
         ]);
 
@@ -324,14 +324,14 @@ class AuthControllerTest extends TestCase
     public function it_allows_profile_update_with_same_email()
     {
         $user = User::factory()->create([
-            'name' => '旧名前',
+            'nickname' => '旧名前',
             'email' => 'user@example.com',
         ]);
         Sanctum::actingAs($user);
 
         // 同じメールアドレスで名前だけ変更
         $response = $this->putJson('/api/auth/profile', [
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'user@example.com',
         ]);
 
@@ -343,7 +343,7 @@ class AuthControllerTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'name' => '新名前',
+            'nickname' => '新名前',
             'email' => 'user@example.com',
         ]);
     }
@@ -352,7 +352,7 @@ class AuthControllerTest extends TestCase
     public function it_generates_correct_avatar_url()
     {
         $userData = [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
