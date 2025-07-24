@@ -295,4 +295,172 @@ class StudyAnalyticsController extends Controller
 
         return $areas;
     }
+
+    // 草表示機能エンドポイント
+
+    /**
+     * 草表示データを取得
+     */
+    public function grassData(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'start_date' => 'nullable|date',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+            ]);
+
+            $user = Auth::user();
+            
+            $grassData = $this->studyActivityService->getGrassData(
+                $user->id,
+                $validated['start_date'] ?? null,
+                $validated['end_date'] ?? null
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $grassData
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '入力データが正しくありません。',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('草表示データ取得エラー:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'request_params' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '草表示データの取得中にエラーが発生しました。',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 月別統計データを取得
+     */
+    public function monthlyStats(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'year' => 'required|integer|min:2020|max:2030',
+                'month' => 'required|integer|min:1|max:12',
+            ]);
+
+            $user = Auth::user();
+            
+            $monthlyStats = $this->studyActivityService->getMonthlyStats(
+                $user->id,
+                $validated['year'],
+                $validated['month']
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $monthlyStats
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '入力データが正しくありません。',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('月別統計取得エラー:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'request_params' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '月別統計の取得中にエラーが発生しました。',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 特定日の詳細データを取得
+     */
+    public function dayDetail(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'date' => 'required|date',
+            ]);
+
+            $user = Auth::user();
+            
+            $dayDetail = $this->studyActivityService->getDayDetail(
+                $user->id,
+                $validated['date']
+            );
+
+            return response()->json([
+                'success' => true,
+                'data' => $dayDetail
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '入力データが正しくありません。',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('日別詳細取得エラー:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'request_params' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '日別詳細の取得中にエラーが発生しました。',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 草表示キャッシュクリア（管理用）
+     */
+    public function clearGrassCache(): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            
+            $this->studyActivityService->clearUserGrassCache($user->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => '草表示キャッシュをクリアしました。'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('草表示キャッシュクリアエラー:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'キャッシュクリア中にエラーが発生しました。',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

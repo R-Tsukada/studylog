@@ -429,4 +429,128 @@ class StudyActivityServiceTest extends TestCase
         
         $this->assertTrue($hasCompletionRateInsight);
     }
+
+    /**
+     * @test
+     */
+    public function can_get_grass_data_correctly()
+    {
+        // テストデータ作成
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        
+        // テストデータを直接作成
+        \App\Models\DailyStudySummary::create([
+            'user_id' => $this->user->id,
+            'study_date' => $yesterday->format('Y-m-d'),
+            'total_minutes' => 25,
+            'session_count' => 1,
+            'study_session_minutes' => 0,
+            'pomodoro_minutes' => 25,
+            'total_focus_sessions' => 1,
+            'grass_level' => 1,
+            'subject_breakdown' => ['テスト分野' => 25],
+        ]);
+
+        $result = $this->service->getGrassData(
+            $this->user->id,
+            $yesterday->format('Y-m-d'),
+            $today->format('Y-m-d')
+        );
+
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('stats', $result);
+        
+        // 期間は2日間だから2日分のデータが返される
+        $this->assertCount(2, $result['data']);
+        
+        // 統計の確認
+        $stats = $result['stats'];
+        
+        // 統計の確認 - 実際は1日分（25分）のデータのみ取得される
+        $this->assertEquals(1, $stats['studyDays']);
+        $this->assertEquals(25, $stats['total_study_time']);
+        $this->assertEquals(0.4, $stats['totalHours']); // 25分 = 0.4時間
+        
+        // データ構造の確認
+        $this->assertIsArray($result['data']);
+        $this->assertArrayHasKey('period', $result);
+        $this->assertArrayHasKey('stats', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function grass_level_calculation_is_correct()
+    {
+        $testCases = [
+            [0, 0],    // 学習なし
+            [30, 1],   // 30分 = レベル1
+            [60, 1],   // 60分 = レベル1
+            [90, 2],   // 90分 = レベル2
+            [120, 2],  // 120分 = レベル2
+            [150, 3],  // 150分 = レベル3
+            [300, 3]   // 300分 = レベル3
+        ];
+
+        $model = new \App\Models\DailyStudySummary();
+        
+        foreach ($testCases as [$minutes, $expectedLevel]) {
+            $actualLevel = $model->calculateGrassLevel($minutes);
+            $this->assertEquals(
+                $expectedLevel, 
+                $actualLevel, 
+                "失敗: {$minutes}分の場合、レベル{$expectedLevel}であるべきですが、{$actualLevel}でした"
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function can_build_grass_data_for_year()
+    {
+        $year = 2024;
+        
+        // 複数の日付でデータ作成
+        $dates = [
+            '2024-01-15' => 60,   // レベル1
+            '2024-03-20' => 120,  // レベル2
+            '2024-06-10' => 180,  // レベル3
+            '2024-12-25' => 30    // レベル1
+        ];
+
+        foreach ($dates as $date => $minutes) {
+            $model = new \App\Models\DailyStudySummary();
+            \App\Models\DailyStudySummary::create([
+                'user_id' => $this->user->id,
+                'study_date' => $date,
+                'total_minutes' => $minutes,
+                'study_session_minutes' => $minutes,
+                'pomodoro_minutes' => 0,
+                'session_count' => 1,
+                'total_focus_sessions' => 0,
+                'grass_level' => $model->calculateGrassLevel($minutes),
+                'subject_breakdown' => []
+            ]);
+        }
+
+        $result = $this->service->getGrassData(
+            $this->user->id,
+            "{$year}-01-01",
+            "{$year}-12-31"
+        );
+
+        $this->assertArrayHasKey('data', $result);
+        $this->assertArrayHasKey('stats', $result);
+        
+        // 2024年の1年間（366日）のデータが返される
+        $this->assertCount(366, $result['data']);
+        
+        // 統計データの確認 - 学習した日は4日、合計390分
+        $stats = $result['stats'];
+        $this->assertEquals(4, $stats['studyDays']);
+        $this->assertEquals(390, $stats['total_study_time']); // 総分数
+        $this->assertEquals(6.5, $stats['totalHours']); // 390分 = 6.5時間
+    }
 }
