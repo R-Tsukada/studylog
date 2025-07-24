@@ -281,7 +281,7 @@ export default {
     // 草セルのスタイル取得
     const getGrassCellStyle = (day) => {
       if (day.isEmpty || !day.isCurrentYear) {
-        return { backgroundColor: '#ebedf0' }
+        return { backgroundColor: 'var(--color-muted-gray)' }
       }
       
       return {
@@ -362,7 +362,7 @@ export default {
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-muted-gray);
   padding: 24px;
   overflow: hidden;
 }
@@ -377,7 +377,7 @@ export default {
 .grass-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-muted-blue-dark);
 }
 
 .grass-controls {
@@ -388,19 +388,20 @@ export default {
 
 .year-selector {
   padding: 4px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-muted-gray);
   border-radius: 6px;
   font-size: 0.875rem;
+  background-color: white;
 }
 
 .year-selector:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px var(--color-muted-blue);
 }
 
 .refresh-btn {
   padding: 4px 12px;
-  background: #2563eb;
+  background: var(--color-muted-blue);
   color: white;
   font-size: 0.875rem;
   border-radius: 6px;
@@ -409,7 +410,7 @@ export default {
 }
 
 .refresh-btn:hover {
-  background: #1d4ed8;
+  background: var(--color-muted-blue-dark);
 }
 
 .refresh-btn:disabled {
@@ -418,9 +419,9 @@ export default {
 }
 
 .error-message {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
+  background: var(--color-muted-pink-light);
+  border: 1px solid var(--color-muted-pink);
+  color: var(--color-muted-pink-dark);
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: 16px;
@@ -429,8 +430,8 @@ export default {
 .retry-btn {
   margin-left: 8px;
   padding: 4px 8px;
-  background: #fee2e2;
-  color: #dc2626;
+  background: var(--color-muted-pink-light);
+  color: var(--color-muted-pink-dark);
   font-size: 0.875rem;
   border-radius: 4px;
   border: none;
@@ -438,7 +439,7 @@ export default {
 }
 
 .retry-btn:hover {
-  background: #fecaca;
+  background: var(--color-muted-pink);
 }
 
 .loading-container {
@@ -452,8 +453,8 @@ export default {
 .loading-spinner {
   width: 32px;
   height: 32px;
-  border: 4px solid #dbeafe;
-  border-top: 4px solid #2563eb;
+  border: 4px solid var(--color-muted-blue-light);
+  border-top: 4px solid var(--color-muted-blue);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 8px;
@@ -470,13 +471,14 @@ export default {
   gap: 16px;
   margin-bottom: 24px;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-muted-gray-dark);
 }
 
 .stat-item {
-  background: #f9fafb;
+  background: var(--color-muted-white);
   padding: 4px 12px;
   border-radius: 9999px;
+  border: 1px solid var(--color-muted-gray);
 }
 
 .grass-calendar {
@@ -509,7 +511,7 @@ export default {
 
 .month-label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-muted-gray-dark);
   text-align: left;
   white-space: nowrap;
   flex: 1;
@@ -533,7 +535,7 @@ export default {
 
 .day-label {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-muted-gray-dark);
   display: flex;
   align-items: center;
   margin-bottom: 2px;
@@ -562,12 +564,12 @@ export default {
   max-width: 16px;
   border-radius: 2px;
   cursor: pointer;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-muted-gray);
   transition: all 0.2s;
 }
 
 .grass-cell:hover {
-  box-shadow: 0 0 0 2px #93c5fd, 0 0 0 4px rgba(147, 197, 253, 0.5);
+  box-shadow: 0 0 0 2px var(--color-muted-blue), 0 0 0 4px var(--color-muted-blue-alpha-hover);
 }
 
 .grass-empty {
@@ -583,19 +585,19 @@ export default {
 }
 
 .grass-level-0 {
-  background: #f3f4f6;
+  background: var(--color-grass-0);
 }
 
 .grass-level-1 {
-  background: #bbf7d0;
+  background: var(--color-grass-1);
 }
 
 .grass-level-2 {
-  background: #4ade80;
+  background: var(--color-grass-2);
 }
 
 .grass-level-3 {
-  background: #16a34a;
+  background: var(--color-grass-3);
 }
 
 .grass-legend {
@@ -604,11 +606,11 @@ export default {
   justify-content: flex-end;
   gap: 8px;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-muted-gray-dark);
 }
 
 .legend-label {
-  color: #6b7280;
+  color: var(--color-muted-gray-dark);
 }
 
 .legend-items {
@@ -620,26 +622,26 @@ export default {
   width: 12px;
   height: 12px;
   border-radius: 2px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-muted-gray);
 }
 
 .grass-detailed-stats {
   margin-top: 24px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--color-muted-gray);
   padding-top: 16px;
 }
 
 .stats-toggle {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-muted-blue-dark);
   cursor: pointer;
   border: none;
   background: none;
 }
 
 .stats-toggle:hover {
-  color: #111827;
+  color: var(--color-muted-blue);
 }
 
 .stats-toggle:focus {
@@ -653,9 +655,10 @@ export default {
 .stats-placeholder {
   padding: 16px;
   text-align: center;
-  color: #6b7280;
-  background: #f9fafb;
+  color: var(--color-muted-gray-dark);
+  background: var(--color-muted-white);
   border-radius: 8px;
+  border: 1px solid var(--color-muted-gray);
 }
 
 .sr-only {

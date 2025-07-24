@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- GitHub風草表示 -->
-    <section class="bg-white rounded-lg shadow p-6 mb-6">
+    <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
       <StudyGrassChart
         :auto-load="true"
         @dayClick="handleGrassDayClick"
@@ -12,8 +12,8 @@
     </section>
 
     <!-- 現在のセッション状態 -->
-    <section v-if="currentSession" class="bg-red-50 border border-red-200 rounded-lg shadow p-6 mb-6">
-      <h2 class="text-lg font-semibold mb-4 text-red-800">🔥 学習中</h2>
+    <section v-if="currentSession" class="rounded-lg shadow p-6 mb-6" style="background-color: var(--color-muted-pink-light); border: 1px solid var(--color-muted-pink);">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-pink-dark);">🔥 学習中</h2>
       <div class="bg-white rounded-lg p-4">
         <div class="flex justify-between items-center mb-3">
           <div>
@@ -29,7 +29,10 @@
           <button 
             @click="endStudySession" 
             :disabled="loading"
-            class="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            style="background-color: var(--color-muted-pink-dark);"
+            onmouseover="this.style.backgroundColor='var(--color-muted-pink)'"
+            onmouseout="this.style.backgroundColor='var(--color-muted-pink-dark)'"
           >
             ⏹️ 学習終了
           </button>
@@ -39,23 +42,23 @@
 
 
     <!-- 今日の学習状況 -->
-    <section class="bg-white rounded-lg shadow p-6 mb-6">
-      <h2 class="text-lg font-semibold mb-4 text-gray-800">📊 今日の学習状況</h2>
+    <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">📊 今日の学習状況</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="text-center p-4 bg-green-50 rounded-lg">
-          <div class="text-2xl font-bold text-green-600">{{ continuousDays }}</div>
+        <div class="text-center p-4 rounded-lg" style="background-color: var(--color-muted-green-light);">
+          <div class="text-2xl font-bold" style="color: var(--color-muted-green-dark);">{{ continuousDays }}</div>
           <div class="text-sm text-gray-600">🔥 連続学習日数</div>
         </div>
-        <div class="text-center p-4 bg-blue-50 rounded-lg">
-          <div class="text-2xl font-bold text-blue-600">{{ todayStudyTime }}</div>
+        <div class="text-center p-4 rounded-lg" style="background-color: var(--color-muted-blue-light);">
+          <div class="text-2xl font-bold" style="color: var(--color-muted-blue-dark);">{{ todayStudyTime }}</div>
           <div class="text-sm text-gray-600">⏰ 今日の学習時間</div>
         </div>
-        <div class="text-center p-4 bg-purple-50 rounded-lg">
-          <div class="text-2xl font-bold text-purple-600">{{ todaySessionCount }}</div>
+        <div class="text-center p-4 rounded-lg" style="background-color: var(--color-muted-purple-light);">
+          <div class="text-2xl font-bold" style="color: var(--color-muted-purple-dark);">{{ todaySessionCount }}</div>
           <div class="text-sm text-gray-600">📝 今日のセッション数</div>
         </div>
-        <div class="text-center p-4 bg-yellow-50 rounded-lg">
-          <div class="text-2xl font-bold text-yellow-600">{{ achievementRate }}%</div>
+        <div class="text-center p-4 rounded-lg" style="background-color: var(--color-muted-yellow-light);">
+          <div class="text-2xl font-bold" style="color: var(--color-muted-yellow-dark);">{{ achievementRate }}%</div>
           <div class="text-sm text-gray-600">🎯 目標達成率</div>
         </div>
       </div>
@@ -64,8 +67,8 @@
     <!-- 学習開始セクション & ポモドーロタイマー -->
     <div v-if="!currentSession" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <!-- 学習開始セクション -->
-      <section class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4 text-gray-800">🚀 学習を開始</h2>
+      <section class="bg-white rounded-lg shadow p-6" style="border: 1px solid var(--color-muted-gray);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🚀 学習を開始</h2>
       
       <!-- エラーメッセージ -->
       <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -80,11 +83,14 @@
       <form @submit.prevent="startStudySession" class="space-y-4">
         <!-- 学習分野選択 -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">学習分野を選択</label>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">学習分野を選択</label>
           <select 
             v-model="selectedSubjectAreaId" 
             required
-            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full p-3 rounded-lg"
+            style="border: 1px solid var(--color-muted-gray); background-color: white;"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
+            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
           >
             <option value="">分野を選択してください</option>
             <optgroup v-for="examType in examTypes" :key="examType.id" :label="examType.name">
@@ -101,11 +107,14 @@
 
         <!-- 学習コメント -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">今日の学習内容</label>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">今日の学習内容</label>
           <textarea 
             v-model="studyComment"
             required
-            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full p-3 rounded-lg"
+            style="border: 1px solid var(--color-muted-gray); background-color: white;"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
+            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="3"
             placeholder="今日学習する内容を簡単に記入してください"
           ></textarea>
@@ -115,7 +124,13 @@
         <button 
           type="submit" 
           :disabled="loading || !selectedSubjectAreaId || !studyComment.trim()"
-          class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+          class="w-full text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+          :style="{
+            backgroundColor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
+            cursor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'not-allowed' : 'pointer'
+          }"
+          onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
+          onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
         >
           {{ loading ? '開始中...' : '🎯 学習開始！' }}
         </button>
@@ -123,18 +138,21 @@
       </section>
 
       <!-- ポモドーロタイマー -->
-      <section class="bg-white rounded-lg shadow p-6">
+      <section class="bg-white rounded-lg shadow p-6" style="border: 1px solid var(--color-muted-gray);">
         <PomodoroTimer />
       </section>
     </div>
 
     <!-- 最近の学習履歴 -->
-    <section class="bg-white rounded-lg shadow p-6 mb-6">
+    <section class="bg-white rounded-lg shadow p-6 mb-6" style="border: 1px solid var(--color-muted-gray);">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">📚 最近の学習履歴</h2>
+        <h2 class="text-lg font-semibold" style="color: var(--color-muted-blue-dark);">📚 最近の学習履歴</h2>
         <router-link 
           to="/history"
-          class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          class="text-sm font-medium transition-colors"
+          style="color: var(--color-muted-blue);"
+          onmouseover="this.style.color='var(--color-muted-blue-dark)'"
+          onmouseout="this.style.color='var(--color-muted-blue)'"
         >
           📋 すべて見る →
         </router-link>
@@ -149,15 +167,15 @@
       </div>
       
       <div v-else class="space-y-3">
-        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 hover:bg-gray-50">
+        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 transition-colors" style="border-color: var(--color-muted-gray);" onmouseover="this.style.backgroundColor='var(--color-muted-white)'" onmouseout="this.style.backgroundColor='white'">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center gap-2">
                 <div class="font-medium">{{ session.subject_area_name }}</div>
-                <span v-if="session.type === 'pomodoro_session'" class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                <span v-if="session.type === 'pomodoro_session'" class="px-2 py-1 text-xs rounded-full" style="background-color: var(--color-muted-pink); color: white;">
                   🍅 ポモドーロ
                 </span>
-                <span v-else class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <span v-else class="px-2 py-1 text-xs rounded-full" style="background-color: var(--color-muted-blue-light); color: var(--color-muted-blue-dark);">
                   📚 学習
                 </span>
               </div>
@@ -165,12 +183,15 @@
               <div v-if="session.notes" class="text-xs text-gray-500 mt-1 italic">💭 {{ session.notes }}</div>
             </div>
             <div class="text-right">
-              <div class="font-bold text-blue-600">{{ session.duration_minutes }}分</div>
+              <div class="font-bold" style="color: var(--color-muted-blue-dark);">{{ session.duration_minutes }}分</div>
               <div class="text-xs text-gray-500">{{ session.last_studied_at }}</div>
               <button 
                 v-if="session.type === 'pomodoro_session'"
                 @click="openEditNotesModal(session)"
-                class="mt-1 text-xs text-blue-500 hover:text-blue-700"
+                class="mt-1 text-xs transition-colors"
+                style="color: var(--color-muted-blue);"
+                onmouseover="this.style.color='var(--color-muted-blue-dark)'"
+                onmouseout="this.style.color='var(--color-muted-blue)'"
                 title="メモ編集"
               >
                 ✏️ 編集
@@ -201,10 +222,13 @@
         </div>
         
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2">メモ</label>
+          <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">メモ</label>
           <textarea
             v-model="editNotesModal.notes"
-            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full p-3 rounded-lg"
+            style="border: 1px solid var(--color-muted-gray); background-color: white;"
+            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
+            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="4"
             placeholder="ポモドーロセッションでのメモを入力してください..."
           ></textarea>
@@ -213,14 +237,24 @@
         <div class="flex gap-3">
           <button
             @click="closeEditNotesModal"
-            class="flex-1 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+            class="flex-1 px-4 py-2 rounded-lg transition-colors"
+            style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
+            onmouseover="this.style.backgroundColor='var(--color-muted-gray-dark)'"
+            onmouseout="this.style.backgroundColor='var(--color-muted-gray)'"
           >
             キャンセル
           </button>
           <button
             @click="saveNotes"
             :disabled="editNotesModal.saving"
-            class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            class="flex-1 px-4 py-2 text-white rounded-lg transition-colors"
+            :style="{
+              backgroundColor: editNotesModal.saving ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
+              cursor: editNotesModal.saving ? 'not-allowed' : 'pointer',
+              opacity: editNotesModal.saving ? '0.5' : '1'
+            }"
+            onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
+            onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
           >
             {{ editNotesModal.saving ? '保存中...' : '保存' }}
           </button>
