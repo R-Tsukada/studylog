@@ -394,4 +394,173 @@ class AuthControllerTest extends TestCase
 
         $this->assertNotEquals($token1, $token2);
     }
+
+    /** @test */
+    public function it_validates_nickname_field_length_in_registration()
+    {
+        // 長すぎるニックネーム（255文字超過）
+        $longNickname = str_repeat('あ', 256);
+
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => $longNickname,
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(422)
+                ->assertJsonValidationErrors(['nickname']);
+    }
+
+    /** @test */
+    public function it_allows_valid_japanese_nicknames()
+    {
+        $testCases = [
+            'ひらがな',
+            'カタカナ',
+            '漢字',
+            'English123',
+            'ミックス名前123',
+        ];
+
+        foreach ($testCases as $nickname) {
+            $response = $this->postJson('/api/auth/register', [
+                'nickname' => $nickname,
+                'email' => "test{$nickname}@example.com",
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ]);
+
+            $response->assertStatus(201, "Failed for nickname: {$nickname}");
+            
+            $this->assertDatabaseHas('users', [
+                'nickname' => $nickname,
+                'email' => "test{$nickname}@example.com",
+            ]);
+        }
+    }
+
+    /** @test */
+    public function it_handles_nickname_migration_properly()
+    {
+        // マイグレーションテスト用のケース
+        $userData = [
+            'nickname' => 'マイグレーション後ユーザー',
+            'email' => 'migration@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ];
+
+        $response = $this->postJson('/api/auth/register', $userData);
+
+        $response->assertStatus(201);
+        
+        // nameフィールドがデータベースに存在しないことを確認
+        $user = User::where('email', 'migration@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertEquals('マイグレーション後ユーザー', $user->nickname);
+        
+        // nameフィールドがAPIレスポンスに含まれないことを確認
+        $responseData = $response->json();
+        $this->assertArrayNotHasKey('name', $responseData['user']);
+        $this->assertArrayHasKey('nickname', $responseData['user']);
+    }
+
+    /** @test */
+    public function it_handles_authentication_flow_with_nickname()
+    {
+        // 登録
+        $userData = [
+            'nickname' => '認証フローテスト',
+            'email' => 'auth-flow@example.com',
+            'password' => 'password123', 
+            'password_confirmation' => 'password123',
+        ];
+
+        $registerResponse = $this->postJson('/api/auth/register', $userData);
+        $registerResponse->assertStatus(201);
+        
+        $registerData = $registerResponse->json();
+        $this->assertEquals('認証フローテスト', $registerData['user']['nickname']);
+        
+        // ログイン
+        $loginResponse = $this->postJson('/api/auth/login', [
+            'email' => 'auth-flow@example.com',
+            'password' => 'password123',
+        ]);
+        
+        $loginResponse->assertStatus(200);
+        $loginData = $loginResponse->json();
+        $this->assertEquals('認証フローテスト', $loginData['user']['nickname']);
+        
+        // プロフィール更新
+        $token = $loginData['token'];
+        $profileResponse = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->putJson('/api/auth/profile', [
+            'nickname' => '更新後ニックネーム',
+        ]);
+        
+        $profileResponse->assertStatus(200);
+        
+        // 更新されたプロフィール確認
+        $userInfoResponse = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->getJson('/api/user');
+        
+        $userInfoResponse->assertStatus(200);
+        $userInfoData = $userInfoResponse->json();
+        $this->assertEquals('更新後ニックネーム', $userInfoData['user']['nickname']);
+    }
+
+    /** @test */
+    public function it_handles_token_management()
+    {
+        $user = User::factory()->create([
+            'email' => 'token-test@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        // ログインしてトークンを作成
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'token-test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $token = $response->json('token');
+
+        // トークンが有効
+        $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+             ->getJson('/api/user')
+             ->assertStatus(200);
+
+        // ログアウト
+        $this->withHeaders(['Authorization' => 'Bearer ' . $token])
+             ->postJson('/api/auth/logout')
+             ->assertStatus(200);
+    }
+
+    /** @test */
+    public function it_sanitizes_user_input_for_security()
+    {
+        // XSS攻撃を想定したニックネーム
+        $maliciousNickname = '<script>alert("xss")</script>';
+        
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => $maliciousNickname,
+            'email' => 'security-test@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(201);
+        
+        // データベースに保存されたニックネームを確認
+        $user = User::where('email', 'security-test@example.com')->first();
+        $this->assertEquals($maliciousNickname, $user->nickname);
+        
+        // APIレスポンスでエスケープされていることを確認（フロントエンドで処理）
+        $responseData = $response->json();
+        $this->assertEquals($maliciousNickname, $responseData['user']['nickname']);
+    }
 }

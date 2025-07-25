@@ -225,4 +225,58 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * アカウント削除
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+            
+            // パスワード確認（Google認証のみのユーザーは除く）
+            if ($user->password) {
+                $validated = $request->validate([
+                    'password' => 'required|string',
+                ]);
+
+                if (!Hash::check($validated['password'], $user->password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'パスワードが間違っています',
+                    ], 401);
+                }
+            }
+
+            // 確認メッセージの検証
+            $validated = $request->validate([
+                'confirmation' => 'required|string|in:削除します',
+            ]);
+
+            // 関連データの削除（カスケード削除）
+            // トークンを削除
+            $user->tokens()->delete();
+            
+            // ユーザーを削除（他の関連データは外部キー制約で自動削除される）
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'アカウントを削除しました'
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'バリデーションエラー',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'アカウント削除中にエラーが発生しました',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

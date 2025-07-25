@@ -318,6 +318,30 @@
       </div>
     </div>
 
+    <!-- アカウント管理 -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">⚠️ アカウント管理</h3>
+      
+      <!-- 危険なゾーン -->
+      <div class="border rounded-lg p-4" style="border-color: var(--color-muted-pink); background-color: var(--color-muted-pink-light);">
+        <h4 class="font-medium mb-2" style="color: var(--color-muted-pink-dark);">危険なゾーン</h4>
+        <p class="text-sm mb-4" style="color: var(--color-muted-pink-dark);">
+          アカウントを削除すると、すべての学習データ、目標、設定が完全に削除されます。<br>
+          この操作は取り消すことができません。
+        </p>
+        
+        <button
+          @click="showDeleteAccountModal = true"
+          @mouseover="handleButtonHover($event, 'pink', true)"
+          @mouseout="handleButtonHover($event, 'pink', false)"
+          class="text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
+          style="background-color: var(--color-muted-pink);"
+        >
+          🗑️ アカウントを削除
+        </button>
+      </div>
+    </div>
+
     <!-- 学習分野追加・編集モーダル -->
     <div v-if="showAddSubjectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-lg shadow-lg max-w-md w-full">
@@ -487,6 +511,89 @@
       </div>
     </div>
 
+    <!-- アカウント削除確認モーダル -->
+    <div v-if="showDeleteAccountModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg shadow-lg max-w-md w-full">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold mb-4" style="color: var(--color-muted-pink-dark);">⚠️ アカウント削除の確認</h3>
+          
+          <div class="mb-6">
+            <p class="text-sm text-gray-700 mb-4">
+              本当にアカウントを削除しますか？この操作により以下のデータが完全に削除されます：
+            </p>
+            <ul class="text-sm text-gray-600 list-disc list-inside mb-4 space-y-1">
+              <li>すべての学習セッション履歴</li>
+              <li>ポモドーロタイマーの記録</li>
+              <li>学習目標と達成状況</li>
+              <li>試験予定日と学習分野の設定</li>
+              <li>プロフィール情報</li>
+            </ul>
+            <p class="text-sm font-medium" style="color: var(--color-muted-pink-dark);">
+              この操作は取り消すことができません。
+            </p>
+          </div>
+
+          <!-- パスワード入力（通常ユーザーのみ） -->
+          <div v-if="!isGoogleUser" class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">現在のパスワード</label>
+            <input 
+              type="password" 
+              v-model="deleteAccountForm.password"
+              required
+              class="w-full p-3 rounded-lg"
+              style="border: 1px solid var(--color-muted-gray); background-color: white;"
+              @focus="handleInputFocus($event)"
+              @blur="handleInputBlur($event)"
+              placeholder="パスワードを入力してください"
+            />
+          </div>
+
+          <!-- 確認入力 -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              確認のため「削除します」と入力してください
+            </label>
+            <input 
+              type="text" 
+              v-model="deleteAccountForm.confirmation"
+              required
+              class="w-full p-3 rounded-lg"
+              style="border: 1px solid var(--color-muted-gray); background-color: white;"
+              @focus="handleInputFocus($event)"
+              @blur="handleInputBlur($event)"
+              placeholder="削除します"
+            />
+          </div>
+
+          <div class="flex gap-3">
+            <button 
+              @click="deleteAccount"
+              :disabled="loading || !canDeleteAccount"
+              @mouseover="handleButtonHover($event, 'pink', true)"
+              @mouseout="handleButtonHover($event, 'pink', false)"
+              class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              :style="{
+                backgroundColor: (loading || !canDeleteAccount) ? 'var(--color-muted-gray)' : 'var(--color-muted-pink)',
+                cursor: (loading || !canDeleteAccount) ? 'not-allowed' : 'pointer'
+              }"
+            >
+              {{ loading ? '削除中...' : '🗑️ 完全に削除する' }}
+            </button>
+            <button 
+              type="button"
+              @click="cancelDeleteAccount"
+              @mouseover="handleButtonHover($event, 'grayDark', true)"
+              @mouseout="handleButtonHover($event, 'grayDark', false)"
+              class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              style="background-color: var(--color-muted-gray-dark);"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- エラーメッセージ -->
     <div v-if="errorMessage" class="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50" style="background-color: var(--color-muted-pink-light); border: 1px solid var(--color-muted-pink); color: var(--color-muted-pink-dark);">
       {{ errorMessage }}
@@ -520,6 +627,7 @@ export default {
       // モーダル表示状態
       showAddExamModal: false,
       showAddSubjectModal: false,
+      showDeleteAccountModal: false,
       editGoalMode: false,
       
       // 編集中のデータ
@@ -545,6 +653,10 @@ export default {
         exam_date: '',
         is_active: true
       },
+      deleteAccountForm: {
+        password: '',
+        confirmation: ''
+      },
       
       // メッセージ
       errorMessage: '',
@@ -557,6 +669,19 @@ export default {
       const date = new Date()
       date.setDate(date.getDate() + 1)
       return date.toISOString().split('T')[0]
+    },
+    
+    isGoogleUser() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}')
+      return user.is_google_user || false
+    },
+    
+    canDeleteAccount() {
+      if (this.isGoogleUser) {
+        return this.deleteAccountForm.confirmation === '削除します'
+      } else {
+        return this.deleteAccountForm.password && this.deleteAccountForm.confirmation === '削除します'
+      }
     }
   },
   async mounted() {
@@ -973,6 +1098,52 @@ export default {
     handleInputBlur(event) {
       event.target.style.borderColor = 'var(--color-muted-gray)'
       event.target.style.boxShadow = 'none'
+    },
+
+    // アカウント削除関連
+    async deleteAccount() {
+      this.loading = true
+      this.clearMessages()
+      
+      try {
+        const response = await axios.delete('/api/auth/account', {
+          data: this.deleteAccountForm,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          // ローカルストレージをクリア
+          localStorage.removeItem('auth_token')
+          localStorage.removeItem('user')
+          
+          // ログインページにリダイレクト
+          alert('アカウントが削除されました。ご利用ありがとうございました。')
+          window.location.href = '/login'
+        } else {
+          this.showError(response.data.message || 'アカウント削除に失敗しました')
+        }
+      } catch (error) {
+        console.error('アカウント削除エラー:', error)
+        if (error.response?.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat()
+          this.showError(errors.join(', '))
+        } else {
+          this.showError(error.response?.data?.message || 'アカウント削除中にエラーが発生しました')
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+    
+    cancelDeleteAccount() {
+      this.showDeleteAccountModal = false
+      this.deleteAccountForm = {
+        password: '',
+        confirmation: ''
+      }
+      this.clearMessages()
     }
   }
 }

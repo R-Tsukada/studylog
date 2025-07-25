@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
+    Route::delete('/auth/account', [AuthController::class, 'deleteAccount']);
     Route::post('/auth/google/link', [GoogleAuthController::class, 'linkGoogleAccount']);
     Route::delete('/auth/google/unlink', [GoogleAuthController::class, 'unlinkGoogleAccount']);
     
