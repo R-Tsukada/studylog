@@ -13,21 +13,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // まずnickname列を追加（既存のnameの値をコピー）
-            $table->string('nickname')->nullable()->after('id');
+            // nickname列が存在しない場合のみ追加
+            if (!Schema::hasColumn('users', 'nickname')) {
+                $table->string('nickname')->nullable()->after('id');
+            }
         });
         
-        // 既存のnameの値をnicknameにコピー
-        DB::statement('UPDATE users SET nickname = name WHERE nickname IS NULL');
+        // name列が存在する場合、既存のnameの値をnicknameにコピー
+        if (Schema::hasColumn('users', 'name')) {
+            DB::statement('UPDATE users SET nickname = name WHERE nickname IS NULL OR nickname = ""');
+        }
         
         // nicknameをnot nullに変更
         Schema::table('users', function (Blueprint $table) {
             $table->string('nickname')->nullable(false)->change();
         });
         
-        // name列を削除
+        // name列が存在する場合のみ削除
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('name');
+            if (Schema::hasColumn('users', 'name')) {
+                $table->dropColumn('name');
+            }
         });
     }
 
@@ -37,16 +43,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // name列を復元
-            $table->string('name')->after('id');
+            // name列が存在しない場合のみ復元
+            if (!Schema::hasColumn('users', 'name')) {
+                $table->string('name')->after('id');
+            }
         });
         
-        // nicknameの値をnameにコピー
-        DB::statement('UPDATE users SET name = nickname WHERE name IS NULL');
+        // nickname列が存在する場合、nicknameの値をnameにコピー
+        if (Schema::hasColumn('users', 'nickname')) {
+            DB::statement('UPDATE users SET name = nickname WHERE name IS NULL OR name = ""');
+        }
         
-        // nickname列を削除
+        // nickname列が存在する場合のみ削除
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('nickname');
+            if (Schema::hasColumn('users', 'nickname')) {
+                $table->dropColumn('nickname');
+            }
         });
     }
 };
