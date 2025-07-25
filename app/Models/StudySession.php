@@ -2,27 +2,27 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Carbon\Carbon;
 
 class StudySession extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'subject_area_id',
         'started_at',
         'ended_at',
         'duration_minutes',
-        'study_comment'
+        'study_comment',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
-        'duration_minutes' => 'integer'
+        'duration_minutes' => 'integer',
     ];
 
     // リレーション
@@ -61,14 +61,14 @@ class StudySession extends Model
     {
         return $query->whereBetween('started_at', [
             now()->startOfWeek(),
-            now()->endOfWeek()
+            now()->endOfWeek(),
         ]);
     }
 
     public function scopeThisMonth($query)
     {
         return $query->whereMonth('started_at', now()->month)
-                    ->whereYear('started_at', now()->year);
+            ->whereYear('started_at', now()->year);
     }
 
     public function scopeDateRange($query, $startDate, $endDate)
@@ -87,6 +87,7 @@ class StudySession extends Model
         if ($limit !== null) {
             $query = $query->limit($limit);
         }
+
         return $query;
     }
 
@@ -98,10 +99,10 @@ class StudySession extends Model
 
     public function calculateDuration(): int
     {
-        if (!$this->ended_at) {
+        if (! $this->ended_at) {
             return 0;
         }
-        
+
         return $this->started_at->diffInMinutes($this->ended_at);
     }
 
@@ -109,11 +110,11 @@ class StudySession extends Model
     {
         $this->ended_at = now();
         $this->duration_minutes = $this->calculateDuration();
-        
+
         if ($comment) {
             $this->study_comment = $comment;
         }
-        
+
         return $this->save();
     }
 

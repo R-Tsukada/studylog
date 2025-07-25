@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\User;
-use App\Models\ExamType;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StudyGoalFactory extends Factory
 {
@@ -75,4 +75,4 @@ class StudyGoalFactory extends Factory
             'exam_date' => null,
         ]);
     }
-} 
+}

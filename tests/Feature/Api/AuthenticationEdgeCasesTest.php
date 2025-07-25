@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -25,7 +24,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname']);
+            ->assertJsonValidationErrors(['nickname']);
     }
 
     /** @test */
@@ -39,7 +38,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname']);
+            ->assertJsonValidationErrors(['nickname']);
     }
 
     /** @test */
@@ -78,7 +77,7 @@ class AuthenticationEdgeCasesTest extends TestCase
             ]);
 
             $response->assertStatus(201, "Failed for nickname: {$nickname}");
-            
+
             $this->assertDatabaseHas('users', [
                 'nickname' => $nickname,
                 'email' => "special{$index}@example.com",
@@ -104,7 +103,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     }
 
     /** @test */
@@ -160,7 +159,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname']);
+            ->assertJsonValidationErrors(['nickname']);
     }
 
     /** @test */
@@ -169,7 +168,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', []);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname', 'email', 'password']);
+            ->assertJsonValidationErrors(['nickname', 'email', 'password']);
     }
 
     /** @test */
@@ -195,7 +194,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         }
 
         // 各トークンが異なること
-        $tokens = array_map(fn($response) => $response->json('token'), $responses);
+        $tokens = array_map(fn ($response) => $response->json('token'), $responses);
         $this->assertEquals(count($tokens), count(array_unique($tokens)));
     }
 
@@ -207,7 +206,7 @@ class AuthenticationEdgeCasesTest extends TestCase
 
         // 間違ったprefixでトークンを送信
         $response = $this->withHeaders([
-            'Authorization' => 'Basic ' . $token,
+            'Authorization' => 'Basic '.$token,
         ])->getJson('/api/user');
 
         $response->assertStatus(401);
@@ -256,7 +255,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname']);
+            ->assertJsonValidationErrors(['nickname']);
 
         // 非常に長いニックネーム
         $longNickname = str_repeat('長', 300);
@@ -265,7 +264,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['nickname']);
+            ->assertJsonValidationErrors(['nickname']);
     }
 
     /** @test */
@@ -289,7 +288,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     }
 
     /** @test */

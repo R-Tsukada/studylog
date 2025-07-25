@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PomodoroSession;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 
 class PomodoroController extends Controller
 {
-
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
@@ -61,7 +59,7 @@ class PomodoroController extends Controller
         if ($activeSession) {
             return response()->json([
                 'message' => '既にアクティブなポモドーロセッションがあります。',
-                'active_session' => $activeSession
+                'active_session' => $activeSession,
             ], 409);
         }
 
@@ -81,7 +79,7 @@ class PomodoroController extends Controller
     public function show(PomodoroSession $pomodoroSession): JsonResponse
     {
         $user = Auth::user();
-        
+
         if ($pomodoroSession->user_id !== $user->id) {
             return response()->json(['message' => 'このリソースにアクセスする権限がありません。'], 403);
         }
@@ -92,7 +90,7 @@ class PomodoroController extends Controller
     public function update(Request $request, PomodoroSession $pomodoroSession): JsonResponse
     {
         $user = Auth::user();
-        
+
         if ($pomodoroSession->user_id !== $user->id) {
             return response()->json(['message' => 'このリソースにアクセスする権限がありません。'], 403);
         }
@@ -110,14 +108,14 @@ class PomodoroController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'ポモドーロセッションを更新しました',
-            'session' => $pomodoroSession->load('subjectArea.examType')
+            'session' => $pomodoroSession->load('subjectArea.examType'),
         ]);
     }
 
     public function complete(Request $request, PomodoroSession $pomodoroSession): JsonResponse
     {
         $user = Auth::user();
-        
+
         if ($pomodoroSession->user_id !== $user->id) {
             return response()->json(['message' => 'このリソースにアクセスする権限がありません。'], 403);
         }
@@ -146,13 +144,13 @@ class PomodoroController extends Controller
     public function current(): JsonResponse
     {
         $user = Auth::user();
-        
+
         $currentSession = PomodoroSession::byUser($user->id)
             ->where('is_completed', false)
             ->with('subjectArea.examType')
             ->first();
 
-        if (!$currentSession) {
+        if (! $currentSession) {
             return response()->json(['message' => 'アクティブなポモドーロセッションがありません。'], 404);
         }
 
@@ -163,17 +161,17 @@ class PomodoroController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             // 日付パラメータを適切に処理
             $startDateParam = $request->get('start_date');
             $endDateParam = $request->get('end_date');
-            
+
             if ($startDateParam) {
                 $startDate = \Carbon\Carbon::parse($startDateParam)->startOfDay();
             } else {
                 $startDate = now()->startOfMonth();
             }
-            
+
             if ($endDateParam) {
                 $endDate = \Carbon\Carbon::parse($endDateParam)->endOfDay();
             } else {
@@ -192,7 +190,7 @@ class PomodoroController extends Controller
                 'total_focus_time' => $sessions->where('session_type', 'focus')->sum('actual_duration') ?: 0,
                 'total_break_time' => $sessions->whereIn('session_type', ['short_break', 'long_break'])->sum('actual_duration') ?: 0,
                 'interrupted_sessions' => $sessions->where('was_interrupted', true)->count(),
-                'completion_rate' => $sessions->count() > 0 ? 
+                'completion_rate' => $sessions->count() > 0 ?
                     round((1 - $sessions->where('was_interrupted', true)->count() / $sessions->count()) * 100, 1) : 0,
                 'average_focus_duration' => $sessions->where('session_type', 'focus')->avg('actual_duration') ?: 0,
             ];
@@ -218,12 +216,12 @@ class PomodoroController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
-            
+
             return response()->json([
                 'message' => 'ポモドーロ統計の取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -231,7 +229,7 @@ class PomodoroController extends Controller
     public function destroy(PomodoroSession $pomodoroSession): JsonResponse
     {
         $user = Auth::user();
-        
+
         if ($pomodoroSession->user_id !== $user->id) {
             return response()->json(['message' => 'このリソースにアクセスする権限がありません。'], 403);
         }

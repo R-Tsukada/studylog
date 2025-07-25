@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
-use App\Models\StudySession;
-use App\Models\StudyGoal;
 use App\Models\ExamType;
+use App\Models\StudyGoal;
+use App\Models\StudySession;
 use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -32,10 +32,10 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         // ユーザーがデータベースから削除されていることを確認
         $this->assertDatabaseMissing('users', [
@@ -59,10 +59,10 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         // ユーザーがデータベースから削除されていることを確認
         $this->assertDatabaseMissing('users', [
@@ -86,10 +86,10 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(401)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'パスワードが間違っています',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'パスワードが間違っています',
+            ]);
 
         // ユーザーがまだ存在することを確認
         $this->assertDatabaseHas('users', [
@@ -113,7 +113,7 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['confirmation']);
+            ->assertJsonValidationErrors(['confirmation']);
 
         // ユーザーがまだ存在することを確認
         $this->assertDatabaseHas('users', [
@@ -186,7 +186,7 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
 
         // 確認なし
         $response = $this->deleteJson('/api/auth/account', [
@@ -194,7 +194,7 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['confirmation']);
+            ->assertJsonValidationErrors(['confirmation']);
     }
 
     /** @test */
@@ -239,10 +239,10 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
@@ -262,7 +262,7 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
 
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
@@ -282,7 +282,7 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['confirmation']);
+            ->assertJsonValidationErrors(['confirmation']);
 
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
@@ -313,7 +313,7 @@ class AccountDeletionTest extends TestCase
             ]);
 
             $response->assertStatus(422)
-                    ->assertJsonValidationErrors(['confirmation']);
+                ->assertJsonValidationErrors(['confirmation']);
 
             $this->assertDatabaseHas('users', ['id' => $user->id]);
         }
@@ -335,10 +335,10 @@ class AccountDeletionTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
@@ -355,7 +355,7 @@ class AccountDeletionTest extends TestCase
 
         // 最初の削除は成功
         $response1 = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->deleteJson('/api/auth/account', [
             'password' => 'password123',
             'confirmation' => '削除します',
@@ -365,7 +365,7 @@ class AccountDeletionTest extends TestCase
 
         // 2回目の削除試行は失敗（トークンが削除されている）
         $response2 = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->deleteJson('/api/auth/account', [
             'password' => 'password123',
             'confirmation' => '削除します',
@@ -424,20 +424,20 @@ class AccountDeletionTest extends TestCase
 
         // 大量のテストデータを作成
         $examTypes = ExamType::factory(5)->create(['user_id' => $user->id]);
-        
+
         foreach ($examTypes as $examType) {
             $subjectAreas = SubjectArea::factory(10)->create([
                 'exam_type_id' => $examType->id,
                 'user_id' => $user->id,
             ]);
-            
+
             foreach ($subjectAreas as $subjectArea) {
                 StudySession::factory(20)->create([
                     'user_id' => $user->id,
                     'subject_area_id' => $subjectArea->id,
                 ]);
             }
-            
+
             StudyGoal::factory(3)->create([
                 'user_id' => $user->id,
                 'exam_type_id' => $examType->id,
@@ -474,7 +474,7 @@ class AccountDeletionTest extends TestCase
         $response = $this->deleteJson('/api/auth/account', []);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
 
         // ユーザーが削除されていないことを確認
         $this->assertDatabaseHas('users', ['id' => $user->id]);

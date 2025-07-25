@@ -30,4 +30,4 @@ class ExamTypeFactory extends Factory
             'is_active' => false,
         ]);
     }
-} 
+}

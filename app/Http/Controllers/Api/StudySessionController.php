@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\StudySession;
-use App\Models\SubjectArea;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class StudySessionController extends Controller
@@ -19,7 +18,7 @@ class StudySessionController extends Controller
         try {
             $validated = $request->validate([
                 'subject_area_id' => 'required|exists:subject_areas,id',
-                'study_comment' => 'required|string|max:1000'
+                'study_comment' => 'required|string|max:1000',
             ]);
 
             $userId = auth()->id();
@@ -34,8 +33,8 @@ class StudySessionController extends Controller
                         'id' => $currentSession->id,
                         'subject_area' => $currentSession->subjectArea->name,
                         'started_at' => $currentSession->started_at->format('Y-m-d H:i:s'),
-                        'elapsed_minutes' => $currentSession->started_at->diffInMinutes(now())
-                    ]
+                        'elapsed_minutes' => $currentSession->started_at->diffInMinutes(now()),
+                    ],
                 ], 400);
             }
 
@@ -44,7 +43,7 @@ class StudySessionController extends Controller
                 'user_id' => $userId,
                 'subject_area_id' => $validated['subject_area_id'],
                 'started_at' => now(),
-                'study_comment' => $validated['study_comment']
+                'study_comment' => $validated['study_comment'],
             ]);
 
             // レスポンス用に関連データを読み込み
@@ -61,21 +60,21 @@ class StudySessionController extends Controller
                     'started_at' => $session->started_at->format('Y-m-d H:i:s'),
                     'started_at_timestamp' => $session->started_at->timestamp,
                     'elapsed_minutes' => 0,
-                    'study_comment' => $session->study_comment
-                ]
+                    'study_comment' => $session->study_comment,
+                ],
             ], 201);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション開始中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -88,7 +87,7 @@ class StudySessionController extends Controller
         try {
             $validated = $request->validate([
                 'session_id' => 'sometimes|exists:study_sessions,id',
-                'study_comment' => 'sometimes|string|max:1000'
+                'study_comment' => 'sometimes|string|max:1000',
             ]);
 
             $userId = auth()->id();
@@ -102,17 +101,17 @@ class StudySessionController extends Controller
                 $session = StudySession::getCurrentSession($userId);
             }
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => false,
-                    'message' => '終了可能な学習セッションが見つかりません'
+                    'message' => '終了可能な学習セッションが見つかりません',
                 ], 404);
             }
 
-            if (!$session->isActive()) {
+            if (! $session->isActive()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'このセッションは既に終了しています'
+                    'message' => 'このセッションは既に終了しています',
                 ], 400);
             }
 
@@ -131,21 +130,21 @@ class StudySessionController extends Controller
                     'started_at' => $session->started_at->format('Y-m-d H:i:s'),
                     'ended_at' => $session->ended_at->format('Y-m-d H:i:s'),
                     'duration_minutes' => $session->duration_minutes,
-                    'study_comment' => $session->study_comment
-                ]
+                    'study_comment' => $session->study_comment,
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション終了中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -160,11 +159,11 @@ class StudySessionController extends Controller
 
             $session = StudySession::getCurrentSession($userId);
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => true,
                     'message' => '現在進行中のセッションはありません',
-                    'session' => null
+                    'session' => null,
                 ]);
             }
 
@@ -181,15 +180,15 @@ class StudySessionController extends Controller
                     'started_at' => $session->started_at->format('Y-m-d H:i:s'),
                     'started_at_timestamp' => $session->started_at->timestamp,
                     'elapsed_minutes' => $elapsedMinutes,
-                    'study_comment' => $session->study_comment
-                ]
+                    'study_comment' => $session->study_comment,
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '現在のセッション取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -202,7 +201,7 @@ class StudySessionController extends Controller
         try {
             $validated = $request->validate([
                 'limit' => 'sometimes|integer|min:1|max:100',
-                'page' => 'sometimes|integer|min:1'
+                'page' => 'sometimes|integer|min:1',
             ]);
 
             $userId = auth()->id();
@@ -226,7 +225,7 @@ class StudySessionController extends Controller
                     'ended_at' => $session->ended_at->format('Y-m-d H:i:s'),
                     'duration_minutes' => $session->duration_minutes,
                     'study_comment' => $session->study_comment,
-                    'date' => $session->started_at->format('Y-m-d')
+                    'date' => $session->started_at->format('Y-m-d'),
                 ];
             });
 
@@ -237,21 +236,21 @@ class StudySessionController extends Controller
                     'current_page' => $sessions->currentPage(),
                     'last_page' => $sessions->lastPage(),
                     'per_page' => $sessions->perPage(),
-                    'total' => $sessions->total()
-                ]
+                    'total' => $sessions->total(),
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '学習履歴取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -267,14 +266,14 @@ class StudySessionController extends Controller
             $query = StudySession::forUser($userId)
                 ->with('subjectArea.examType')
                 ->orderBy('started_at', 'desc');
-            
+
             // statusパラメータの処理
             if ($request->has('status') && $request->status === 'active') {
                 $query->whereNull('ended_at');
             } else {
                 $query->limit(10);
             }
-            
+
             $sessions = $query->get();
 
             $data = $sessions->map(function ($session) {
@@ -289,22 +288,22 @@ class StudySessionController extends Controller
                     'study_comment' => $session->study_comment,
                     'subject_area' => [
                         'id' => $session->subjectArea->id,
-                        'name' => $session->subjectArea->name
-                    ]
+                        'name' => $session->subjectArea->name,
+                    ],
                 ];
             });
 
             return response()->json([
                 'success' => true,
                 'data' => $data,
-                'sessions' => $data
+                'sessions' => $data,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション一覧取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -322,10 +321,10 @@ class StudySessionController extends Controller
                 ->with('subjectArea.examType')
                 ->first();
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => false,
-                    'message' => '指定された学習セッションが見つかりません'
+                    'message' => '指定された学習セッションが見つかりません',
                 ], 404);
             }
 
@@ -341,15 +340,15 @@ class StudySessionController extends Controller
                     'duration_minutes' => $session->duration_minutes,
                     'study_comment' => $session->study_comment,
                     'is_active' => $session->isActive(),
-                    'created_at' => $session->created_at->format('Y-m-d H:i:s')
-                ]
+                    'created_at' => $session->created_at->format('Y-m-d H:i:s'),
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -365,7 +364,7 @@ class StudySessionController extends Controller
                 'study_comment' => 'sometimes|string|max:1000',
                 'started_at' => 'sometimes|date',
                 'ended_at' => 'sometimes|date|after:started_at',
-                'duration_minutes' => 'sometimes|integer|min:1|max:1440' // 最大24時間
+                'duration_minutes' => 'sometimes|integer|min:1|max:1440', // 最大24時間
             ]);
 
             $userId = auth()->id();
@@ -374,10 +373,10 @@ class StudySessionController extends Controller
                 ->where('user_id', $userId)
                 ->first();
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => false,
-                    'message' => '指定された学習セッションが見つかりません'
+                    'message' => '指定された学習セッションが見つかりません',
                 ], 404);
             }
 
@@ -385,18 +384,18 @@ class StudySessionController extends Controller
             if ($session->isActive()) {
                 return response()->json([
                     'success' => false,
-                    'message' => '進行中のセッションは編集できません。先に終了してください。'
+                    'message' => '進行中のセッションは編集できません。先に終了してください。',
                 ], 400);
             }
 
             // 日時が更新された場合、duration_minutesを再計算
             if (isset($validated['started_at']) || isset($validated['ended_at'])) {
-                $startedAt = isset($validated['started_at']) ? 
-                    \Carbon\Carbon::parse($validated['started_at']) : 
+                $startedAt = isset($validated['started_at']) ?
+                    \Carbon\Carbon::parse($validated['started_at']) :
                     $session->started_at;
-                
-                $endedAt = isset($validated['ended_at']) ? 
-                    \Carbon\Carbon::parse($validated['ended_at']) : 
+
+                $endedAt = isset($validated['ended_at']) ?
+                    \Carbon\Carbon::parse($validated['ended_at']) :
                     $session->ended_at;
 
                 if ($endedAt) {
@@ -420,21 +419,21 @@ class StudySessionController extends Controller
                     'ended_at' => $session->ended_at?->format('Y-m-d H:i:s'),
                     'duration_minutes' => $session->duration_minutes,
                     'study_comment' => $session->study_comment,
-                    'is_active' => $session->isActive()
-                ]
+                    'is_active' => $session->isActive(),
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション更新中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -451,10 +450,10 @@ class StudySessionController extends Controller
                 ->where('user_id', $userId)
                 ->first();
 
-            if (!$session) {
+            if (! $session) {
                 return response()->json([
                     'success' => false,
-                    'message' => '指定された学習セッションが見つかりません'
+                    'message' => '指定された学習セッションが見つかりません',
                 ], 404);
             }
 
@@ -462,7 +461,7 @@ class StudySessionController extends Controller
             if ($session->isActive()) {
                 return response()->json([
                     'success' => false,
-                    'message' => '進行中のセッションは削除できません。先に終了してください。'
+                    'message' => '進行中のセッションは削除できません。先に終了してください。',
                 ], 400);
             }
 
@@ -471,7 +470,7 @@ class StudySessionController extends Controller
                 'id' => $session->id,
                 'subject_area_name' => $session->subjectArea->name,
                 'started_at' => $session->started_at->format('Y-m-d H:i:s'),
-                'duration_minutes' => $session->duration_minutes
+                'duration_minutes' => $session->duration_minutes,
             ];
 
             $session->delete();
@@ -479,14 +478,14 @@ class StudySessionController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '学習セッションを削除しました',
-                'deleted_session' => $sessionData
+                'deleted_session' => $sessionData,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'セッション削除中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

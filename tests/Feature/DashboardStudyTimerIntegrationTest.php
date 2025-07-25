@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * ダッシュボードと時間計測タイマーの統合テスト
- * 
+ *
  * - ダッシュボードでの学習開始/終了
  * - グローバルタイマーとの同期
  * - 時間表示の一貫性
@@ -22,26 +22,28 @@ class DashboardStudyTimerIntegrationTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private ExamType $examType;
+
     private SubjectArea $subjectArea;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // テストデータ作成
         $this->user = User::factory()->create([
             'nickname' => 'テストユーザー',
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
-        
+
         $this->examType = ExamType::factory()->create([
-            'name' => 'JSTQB Foundation Level'
+            'name' => 'JSTQB Foundation Level',
         ]);
-        
+
         $this->subjectArea = SubjectArea::factory()->create([
             'exam_type_id' => $this->examType->id,
-            'name' => 'ソフトウェアテスト基礎'
+            'name' => 'ソフトウェアテスト基礎',
         ]);
     }
 
@@ -56,14 +58,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // 1. ダッシュボードデータ取得（初期状態）
         $response = $this->getJson('/api/dashboard');
         $response->assertStatus(200);
-        
+
         $dashboardData = $response->json('data');
         $this->assertEquals(0, $dashboardData['today_session_count']);
         // 時間の形式は数値または文字列の可能性があるため、どちらも受け入れる
         $this->assertTrue(
-            $dashboardData['today_study_time'] === 0 || 
+            $dashboardData['today_study_time'] === 0 ||
             $dashboardData['today_study_time'] === '0分',
-            '今日の学習時間が期待値と一致しません: ' . $dashboardData['today_study_time']
+            '今日の学習時間が期待値と一致しません: '.$dashboardData['today_study_time']
         );
 
         // 2. 現在のセッション確認（なし）
@@ -71,29 +73,29 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'session' => null
+            'session' => null,
         ]);
 
         // 3. ダッシュボードから学習セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => 'ダッシュボードからの学習開始テスト'
+            'study_comment' => 'ダッシュボードからの学習開始テスト',
         ];
-        
+
         $startTime = time();
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $response->assertJson([
             'success' => true,
-            'message' => '学習セッションを開始しました'
+            'message' => '学習セッションを開始しました',
         ]);
-        
+
         $sessionData = $response->json('session');
         $this->assertNotNull($sessionData['id']);
         $this->assertEquals('ソフトウェアテスト基礎', $sessionData['subject_area_name']);
         $this->assertEquals('JSTQB Foundation Level', $sessionData['exam_type_name']);
         $this->assertEquals(0, $sessionData['elapsed_minutes']);
-        
+
         // タイムスタンプの精度確認
         $this->assertEqualsWithDelta($startTime, $sessionData['started_at_timestamp'], 2);
 
@@ -101,7 +103,7 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         sleep(1); // 少し時間を進める
         $response = $this->getJson('/api/study-sessions/current');
         $response->assertStatus(200);
-        
+
         $currentSession = $response->json('session');
         $this->assertNotNull($currentSession);
         $this->assertEquals($sessionData['id'], $currentSession['id']);
@@ -112,9 +114,9 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'message' => '学習セッションを終了しました'
+            'message' => '学習セッションを終了しました',
         ]);
-        
+
         $endedSession = $response->json('session');
         $this->assertNotNull($endedSession['ended_at']);
         $this->assertGreaterThanOrEqual(0, $endedSession['duration_minutes']); // 0以上に変更（タイミング誤差を考慮）
@@ -124,13 +126,13 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'session' => null
+            'session' => null,
         ]);
 
         // 7. ダッシュボードデータ更新確認
         $response = $this->getJson('/api/dashboard');
         $response->assertStatus(200);
-        
+
         $updatedDashboardData = $response->json('data');
         $this->assertEquals(1, $updatedDashboardData['today_session_count']);
         // 短時間のセッションでは0分になる可能性があるため、セッション数で確認
@@ -148,9 +150,9 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '一貫性テスト'
+            'study_comment' => '一貫性テスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $sessionId = $response->json('session.id');
@@ -187,9 +189,9 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // 1. セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '状態復元テスト'
+            'study_comment' => '状態復元テスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $originalSession = $response->json('session');
@@ -200,17 +202,17 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // 3. ページリロード想定：新しいリクエストで状態確認
         $response = $this->getJson('/api/study-sessions/current');
         $response->assertStatus(200);
-        
+
         $restoredSession = $response->json('session');
-        
+
         // セッション情報が正しく復元されることを確認
         $this->assertEquals($originalSession['id'], $restoredSession['id']);
         $this->assertEquals($originalSession['subject_area_name'], $restoredSession['subject_area_name']);
         $this->assertEquals($originalSession['study_comment'], $restoredSession['study_comment']);
-        
+
         // 経過時間が進んでいることを確認
         $this->assertGreaterThanOrEqual($originalSession['elapsed_minutes'], $restoredSession['elapsed_minutes']);
-        
+
         // グローバルタイマー復元に必要なデータが含まれていることを確認
         $this->assertArrayHasKey('started_at_timestamp', $restoredSession);
         $this->assertArrayHasKey('elapsed_minutes', $restoredSession);
@@ -230,9 +232,9 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // 1回目のセッション
         $sessionData1 = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '1回目のセッション'
+            'study_comment' => '1回目のセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData1);
         $response->assertStatus(201);
         $session1Id = $response->json('session.id');
@@ -250,9 +252,9 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // 2回目のセッション
         $sessionData2 = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '2回目のセッション'
+            'study_comment' => '2回目のセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData2);
         $response->assertStatus(201);
         $session2Id = $response->json('session.id');
@@ -284,24 +286,24 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $response->assertStatus(404);
         $response->assertJson([
             'success' => false,
-            'message' => '終了可能な学習セッションが見つかりません'
+            'message' => '終了可能な学習セッションが見つかりません',
         ]);
 
         // 2. 無効な学習分野IDでセッション開始を試行
         $invalidSessionData = [
             'subject_area_id' => 99999,
-            'study_comment' => '無効なテスト'
+            'study_comment' => '無効なテスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $invalidSessionData);
         $response->assertStatus(422);
 
         // 3. 正常なセッションが開始できることを確認
         $validSessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '正常なテスト'
+            'study_comment' => '正常なテスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $validSessionData);
         $response->assertStatus(201);
 
@@ -310,7 +312,7 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $response->assertStatus(400);
         $response->assertJson([
             'success' => false,
-            'message' => '既に進行中の学習セッションがあります。先に終了してください。'
+            'message' => '既に進行中の学習セッションがあります。先に終了してください。',
         ]);
 
         // セッション終了
@@ -330,18 +332,18 @@ class DashboardStudyTimerIntegrationTest extends TestCase
             'user_id' => $this->user->id,
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subMinutes(125), // 2時間5分前
-            'study_comment' => '長時間セッションテスト'
+            'study_comment' => '長時間セッションテスト',
         ]);
 
         // 現在のセッション取得
         $response = $this->getJson('/api/study-sessions/current');
         $response->assertStatus(200);
-        
+
         $currentSession = $response->json('session');
         $this->assertNotNull($currentSession);
-        
+
         $elapsedMinutes = $currentSession['elapsed_minutes'];
-        
+
         // 経過時間が120-130分の範囲内であることを確認（多少の誤差を許容）
         $this->assertGreaterThanOrEqual(120, $elapsedMinutes);
         $this->assertLessThanOrEqual(130, $elapsedMinutes);
@@ -349,7 +351,7 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         // セッション終了
         $response = $this->postJson('/api/study-sessions/end');
         $response->assertStatus(200);
-        
+
         $endedSession = $response->json('session');
         $this->assertGreaterThanOrEqual(120, $endedSession['duration_minutes']); // 120分以上（丁度の場合も考慮）
     }

@@ -25,7 +25,7 @@ return new class extends Migration
             $table->json('settings')->nullable(); // フォーカス時間、休憩時間の設定を保存
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index(['user_id', 'started_at']);
             $table->index(['session_type', 'is_completed']);
         });

@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\ExamType;
-use App\Models\SubjectArea;
-use App\Models\StudySession;
-use App\Models\StudyGoal;
-use App\Models\PomodoroSession;
 use App\Models\DailyStudySummary;
+use App\Models\ExamType;
+use App\Models\PomodoroSession;
+use App\Models\StudyGoal;
+use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
@@ -30,12 +30,12 @@ class UserDeletionIntegrationTest extends TestCase
 
         // 複数の試験タイプを作成
         $examTypes = ExamType::factory(3)->create(['user_id' => $user->id]);
-        
+
         $allSubjectAreas = collect();
         $allStudySessions = collect();
         $allStudyGoals = collect();
         $allPomodoroSessions = collect();
-        
+
         foreach ($examTypes as $examType) {
             // 学習分野を作成
             $subjectAreas = SubjectArea::factory(5)->create([
@@ -43,7 +43,7 @@ class UserDeletionIntegrationTest extends TestCase
                 'user_id' => $user->id,
             ]);
             $allSubjectAreas = $allSubjectAreas->concat($subjectAreas);
-            
+
             // 学習セッションを作成
             foreach ($subjectAreas as $subjectArea) {
                 $studySessions = StudySession::factory(15)->create([
@@ -51,7 +51,7 @@ class UserDeletionIntegrationTest extends TestCase
                     'subject_area_id' => $subjectArea->id,
                 ]);
                 $allStudySessions = $allStudySessions->concat($studySessions);
-                
+
                 // ポモドーロセッションも作成
                 $pomodoroSessions = PomodoroSession::factory(10)->create([
                     'user_id' => $user->id,
@@ -59,7 +59,7 @@ class UserDeletionIntegrationTest extends TestCase
                 ]);
                 $allPomodoroSessions = $allPomodoroSessions->concat($pomodoroSessions);
             }
-            
+
             // 学習目標を作成
             $studyGoals = StudyGoal::factory(2)->create([
                 'user_id' => $user->id,
@@ -67,7 +67,7 @@ class UserDeletionIntegrationTest extends TestCase
             ]);
             $allStudyGoals = $allStudyGoals->concat($studyGoals);
         }
-        
+
         // 日次学習サマリーを作成（日付を分散させる）
         $dailySummaries = collect();
         for ($i = 0; $i < 30; $i++) {
@@ -95,10 +95,10 @@ class UserDeletionIntegrationTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         // すべてのユーザーデータが削除されていることを確認
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
@@ -245,10 +245,10 @@ class UserDeletionIntegrationTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => 'アカウントを削除しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => 'アカウントを削除しました',
+            ]);
 
         // ユーザーとデータが削除されていることを確認
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
@@ -333,19 +333,19 @@ class UserDeletionIntegrationTest extends TestCase
 
         // 大量のデータを作成（パフォーマンステスト）
         $examTypes = ExamType::factory(10)->create(['user_id' => $user->id]);
-        
+
         foreach ($examTypes->take(3) as $examType) { // 最初の3つだけで大量データ作成
             $subjectAreas = SubjectArea::factory(20)->create([
                 'exam_type_id' => $examType->id,
                 'user_id' => $user->id,
             ]);
-            
+
             foreach ($subjectAreas->take(5) as $subjectArea) { // 最初の5つだけ
                 StudySession::factory(50)->create([
                     'user_id' => $user->id,
                     'subject_area_id' => $subjectArea->id,
                 ]);
-                
+
                 PomodoroSession::factory(30)->create([
                     'user_id' => $user->id,
                     'subject_area_id' => $subjectArea->id,

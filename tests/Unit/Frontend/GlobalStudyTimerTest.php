@@ -2,16 +2,16 @@
 
 namespace Tests\Unit\Frontend;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * グローバル時間計測タイマーのテストクラス
- * 
+ *
  * Frontend: App.vue の globalStudyTimer 機能をテスト
  */
 class GlobalStudyTimerTest extends TestCase
@@ -19,18 +19,19 @@ class GlobalStudyTimerTest extends TestCase
     use RefreshDatabase;
 
     private User $user;
+
     private SubjectArea $subjectArea;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // テストユーザーとデータを作成
         $this->user = User::factory()->create();
         $examType = ExamType::factory()->create(['name' => 'テスト資格']);
         $this->subjectArea = SubjectArea::factory()->create([
             'exam_type_id' => $examType->id,
-            'name' => 'テスト分野'
+            'name' => 'テスト分野',
         ]);
     }
 
@@ -48,21 +49,21 @@ class GlobalStudyTimerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'session' => null
+            'session' => null,
         ]);
 
         // 2. セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => 'グローバルタイマーテスト'
+            'study_comment' => 'グローバルタイマーテスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $response->assertJson([
-            'success' => true
+            'success' => true,
         ]);
-        
+
         $sessionId = $response->json('session.id');
         $this->assertNotNull($sessionId);
 
@@ -74,8 +75,8 @@ class GlobalStudyTimerTest extends TestCase
             'session' => [
                 'id' => $sessionId,
                 'subject_area_name' => 'テスト分野',
-                'study_comment' => 'グローバルタイマーテスト'
-            ]
+                'study_comment' => 'グローバルタイマーテスト',
+            ],
         ]);
 
         // タイムスタンプが含まれていることを確認
@@ -84,11 +85,11 @@ class GlobalStudyTimerTest extends TestCase
 
         // 4. セッション終了（コメントを渡す）
         $response = $this->postJson('/api/study-sessions/end', [
-            'study_comment' => 'グローバルタイマーテスト'
+            'study_comment' => 'グローバルタイマーテスト',
         ]);
         $response->assertStatus(200);
         $response->assertJson([
-            'success' => true
+            'success' => true,
         ]);
 
         // 5. セッション終了後：アクティブなセッションがないことを確認
@@ -96,7 +97,7 @@ class GlobalStudyTimerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJson([
             'success' => true,
-            'session' => null
+            'session' => null,
         ]);
     }
 
@@ -111,27 +112,27 @@ class GlobalStudyTimerTest extends TestCase
         // セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '時間計算テスト'
+            'study_comment' => '時間計算テスト',
         ];
-        
+
         $startTime = time();
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
-        
+
         $sessionStartTimestamp = $response->json('session.started_at_timestamp');
-        
+
         // タイムスタンプの精度確認（±1秒の誤差を許容）
         $this->assertEqualsWithDelta($startTime, $sessionStartTimestamp, 1);
 
         // 少し待機してから現在のセッション取得
         sleep(2);
-        
+
         $response = $this->getJson('/api/study-sessions/current');
         $response->assertStatus(200);
-        
+
         $elapsedMinutes = $response->json('session.elapsed_minutes');
         $this->assertGreaterThanOrEqual(0, $elapsedMinutes);
-        
+
         // 経過時間が現実的な範囲内であることを確認
         $this->assertLessThan(5, $elapsedMinutes); // 5分未満であること
     }
@@ -147,23 +148,23 @@ class GlobalStudyTimerTest extends TestCase
         // 最初のセッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '最初のセッション'
+            'study_comment' => '最初のセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
 
         // 2つ目のセッション開始を試行（失敗するはず）
         $sessionData2 = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '2つ目のセッション'
+            'study_comment' => '2つ目のセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData2);
         $response->assertStatus(400);
         $response->assertJson([
             'success' => false,
-            'message' => '既に進行中の学習セッションがあります。先に終了してください。'
+            'message' => '既に進行中の学習セッションがあります。先に終了してください。',
         ]);
     }
 
@@ -178,9 +179,9 @@ class GlobalStudyTimerTest extends TestCase
         // セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '復元テストセッション'
+            'study_comment' => '復元テストセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $sessionId = $response->json('session.id');
@@ -188,11 +189,11 @@ class GlobalStudyTimerTest extends TestCase
         // ページリロード想定：現在のセッション再取得
         $response = $this->getJson('/api/study-sessions/current');
         $response->assertStatus(200);
-        
+
         $session = $response->json('session');
         $this->assertEquals($sessionId, $session['id']);
         $this->assertEquals('復元テストセッション', $session['study_comment']);
-        
+
         // 必要なフィールドが含まれていることを確認
         $this->assertArrayHasKey('started_at_timestamp', $session);
         $this->assertArrayHasKey('elapsed_minutes', $session);
@@ -211,9 +212,9 @@ class GlobalStudyTimerTest extends TestCase
         // セッション開始
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '終了テストセッション'
+            'study_comment' => '終了テストセッション',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(201);
         $sessionId = $response->json('session.id');
@@ -223,10 +224,10 @@ class GlobalStudyTimerTest extends TestCase
 
         // セッション終了
         $response = $this->postJson('/api/study-sessions/end', [
-            'study_comment' => '終了テストセッション'
+            'study_comment' => '終了テストセッション',
         ]);
         $response->assertStatus(200);
-        
+
         $endedSession = $response->json('session');
         $this->assertEquals($sessionId, $endedSession['id']);
         $this->assertNotNull($endedSession['ended_at']);
@@ -251,9 +252,9 @@ class GlobalStudyTimerTest extends TestCase
 
         $sessionData = [
             'subject_area_id' => $this->subjectArea->id,
-            'study_comment' => '認証なしテスト'
+            'study_comment' => '認証なしテスト',
         ];
-        
+
         $response = $this->postJson('/api/study-sessions/start', $sessionData);
         $response->assertStatus(401);
 

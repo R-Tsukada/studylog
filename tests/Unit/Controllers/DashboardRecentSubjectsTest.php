@@ -2,47 +2,48 @@
 
 namespace Tests\Unit\Controllers;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\ExamType;
-use App\Models\SubjectArea;
-use App\Models\StudySession;
-use App\Models\StudyGoal;
-use App\Models\PomodoroSession;
 use App\Http\Controllers\Api\DashboardController;
+use App\Models\ExamType;
+use App\Models\PomodoroSession;
+use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\Carbon;
+use Tests\TestCase;
 
 class DashboardRecentSubjectsTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $user;
+
     private ExamType $examType;
+
     private SubjectArea $subjectArea;
+
     private DashboardController $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // テスト用ユーザーを作成
         $this->user = User::factory()->create();
-        
+
         // テスト用試験タイプを作成
         $this->examType = ExamType::factory()->create([
             'user_id' => $this->user->id,
             'name' => 'テスト試験',
         ]);
-        
+
         // テスト用学習分野を作成
         $this->subjectArea = SubjectArea::factory()->create([
             'exam_type_id' => $this->examType->id,
             'name' => 'テスト分野',
         ]);
-        
+
         // コントローラーインスタンスを作成
-        $this->controller = new DashboardController();
+        $this->controller = new DashboardController;
     }
 
     /**
@@ -69,14 +70,14 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // recent_subjectsが存在し、3件の学習セッションが含まれることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(3, $data['recent_subjects']);
-        
+
         // 最新のセッションが最初に表示されることを確認
         $firstSession = $data['recent_subjects'][0];
         $this->assertEquals('study_session', $firstSession['type']);
@@ -112,14 +113,14 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // recent_subjectsが存在し、2件のポモドーロセッションが含まれることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(2, $data['recent_subjects']);
-        
+
         // 最新のセッションが最初に表示されることを確認
         $firstSession = $data['recent_subjects'][0];
         $this->assertEquals('pomodoro_session', $firstSession['type']);
@@ -161,19 +162,19 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // recent_subjectsが存在し、2件のセッションが含まれることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(2, $data['recent_subjects']);
-        
+
         // 時系列順（新しい順）で表示されることを確認
         $this->assertEquals('pomodoro_session', $data['recent_subjects'][0]['type']);
         $this->assertEquals($pomodoroSession->id, $data['recent_subjects'][0]['id']);
         $this->assertEquals('最新のポモドーロメモ', $data['recent_subjects'][0]['notes']);
-        
+
         $this->assertEquals('study_session', $data['recent_subjects'][1]['type']);
         $this->assertEquals($studySession->id, $data['recent_subjects'][1]['id']);
         $this->assertEquals('古い学習セッションメモ', $data['recent_subjects'][1]['notes']);
@@ -213,10 +214,10 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // recent_subjectsが5件に制限されることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(5, $data['recent_subjects']);
@@ -263,10 +264,10 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 完了したfocusセッションのみが表示されることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(1, $data['recent_subjects']);
@@ -317,10 +318,10 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 自分のデータのみが表示されることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(1, $data['recent_subjects']);
@@ -350,14 +351,14 @@ class DashboardRecentSubjectsTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // recent_subjectsが存在し、1件のポモドーロセッションが含まれることを確認
         $this->assertArrayHasKey('recent_subjects', $data);
         $this->assertCount(1, $data['recent_subjects']);
-        
+
         $session = $data['recent_subjects'][0];
         $this->assertEquals('pomodoro_session', $session['type']);
         $this->assertEquals($pomodoroSession->id, $session['id']);

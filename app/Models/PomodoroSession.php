@@ -93,15 +93,15 @@ class PomodoroSession extends Model
 
     public function getIsActiveAttribute()
     {
-        return !$this->is_completed && !is_null($this->started_at);
+        return ! $this->is_completed && ! is_null($this->started_at);
     }
 
     public function getCompletionPercentageAttribute()
     {
-        if (!$this->actual_duration || !$this->planned_duration) {
+        if (! $this->actual_duration || ! $this->planned_duration) {
             return 0;
         }
-        
+
         return min(100, round(($this->actual_duration / $this->planned_duration) * 100));
     }
 }

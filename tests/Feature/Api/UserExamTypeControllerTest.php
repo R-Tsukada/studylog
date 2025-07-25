@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\ExamType;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
@@ -12,7 +12,6 @@ use Tests\TestCase;
 class UserExamTypeControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
-
 
     /** @test */
     public function it_can_get_user_exam_types_list()
@@ -45,14 +44,14 @@ class UserExamTypeControllerTest extends TestCase
         $response = $this->getJson('/api/user/exam-types');
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                ])
-                ->assertJsonCount(2, 'exam_types'); // ユーザー固有 + システム標準
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonCount(2, 'exam_types'); // ユーザー固有 + システム標準
 
         $responseData = $response->json('exam_types');
         $examNames = collect($responseData)->pluck('name')->toArray();
-        
+
         $this->assertContains('ユーザー固有の試験', $examNames);
         $this->assertContains('システム標準試験', $examNames);
         $this->assertNotContains('他のユーザーの試験', $examNames);
@@ -75,17 +74,17 @@ class UserExamTypeControllerTest extends TestCase
         $response = $this->postJson('/api/user/exam-types', $examData);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '試験タイプを作成しました',
-                ])
-                ->assertJsonStructure([
-                    'exam_type' => [
-                        'id', 'code', 'name', 'description', 
-                        'exam_date', 'exam_notes', 'color', 
-                        'user_id', 'is_system'
-                    ]
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '試験タイプを作成しました',
+            ])
+            ->assertJsonStructure([
+                'exam_type' => [
+                    'id', 'code', 'name', 'description',
+                    'exam_date', 'exam_notes', 'color',
+                    'user_id', 'is_system',
+                ],
+            ]);
 
         $this->assertDatabaseHas('exam_types', [
             'name' => 'AWS Solutions Architect',
@@ -111,11 +110,11 @@ class UserExamTypeControllerTest extends TestCase
         $response = $this->postJson('/api/user/exam-types', []);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'バリデーションエラー',
-                ])
-                ->assertJsonValidationErrors(['name']);
+            ->assertJson([
+                'success' => false,
+                'message' => 'バリデーションエラー',
+            ])
+            ->assertJsonValidationErrors(['name']);
 
         // 不正なカラーコードの場合
         $response = $this->postJson('/api/user/exam-types', [
@@ -124,7 +123,7 @@ class UserExamTypeControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['color']);
+            ->assertJsonValidationErrors(['color']);
 
         // 不正な日付の場合
         $response = $this->postJson('/api/user/exam-types', [
@@ -133,7 +132,7 @@ class UserExamTypeControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['exam_date']);
+            ->assertJsonValidationErrors(['exam_date']);
     }
 
     /** @test */
@@ -156,10 +155,10 @@ class UserExamTypeControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'この名前の試験タイプは既に存在します',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'この名前の試験タイプは既に存在します',
+            ]);
     }
 
     /** @test */
@@ -186,10 +185,10 @@ class UserExamTypeControllerTest extends TestCase
         $response = $this->putJson("/api/user/exam-types/{$examType->id}", $updateData);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '試験タイプを更新しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '試験タイプを更新しました',
+            ]);
 
         $this->assertDatabaseHas('exam_types', [
             'id' => $examType->id,
@@ -204,7 +203,7 @@ class UserExamTypeControllerTest extends TestCase
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
-        
+
         Sanctum::actingAs($user1);
 
         $examType = ExamType::factory()->create([
@@ -219,10 +218,10 @@ class UserExamTypeControllerTest extends TestCase
         ]);
 
         $response->assertStatus(404)
-                ->assertJson([
-                    'success' => false,
-                    'message' => '指定された試験タイプが見つかりません',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => '指定された試験タイプが見つかりません',
+            ]);
     }
 
     /** @test */
@@ -260,9 +259,9 @@ class UserExamTypeControllerTest extends TestCase
         $response = $this->deleteJson("/api/user/exam-types/{$examType->id}");
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                ]);
+            ->assertJson([
+                'success' => true,
+            ]);
 
         $this->assertDatabaseMissing('exam_types', [
             'id' => $examType->id,
@@ -304,9 +303,9 @@ class UserExamTypeControllerTest extends TestCase
         // 同じ名前の試験は失敗するはず（重複チェック）
         $response2 = $this->postJson('/api/user/exam-types', $examData2);
         $response2->assertStatus(422)
-                  ->assertJson([
-                      'success' => false,
-                      'message' => 'この名前の試験タイプは既に存在します',
-                  ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'この名前の試験タイプは既に存在します',
+            ]);
     }
 }

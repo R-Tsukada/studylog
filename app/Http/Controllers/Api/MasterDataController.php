@@ -15,9 +15,9 @@ class MasterDataController extends Controller
     public function examTypes(): JsonResponse
     {
         try {
-            $examTypes = ExamType::with(['subjectAreas' => function($query) {
-                    $query->where('is_active', true)->orderBy('sort_order');
-                }])
+            $examTypes = ExamType::with(['subjectAreas' => function ($query) {
+                $query->where('is_active', true)->orderBy('sort_order');
+            }])
                 ->where('is_active', true)
                 ->orderBy('created_at')
                 ->get(['id', 'code', 'name', 'description', 'is_active', 'created_at', 'updated_at']);
@@ -25,13 +25,13 @@ class MasterDataController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $examTypes,
-                'message' => '試験タイプ一覧を取得しました'
+                'message' => '試験タイプ一覧を取得しました',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => '試験タイプの取得に失敗しました',
-                'error' => config('app.debug') ? $e->getMessage() : null
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -59,13 +59,13 @@ class MasterDataController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $subjectAreas,
-                'message' => '学習分野一覧を取得しました'
+                'message' => '学習分野一覧を取得しました',
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => '学習分野の取得に失敗しました',
-                'error' => config('app.debug') ? $e->getMessage() : null
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }

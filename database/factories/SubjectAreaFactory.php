@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\SubjectArea;
 use App\Models\ExamType;
+use App\Models\SubjectArea;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class SubjectAreaFactory extends Factory
@@ -37,4 +37,4 @@ class SubjectAreaFactory extends Factory
             'exam_type_id' => $examType->id,
         ]);
     }
-} 
+}

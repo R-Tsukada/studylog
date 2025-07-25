@@ -2,37 +2,40 @@
 
 namespace Tests\Unit\Services;
 
-use Tests\TestCase;
-use App\Services\StudyActivityService;
-use App\Models\User;
-use App\Models\StudySession;
-use App\Models\PomodoroSession;
 use App\Models\ExamType;
+use App\Models\PomodoroSession;
+use App\Models\StudySession;
 use App\Models\SubjectArea;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Models\User;
+use App\Services\StudyActivityService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class StudyActivityServiceTest extends TestCase
 {
     use RefreshDatabase;
 
     private StudyActivityService $service;
+
     private User $user;
+
     private ExamType $examType;
+
     private SubjectArea $subjectArea;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
-        $this->service = new StudyActivityService();
-        
+
+        $this->service = new StudyActivityService;
+
         // テストユーザーとマスターデータを作成
         $this->user = User::factory()->create();
         $this->examType = ExamType::factory()->create(['name' => 'テスト試験']);
         $this->subjectArea = SubjectArea::factory()->create([
             'exam_type_id' => $this->examType->id,
-            'name' => 'テスト分野'
+            'name' => 'テスト分野',
         ]);
     }
 
@@ -48,7 +51,7 @@ class StudyActivityServiceTest extends TestCase
             'started_at' => Carbon::now()->subHours(2),
             'ended_at' => Carbon::now()->subHours(1),
             'duration_minutes' => 60,
-            'study_comment' => 'テスト学習'
+            'study_comment' => 'テスト学習',
         ]);
 
         // ポモドーロセッション作成
@@ -61,17 +64,17 @@ class StudyActivityServiceTest extends TestCase
             'started_at' => Carbon::now()->subHours(1),
             'completed_at' => Carbon::now()->subMinutes(35),
             'is_completed' => true,
-            'was_interrupted' => false
+            'was_interrupted' => false,
         ]);
 
         $history = $this->service->getUnifiedHistory($this->user->id);
 
         $this->assertCount(2, $history);
-        
+
         // 時系列順でソートされているか確認（新しい順）
         $this->assertEquals('pomodoro', $history[0]['type']);
         $this->assertEquals('time_tracking', $history[1]['type']);
-        
+
         // データ構造の確認
         $timeTrackingItem = $history[1];
         $this->assertEquals($studySession->id, $timeTrackingItem['id']);
@@ -103,7 +106,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subDays(2),
             'ended_at' => Carbon::now()->subDays(2)->addHour(),
-            'duration_minutes' => 60
+            'duration_minutes' => 60,
         ]);
 
         // 範囲外のセッション
@@ -112,15 +115,15 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subDays(10),
             'ended_at' => Carbon::now()->subDays(10)->addHour(),
-            'duration_minutes' => 60
+            'duration_minutes' => 60,
         ]);
 
         $startDate = Carbon::now()->subDays(3);
         $endDate = Carbon::now();
-        
+
         $history = $this->service->getUnifiedHistory(
-            $this->user->id, 
-            $startDate, 
+            $this->user->id,
+            $startDate,
             $endDate
         );
 
@@ -138,7 +141,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subHours(3),
             'ended_at' => Carbon::now()->subHours(2),
-            'duration_minutes' => 60
+            'duration_minutes' => 60,
         ]);
 
         StudySession::factory()->create([
@@ -146,7 +149,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subHours(2),
             'ended_at' => Carbon::now()->subHours(1),
-            'duration_minutes' => 90
+            'duration_minutes' => 90,
         ]);
 
         // ポモドーロセッション（複数）
@@ -159,7 +162,7 @@ class StudyActivityServiceTest extends TestCase
             'started_at' => Carbon::now()->subHours(1),
             'completed_at' => Carbon::now()->subMinutes(35),
             'is_completed' => true,
-            'was_interrupted' => false
+            'was_interrupted' => false,
         ]);
 
         PomodoroSession::factory()->create([
@@ -171,7 +174,7 @@ class StudyActivityServiceTest extends TestCase
             'started_at' => Carbon::now()->subMinutes(30),
             'completed_at' => Carbon::now()->subMinutes(10),
             'is_completed' => true,
-            'was_interrupted' => true
+            'was_interrupted' => true,
         ]);
 
         $stats = $this->service->getUnifiedStats($this->user->id);
@@ -219,7 +222,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subDays(5),
             'ended_at' => Carbon::now()->subDays(5)->addHours(2),
-            'duration_minutes' => 120
+            'duration_minutes' => 120,
         ]);
 
         PomodoroSession::factory()->create([
@@ -230,7 +233,7 @@ class StudyActivityServiceTest extends TestCase
             'actual_duration' => 25,
             'started_at' => Carbon::now()->subDays(3),
             'completed_at' => Carbon::now()->subDays(3)->addMinutes(25),
-            'is_completed' => true
+            'is_completed' => true,
         ]);
 
         $insights = $this->service->getStudyInsights($this->user->id);
@@ -266,7 +269,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subDays(1),
             'ended_at' => Carbon::now()->subDays(1)->addHours(2),
-            'duration_minutes' => 120
+            'duration_minutes' => 120,
         ]);
 
         $suggestion = $this->service->suggestStudyMethod($this->user->id, $this->subjectArea->id);
@@ -289,7 +292,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertArrayHasKey('time_of_day', $context);
         $this->assertArrayHasKey('recent_avg_duration', $context);
         $this->assertArrayHasKey('recent_method', $context);
-        
+
         $this->assertIsInt($context['time_of_day']);
         $this->assertGreaterThanOrEqual(0, $context['time_of_day']);
         $this->assertLessThan(24, $context['time_of_day']);
@@ -307,7 +310,7 @@ class StudyActivityServiceTest extends TestCase
                 'subject_area_id' => $this->subjectArea->id,
                 'started_at' => Carbon::now()->subDays($i + 1),
                 'ended_at' => Carbon::now()->subDays($i + 1)->addHours(2),
-                'duration_minutes' => 120
+                'duration_minutes' => 120,
             ]);
         }
 
@@ -316,7 +319,7 @@ class StudyActivityServiceTest extends TestCase
         // 長時間セッションの履歴があるため、時間計測が推奨される可能性が高い
         $hasTimeTrackingSuggestion = $suggestion['recommended']['method'] === 'time_tracking' ||
             collect($suggestion['alternatives'])->contains('method', 'time_tracking');
-        
+
         $this->assertTrue($hasTimeTrackingSuggestion);
     }
 
@@ -332,7 +335,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subHour(),
             'ended_at' => Carbon::now(),
-            'duration_minutes' => 60
+            'duration_minutes' => 60,
         ]);
 
         // 対象ユーザーのデータ
@@ -341,7 +344,7 @@ class StudyActivityServiceTest extends TestCase
             'subject_area_id' => $this->subjectArea->id,
             'started_at' => Carbon::now()->subHour(),
             'ended_at' => Carbon::now(),
-            'duration_minutes' => 30
+            'duration_minutes' => 30,
         ]);
 
         $history = $this->service->getUnifiedHistory($this->user->id);
@@ -384,7 +387,7 @@ class StudyActivityServiceTest extends TestCase
             'planned_duration' => 25,
             'actual_duration' => 25,
             'is_completed' => true,
-            'was_interrupted' => false
+            'was_interrupted' => false,
         ]);
 
         // 中断セッション
@@ -395,7 +398,7 @@ class StudyActivityServiceTest extends TestCase
             'planned_duration' => 25,
             'actual_duration' => 15,
             'is_completed' => true,
-            'was_interrupted' => true
+            'was_interrupted' => true,
         ]);
 
         $stats = $this->service->getUnifiedStats($this->user->id);
@@ -417,7 +420,7 @@ class StudyActivityServiceTest extends TestCase
                 'planned_duration' => 25,
                 'actual_duration' => 15,
                 'is_completed' => true,
-                'was_interrupted' => true
+                'was_interrupted' => true,
             ]);
         }
 
@@ -425,8 +428,8 @@ class StudyActivityServiceTest extends TestCase
 
         $this->assertNotEmpty($stats['insights']);
         $hasCompletionRateInsight = collect($stats['insights'])
-            ->contains(fn($insight) => str_contains($insight, 'ポモドーロセッションの完了率'));
-        
+            ->contains(fn ($insight) => str_contains($insight, 'ポモドーロセッションの完了率'));
+
         $this->assertTrue($hasCompletionRateInsight);
     }
 
@@ -438,7 +441,7 @@ class StudyActivityServiceTest extends TestCase
         // テストデータ作成
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
-        
+
         // テストデータを直接作成
         \App\Models\DailyStudySummary::create([
             'user_id' => $this->user->id,
@@ -460,18 +463,18 @@ class StudyActivityServiceTest extends TestCase
 
         $this->assertArrayHasKey('data', $result);
         $this->assertArrayHasKey('stats', $result);
-        
+
         // 期間は2日間だから2日分のデータが返される
         $this->assertCount(2, $result['data']);
-        
+
         // 統計の確認
         $stats = $result['stats'];
-        
+
         // 統計の確認 - 実際は1日分（25分）のデータのみ取得される
         $this->assertEquals(1, $stats['studyDays']);
         $this->assertEquals(25, $stats['total_study_time']);
         $this->assertEquals(0.4, $stats['totalHours']); // 25分 = 0.4時間
-        
+
         // データ構造の確認
         $this->assertIsArray($result['data']);
         $this->assertArrayHasKey('period', $result);
@@ -490,16 +493,16 @@ class StudyActivityServiceTest extends TestCase
             [90, 2],   // 90分 = レベル2
             [120, 2],  // 120分 = レベル2
             [150, 3],  // 150分 = レベル3
-            [300, 3]   // 300分 = レベル3
+            [300, 3],   // 300分 = レベル3
         ];
 
-        $model = new \App\Models\DailyStudySummary();
-        
+        $model = new \App\Models\DailyStudySummary;
+
         foreach ($testCases as [$minutes, $expectedLevel]) {
             $actualLevel = $model->calculateGrassLevel($minutes);
             $this->assertEquals(
-                $expectedLevel, 
-                $actualLevel, 
+                $expectedLevel,
+                $actualLevel,
                 "失敗: {$minutes}分の場合、レベル{$expectedLevel}であるべきですが、{$actualLevel}でした"
             );
         }
@@ -511,17 +514,17 @@ class StudyActivityServiceTest extends TestCase
     public function can_build_grass_data_for_year()
     {
         $year = 2024;
-        
+
         // 複数の日付でデータ作成
         $dates = [
             '2024-01-15' => 60,   // レベル1
             '2024-03-20' => 120,  // レベル2
             '2024-06-10' => 180,  // レベル3
-            '2024-12-25' => 30    // レベル1
+            '2024-12-25' => 30,    // レベル1
         ];
 
         foreach ($dates as $date => $minutes) {
-            $model = new \App\Models\DailyStudySummary();
+            $model = new \App\Models\DailyStudySummary;
             \App\Models\DailyStudySummary::create([
                 'user_id' => $this->user->id,
                 'study_date' => $date,
@@ -531,7 +534,7 @@ class StudyActivityServiceTest extends TestCase
                 'session_count' => 1,
                 'total_focus_sessions' => 0,
                 'grass_level' => $model->calculateGrassLevel($minutes),
-                'subject_breakdown' => []
+                'subject_breakdown' => [],
             ]);
         }
 
@@ -543,10 +546,10 @@ class StudyActivityServiceTest extends TestCase
 
         $this->assertArrayHasKey('data', $result);
         $this->assertArrayHasKey('stats', $result);
-        
+
         // 2024年の1年間（366日）のデータが返される
         $this->assertCount(366, $result['data']);
-        
+
         // 統計データの確認 - 学習した日は4日、合計390分
         $stats = $result['stats'];
         $this->assertEquals(4, $stats['studyDays']);

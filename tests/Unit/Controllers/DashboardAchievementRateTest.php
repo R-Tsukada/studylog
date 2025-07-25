@@ -2,48 +2,51 @@
 
 namespace Tests\Unit\Controllers;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\ExamType;
-use App\Models\SubjectArea;
-use App\Models\StudySession;
-use App\Models\StudyGoal;
-use App\Models\PomodoroSession;
 use App\Http\Controllers\Api\DashboardController;
+use App\Models\ExamType;
+use App\Models\PomodoroSession;
+use App\Models\StudyGoal;
+use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Carbon\Carbon;
+use Tests\TestCase;
 
 class DashboardAchievementRateTest extends TestCase
 {
     use RefreshDatabase;
 
     private User $user;
+
     private ExamType $examType;
+
     private SubjectArea $subjectArea;
+
     private StudyGoal $studyGoal;
+
     private DashboardController $controller;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // テスト用ユーザーを作成
         $this->user = User::factory()->create();
-        
+
         // テスト用試験タイプを作成
         $this->examType = ExamType::factory()->create([
             'user_id' => $this->user->id,
             'name' => 'テスト試験',
         ]);
-        
+
         // テスト用学習分野を作成
         $this->subjectArea = SubjectArea::factory()->create([
             'exam_type_id' => $this->examType->id,
             'name' => 'テスト分野',
         ]);
-        
+
         // コントローラーインスタンスを作成
-        $this->controller = new DashboardController();
+        $this->controller = new DashboardController;
     }
 
     /**
@@ -74,10 +77,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 80分 ÷ 120分 = 66.67% → 67%（四捨五入）
         $this->assertEquals(67, $data['achievement_rate']);
     }
@@ -121,10 +124,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 45分 ÷ 90分 = 50%
         $this->assertEquals(50, $data['achievement_rate']);
     }
@@ -177,10 +180,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 学習セッション60分 + ポモドーロ75分 = 135分合計
         // 135分 ÷ 150分 = 90%
         $this->assertEquals(90, $data['achievement_rate']);
@@ -214,10 +217,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 100分 ÷ 60分 = 166.67% → 100%（上限）
         $this->assertEquals(100, $data['achievement_rate']);
     }
@@ -250,10 +253,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // アクティブな目標がないため0%
         $this->assertEquals(0, $data['achievement_rate']);
     }
@@ -286,10 +289,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 目標が0分のため0%
         $this->assertEquals(0, $data['achievement_rate']);
     }
@@ -341,10 +344,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 今日のデータのみ：30分 ÷ 60分 = 50%
         $this->assertEquals(50, $data['achievement_rate']);
     }
@@ -400,10 +403,10 @@ class DashboardAchievementRateTest extends TestCase
 
         // ダッシュボードAPIを呼び出し
         $response = $this->getJson('/api/dashboard');
-        
+
         $response->assertStatus(200);
         $data = $response->json('data');
-        
+
         // 自分のデータのみ：15分 ÷ 60分 = 25%
         $this->assertEquals(25, $data['achievement_rate']);
     }

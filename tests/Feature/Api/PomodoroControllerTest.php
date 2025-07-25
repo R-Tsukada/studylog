@@ -3,8 +3,8 @@
 namespace Tests\Feature\Api;
 
 use App\Models\PomodoroSession;
-use App\Models\User;
 use App\Models\StudySession;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -43,9 +43,9 @@ class PomodoroControllerTest extends TestCase
                         'started_at',
                         'completed_at',
                         'is_completed',
-                        'was_interrupted'
-                    ]
-                ]
+                        'was_interrupted',
+                    ],
+                ],
             ]);
 
         $this->assertCount(3, $response->json('data'));
@@ -58,16 +58,16 @@ class PomodoroControllerTest extends TestCase
     {
         $todaySession = PomodoroSession::factory()->create([
             'user_id' => $this->user->id,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
-        
+
         $yesterdaySession = PomodoroSession::factory()->create([
             'user_id' => $this->user->id,
-            'started_at' => now()->subDay()
+            'started_at' => now()->subDay(),
         ]);
 
         $response = $this->actingAs($this->user, 'sanctum')
-            ->getJson('/api/pomodoro?date=' . now()->toDateString());
+            ->getJson('/api/pomodoro?date='.now()->toDateString());
 
         $response->assertStatus(200);
         $this->assertCount(1, $response->json('data'));
@@ -100,8 +100,8 @@ class PomodoroControllerTest extends TestCase
             'settings' => [
                 'focus_duration' => 25,
                 'short_break_duration' => 5,
-                'sound_enabled' => true
-            ]
+                'sound_enabled' => true,
+            ],
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
@@ -114,14 +114,14 @@ class PomodoroControllerTest extends TestCase
                 'session_type',
                 'planned_duration',
                 'started_at',
-                'settings'
+                'settings',
             ]);
 
         $this->assertDatabaseHas('pomodoro_sessions', [
             'user_id' => $this->user->id,
             'session_type' => 'focus',
             'planned_duration' => 25,
-            'is_completed' => false
+            'is_completed' => false,
         ]);
     }
 
@@ -135,17 +135,17 @@ class PomodoroControllerTest extends TestCase
         $sessionData = [
             'session_type' => 'focus',
             'planned_duration' => 25,
-            'study_session_id' => $studySession->id
+            'study_session_id' => $studySession->id,
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/pomodoro', $sessionData);
 
         $response->assertStatus(201);
-        
+
         $this->assertDatabaseHas('pomodoro_sessions', [
             'user_id' => $this->user->id,
-            'study_session_id' => $studySession->id
+            'study_session_id' => $studySession->id,
         ]);
     }
 
@@ -170,7 +170,7 @@ class PomodoroControllerTest extends TestCase
 
         $sessionData = [
             'session_type' => 'focus',
-            'planned_duration' => 25
+            'planned_duration' => 25,
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
@@ -178,7 +178,7 @@ class PomodoroControllerTest extends TestCase
 
         $response->assertStatus(409)
             ->assertJson([
-                'message' => '既にアクティブなポモドーロセッションがあります。'
+                'message' => '既にアクティブなポモドーロセッションがあります。',
             ]);
     }
 
@@ -195,7 +195,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'id' => $session->id,
-                'user_id' => $this->user->id
+                'user_id' => $this->user->id,
             ]);
     }
 
@@ -222,7 +222,7 @@ class PomodoroControllerTest extends TestCase
 
         $updateData = [
             'actual_duration' => 25,
-            'notes' => 'Great focus session!'
+            'notes' => 'Great focus session!',
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
@@ -236,18 +236,18 @@ class PomodoroControllerTest extends TestCase
                     'id',
                     'actual_duration',
                     'notes',
-                    'subject_area'
-                ]
+                    'subject_area',
+                ],
             ])
             ->assertJson([
                 'success' => true,
-                'message' => 'ポモドーロセッションを更新しました'
+                'message' => 'ポモドーロセッションを更新しました',
             ]);
-        
+
         $this->assertDatabaseHas('pomodoro_sessions', [
             'id' => $session->id,
             'actual_duration' => 25,
-            'notes' => 'Great focus session!'
+            'notes' => 'Great focus session!',
         ]);
     }
 
@@ -259,11 +259,11 @@ class PomodoroControllerTest extends TestCase
         $session = PomodoroSession::factory()->create([
             'user_id' => $this->user->id,
             'notes' => '初期メモ',
-            'actual_duration' => 20
+            'actual_duration' => 20,
         ]);
 
         $updateData = [
-            'notes' => '更新されたメモ：集中できた！'
+            'notes' => '更新されたメモ：集中できた！',
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
@@ -272,13 +272,13 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'ポモドーロセッションを更新しました'
+                'message' => 'ポモドーロセッションを更新しました',
             ]);
-        
+
         $this->assertDatabaseHas('pomodoro_sessions', [
             'id' => $session->id,
             'notes' => '更新されたメモ：集中できた！',
-            'actual_duration' => 20 // 他のフィールドは変更されない
+            'actual_duration' => 20, // 他のフィールドは変更されない
         ]);
     }
 
@@ -288,7 +288,7 @@ class PomodoroControllerTest extends TestCase
     public function it_validates_notes_max_length()
     {
         $session = PomodoroSession::factory()->create(['user_id' => $this->user->id]);
-        
+
         $longNotes = str_repeat('あ', 1001); // 1001文字（制限を超過）
 
         $response = $this->actingAs($this->user, 'sanctum')
@@ -305,17 +305,17 @@ class PomodoroControllerTest extends TestCase
     {
         $session = PomodoroSession::factory()->create([
             'user_id' => $this->user->id,
-            'notes' => '削除予定のメモ'
+            'notes' => '削除予定のメモ',
         ]);
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson("/api/pomodoro/{$session->id}", ['notes' => null]);
 
         $response->assertStatus(200);
-        
+
         $this->assertDatabaseHas('pomodoro_sessions', [
             'id' => $session->id,
-            'notes' => null
+            'notes' => null,
         ]);
     }
 
@@ -343,20 +343,20 @@ class PomodoroControllerTest extends TestCase
         $completeData = [
             'actual_duration' => 25,
             'was_interrupted' => false,
-            'notes' => 'Completed successfully!'
+            'notes' => 'Completed successfully!',
         ];
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/pomodoro/{$session->id}/complete", $completeData);
 
         $response->assertStatus(200);
-        
+
         $this->assertDatabaseHas('pomodoro_sessions', [
             'id' => $session->id,
             'actual_duration' => 25,
             'is_completed' => true,
             'was_interrupted' => false,
-            'notes' => 'Completed successfully!'
+            'notes' => 'Completed successfully!',
         ]);
     }
 
@@ -369,12 +369,12 @@ class PomodoroControllerTest extends TestCase
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson("/api/pomodoro/{$session->id}/complete", [
-                'actual_duration' => 25
+                'actual_duration' => 25,
             ]);
 
         $response->assertStatus(409)
             ->assertJson([
-                'message' => 'このセッションは既に完了しています。'
+                'message' => 'このセッションは既に完了しています。',
             ]);
     }
 
@@ -392,7 +392,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'id' => $activeSession->id,
-                'is_completed' => false
+                'is_completed' => false,
             ]);
     }
 
@@ -406,7 +406,7 @@ class PomodoroControllerTest extends TestCase
 
         $response->assertStatus(404)
             ->assertJson([
-                'message' => 'アクティブなポモドーロセッションがありません。'
+                'message' => 'アクティブなポモドーロセッションがありません。',
             ]);
     }
 
@@ -419,17 +419,17 @@ class PomodoroControllerTest extends TestCase
         $todayFocusSession = PomodoroSession::factory()->focus()->completed()->create([
             'user_id' => $this->user->id,
             'started_at' => now(),
-            'actual_duration' => 25
+            'actual_duration' => 25,
         ]);
 
         $todayBreakSession = PomodoroSession::factory()->shortBreak()->completed()->create([
             'user_id' => $this->user->id,
             'started_at' => now(),
-            'actual_duration' => 5
+            'actual_duration' => 5,
         ]);
 
         $response = $this->actingAs($this->user, 'sanctum')
-            ->getJson('/api/pomodoro/stats?start_date=' . now()->toDateString() . '&end_date=' . now()->toDateString());
+            ->getJson('/api/pomodoro/stats?start_date='.now()->toDateString().'&end_date='.now()->toDateString());
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -441,9 +441,9 @@ class PomodoroControllerTest extends TestCase
                     'total_break_time',
                     'interrupted_sessions',
                     'completion_rate',
-                    'average_focus_duration'
+                    'average_focus_duration',
                 ],
-                'daily_stats'
+                'daily_stats',
             ]);
 
         $stats = $response->json('stats');
@@ -463,7 +463,7 @@ class PomodoroControllerTest extends TestCase
             ->getJson('/api/pomodoro/stats');
 
         $response->assertStatus(200);
-        
+
         $stats = $response->json('stats');
         $this->assertEquals(0, $stats['total_sessions']);
         $this->assertEquals(0, $stats['total_focus_time']);
@@ -482,11 +482,11 @@ class PomodoroControllerTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'message' => 'ポモドーロセッションが削除されました。'
+                'message' => 'ポモドーロセッションが削除されました。',
             ]);
 
         $this->assertDatabaseMissing('pomodoro_sessions', [
-            'id' => $session->id
+            'id' => $session->id,
         ]);
     }
 
@@ -504,7 +504,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(403);
 
         $this->assertDatabaseHas('pomodoro_sessions', [
-            'id' => $session->id
+            'id' => $session->id,
         ]);
     }
 
@@ -534,7 +534,7 @@ class PomodoroControllerTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/pomodoro', [
                 'session_type' => 'invalid_type',
-                'planned_duration' => 25
+                'planned_duration' => 25,
             ]);
 
         $response->assertStatus(422)
@@ -549,7 +549,7 @@ class PomodoroControllerTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/pomodoro', [
                 'session_type' => 'focus',
-                'planned_duration' => 0
+                'planned_duration' => 0,
             ]);
 
         $response->assertStatus(422)
@@ -558,7 +558,7 @@ class PomodoroControllerTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/pomodoro', [
                 'session_type' => 'focus',
-                'planned_duration' => 200
+                'planned_duration' => 200,
             ]);
 
         $response->assertStatus(422)
@@ -574,21 +574,21 @@ class PomodoroControllerTest extends TestCase
         PomodoroSession::factory()->count(8)->completed()->create([
             'user_id' => $this->user->id,
             'was_interrupted' => false,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
 
         // 中断セッション
         PomodoroSession::factory()->count(2)->interrupted()->create([
             'user_id' => $this->user->id,
             'was_interrupted' => true,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
 
         $response = $this->actingAs($this->user, 'sanctum')
-            ->getJson('/api/pomodoro/stats?start_date=' . now()->toDateString() . '&end_date=' . now()->toDateString());
+            ->getJson('/api/pomodoro/stats?start_date='.now()->toDateString().'&end_date='.now()->toDateString());
 
         $response->assertStatus(200);
-        
+
         $stats = $response->json('stats');
         $this->assertEquals(10, $stats['total_sessions']);
         $this->assertEquals(2, $stats['interrupted_sessions']);

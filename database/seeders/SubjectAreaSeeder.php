@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\ExamType;
 use App\Models\SubjectArea;
+use Illuminate\Database\Seeder;
 
 class SubjectAreaSeeder extends Seeder
 {
@@ -16,7 +15,7 @@ class SubjectAreaSeeder extends Seeder
     {
         // JSTQB FL の試験タイプを取得
         $jstqbFL = ExamType::where('code', 'jstqb_fl')->first();
-        
+
         if ($jstqbFL) {
             $jstqbSubjects = [
                 [
@@ -73,7 +72,7 @@ class SubjectAreaSeeder extends Seeder
                 SubjectArea::firstOrCreate(
                     [
                         'exam_type_id' => $subject['exam_type_id'],
-                        'code' => $subject['code']
+                        'code' => $subject['code'],
                     ],
                     $subject
                 );
@@ -84,7 +83,7 @@ class SubjectAreaSeeder extends Seeder
 
         // 基本情報技術者試験の分野
         $fe = ExamType::where('code', 'fe')->first();
-        
+
         if ($fe) {
             $feSubjects = [
                 [
@@ -165,7 +164,7 @@ class SubjectAreaSeeder extends Seeder
                 SubjectArea::firstOrCreate(
                     [
                         'exam_type_id' => $subject['exam_type_id'],
-                        'code' => $subject['code']
+                        'code' => $subject['code'],
                     ],
                     $subject
                 );

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\StudyActivityService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -28,7 +28,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $history = $this->studyActivityService->getUnifiedHistory(
                 $user->id,
                 $validated['start_date'] ?? null,
@@ -43,27 +43,27 @@ class StudyAnalyticsController extends Controller
                     'total_count' => $history->count(),
                     'start_date' => $validated['start_date'] ?? null,
                     'end_date' => $validated['end_date'] ?? null,
-                ]
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('統合学習履歴取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '学習履歴の取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -80,7 +80,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $stats = $this->studyActivityService->getUnifiedStats(
                 $user->id,
                 $validated['start_date'] ?? null,
@@ -89,27 +89,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $stats
+                'data' => $stats,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('統合学習統計取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '学習統計の取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -121,12 +121,12 @@ class StudyAnalyticsController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             $insights = $this->studyActivityService->getStudyInsights($user->id);
 
             return response()->json([
                 'success' => true,
-                'data' => $insights
+                'data' => $insights,
             ]);
 
         } catch (\Exception $e) {
@@ -139,7 +139,7 @@ class StudyAnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => '学習インサイトの取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -155,7 +155,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $suggestion = $this->studyActivityService->suggestStudyMethod(
                 $user->id,
                 $validated['subject_area_id'] ?? null
@@ -163,27 +163,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $suggestion
+                'data' => $suggestion,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('学習手法推奨取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '学習手法推奨の取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -202,7 +202,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $period1Stats = $this->studyActivityService->getUnifiedStats(
                 $user->id,
                 $validated['period1_start'],
@@ -230,27 +230,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $comparison
+                'data' => $comparison,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('学習比較分析エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '学習比較分析中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -268,27 +268,27 @@ class StudyAnalyticsController extends Controller
             $areas[] = [
                 'area' => 'study_time',
                 'message' => '学習時間が減少しています。定期的な学習習慣を見直してみませんか？',
-                'severity' => 'high'
+                'severity' => 'high',
             ];
         } elseif ($timeChange > 60) { // 1時間以上増加
             $areas[] = [
                 'area' => 'study_time',
                 'message' => '学習時間が増加しています！この調子で続けていきましょう。',
-                'severity' => 'positive'
+                'severity' => 'positive',
             ];
         }
 
         // ポモドーロ完了率の変化
         $p1PomodoroRate = $period1Stats['by_method']['pomodoro']['completion_rate'] ?? 0;
         $p2PomodoroRate = $period2Stats['by_method']['pomodoro']['completion_rate'] ?? 0;
-        
+
         if ($p1PomodoroRate > 0 && $p2PomodoroRate > 0) {
             $rateChange = $p1PomodoroRate - $p2PomodoroRate;
             if ($rateChange < -10) {
                 $areas[] = [
                     'area' => 'pomodoro_completion',
                     'message' => 'ポモドーロの完了率が下がっています。時間設定を調整してみませんか？',
-                    'severity' => 'medium'
+                    'severity' => 'medium',
                 ];
             }
         }
@@ -310,7 +310,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $grassData = $this->studyActivityService->getGrassData(
                 $user->id,
                 $validated['start_date'] ?? null,
@@ -319,27 +319,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $grassData
+                'data' => $grassData,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('草表示データ取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '草表示データの取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -356,7 +356,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $monthlyStats = $this->studyActivityService->getMonthlyStats(
                 $user->id,
                 $validated['year'],
@@ -365,27 +365,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $monthlyStats
+                'data' => $monthlyStats,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('月別統計取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '月別統計の取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -401,7 +401,7 @@ class StudyAnalyticsController extends Controller
             ]);
 
             $user = Auth::user();
-            
+
             $dayDetail = $this->studyActivityService->getDayDetail(
                 $user->id,
                 $validated['date']
@@ -409,27 +409,27 @@ class StudyAnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $dayDetail
+                'data' => $dayDetail,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => '入力データが正しくありません。',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             \Log::error('日別詳細取得エラー:', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
-                'request_params' => $request->all()
+                'request_params' => $request->all(),
             ]);
 
             return response()->json([
                 'success' => false,
                 'message' => '日別詳細の取得中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -441,12 +441,12 @@ class StudyAnalyticsController extends Controller
     {
         try {
             $user = Auth::user();
-            
+
             $this->studyActivityService->clearUserGrassCache($user->id);
 
             return response()->json([
                 'success' => true,
-                'message' => '草表示キャッシュをクリアしました。'
+                'message' => '草表示キャッシュをクリアしました。',
             ]);
 
         } catch (\Exception $e) {
@@ -459,7 +459,7 @@ class StudyAnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'キャッシュクリア中にエラーが発生しました。',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

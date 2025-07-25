@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DailyStudySummary extends Model
 {
@@ -65,11 +65,11 @@ class DailyStudySummary extends Model
     public function scopeRecent($query, $limit = null)
     {
         $query = $query->orderBy('study_date', 'desc');
-        
+
         if ($limit !== null) {
             $query = $query->limit($limit);
         }
-        
+
         return $query;
     }
 
@@ -110,11 +110,11 @@ class DailyStudySummary extends Model
     {
         $breakdown = $this->subject_breakdown ?? [];
         $subjectName = $studySession->subjectArea->name ?? 'その他';
-        
-        if (!isset($breakdown[$subjectName])) {
+
+        if (! isset($breakdown[$subjectName])) {
             $breakdown[$subjectName] = 0;
         }
-        
+
         $breakdown[$subjectName] += $studySession->duration_minutes;
         $this->subject_breakdown = $breakdown;
     }
@@ -123,11 +123,11 @@ class DailyStudySummary extends Model
     {
         $breakdown = $this->subject_breakdown ?? [];
         $subjectName = $pomodoroSession->subjectArea->name ?? 'その他';
-        
-        if (!isset($breakdown[$subjectName])) {
+
+        if (! isset($breakdown[$subjectName])) {
             $breakdown[$subjectName] = 0;
         }
-        
+
         $breakdown[$subjectName] += $pomodoroSession->actual_duration;
         $this->subject_breakdown = $breakdown;
     }
@@ -140,9 +140,16 @@ class DailyStudySummary extends Model
 
     public function calculateGrassLevel(int $totalMinutes): int
     {
-        if ($totalMinutes === 0) return 0;
-        if ($totalMinutes <= 60) return 1;
-        if ($totalMinutes <= 120) return 2;
+        if ($totalMinutes === 0) {
+            return 0;
+        }
+        if ($totalMinutes <= 60) {
+            return 1;
+        }
+        if ($totalMinutes <= 120) {
+            return 2;
+        }
+
         return 3;
     }
 
