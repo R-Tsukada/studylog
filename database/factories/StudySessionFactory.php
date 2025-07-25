@@ -3,10 +3,10 @@
 namespace Database\Factories;
 
 use App\Models\StudySession;
-use App\Models\User;
 use App\Models\SubjectArea;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StudySessionFactory extends Factory
 {
@@ -15,8 +15,8 @@ class StudySessionFactory extends Factory
     public function definition(): array
     {
         $startedAt = $this->faker->dateTimeBetween('-30 days', 'now');
-        $endedAt = (clone $startedAt)->modify('+' . $this->faker->numberBetween(15, 180) . ' minutes');
-        
+        $endedAt = (clone $startedAt)->modify('+'.$this->faker->numberBetween(15, 180).' minutes');
+
         return [
             'user_id' => User::factory(),
             'subject_area_id' => SubjectArea::factory(),
@@ -38,8 +38,8 @@ class StudySessionFactory extends Factory
     public function completed(): static
     {
         $startedAt = $this->faker->dateTimeBetween('-7 days', 'now');
-        $endedAt = (clone $startedAt)->modify('+' . $this->faker->numberBetween(15, 180) . ' minutes');
-        
+        $endedAt = (clone $startedAt)->modify('+'.$this->faker->numberBetween(15, 180).' minutes');
+
         return $this->state(fn (array $attributes) => [
             'started_at' => $startedAt,
             'ended_at' => $endedAt,
@@ -60,4 +60,4 @@ class StudySessionFactory extends Factory
             'subject_area_id' => $subjectArea->id,
         ]);
     }
-} 
+}

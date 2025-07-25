@@ -3,8 +3,8 @@
 namespace Tests\Unit\Models;
 
 use App\Models\PomodoroSession;
-use App\Models\User;
 use App\Models\StudySession;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,7 +32,7 @@ class PomodoroSessionTest extends TestCase
             'notes',
         ];
 
-        $pomodoroSession = new PomodoroSession();
+        $pomodoroSession = new PomodoroSession;
         $this->assertEquals($fillable, $pomodoroSession->getFillable());
     }
 
@@ -50,7 +50,7 @@ class PomodoroSessionTest extends TestCase
             'settings' => 'array',
         ];
 
-        $pomodoroSession = new PomodoroSession();
+        $pomodoroSession = new PomodoroSession;
         foreach ($casts as $attribute => $expectedCast) {
             $this->assertEquals($expectedCast, $pomodoroSession->getCasts()[$attribute] ?? null);
         }
@@ -77,7 +77,7 @@ class PomodoroSessionTest extends TestCase
         $studySession = StudySession::factory()->create(['user_id' => $user->id]);
         $pomodoroSession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'study_session_id' => $studySession->id
+            'study_session_id' => $studySession->id,
         ]);
 
         $this->assertInstanceOf(StudySession::class, $pomodoroSession->studySession);
@@ -91,12 +91,12 @@ class PomodoroSessionTest extends TestCase
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
-        
+
         $session1 = PomodoroSession::factory()->create(['user_id' => $user1->id]);
         $session2 = PomodoroSession::factory()->create(['user_id' => $user2->id]);
 
         $user1Sessions = PomodoroSession::byUser($user1->id)->get();
-        
+
         $this->assertCount(1, $user1Sessions);
         $this->assertEquals($session1->id, $user1Sessions->first()->id);
     }
@@ -107,12 +107,12 @@ class PomodoroSessionTest extends TestCase
     public function completed_scope_returns_only_completed_sessions()
     {
         $user = User::factory()->create();
-        
+
         $completedSession = PomodoroSession::factory()->completed()->create(['user_id' => $user->id]);
         $activeSession = PomodoroSession::factory()->active()->create(['user_id' => $user->id]);
 
         $completedSessions = PomodoroSession::completed()->get();
-        
+
         $this->assertCount(1, $completedSessions);
         $this->assertEquals($completedSession->id, $completedSessions->first()->id);
     }
@@ -123,12 +123,12 @@ class PomodoroSessionTest extends TestCase
     public function focus_sessions_scope_returns_only_focus_sessions()
     {
         $user = User::factory()->create();
-        
+
         $focusSession = PomodoroSession::factory()->focus()->create(['user_id' => $user->id]);
         $breakSession = PomodoroSession::factory()->shortBreak()->create(['user_id' => $user->id]);
 
         $focusSessions = PomodoroSession::focusSessions()->get();
-        
+
         $this->assertCount(1, $focusSessions);
         $this->assertEquals($focusSession->id, $focusSessions->first()->id);
         $this->assertEquals('focus', $focusSessions->first()->session_type);
@@ -140,13 +140,13 @@ class PomodoroSessionTest extends TestCase
     public function break_sessions_scope_returns_only_break_sessions()
     {
         $user = User::factory()->create();
-        
+
         $focusSession = PomodoroSession::factory()->focus()->create(['user_id' => $user->id]);
         $shortBreakSession = PomodoroSession::factory()->shortBreak()->create(['user_id' => $user->id]);
         $longBreakSession = PomodoroSession::factory()->longBreak()->create(['user_id' => $user->id]);
 
         $breakSessions = PomodoroSession::breakSessions()->get();
-        
+
         $this->assertCount(2, $breakSessions);
         $this->assertContains('short_break', $breakSessions->pluck('session_type')->toArray());
         $this->assertContains('long_break', $breakSessions->pluck('session_type')->toArray());
@@ -158,22 +158,22 @@ class PomodoroSessionTest extends TestCase
     public function date_range_scope_filters_by_date_range()
     {
         $user = User::factory()->create();
-        
+
         $todaySession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
-        
+
         $yesterdaySession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'started_at' => now()->subDay()
+            'started_at' => now()->subDay(),
         ]);
 
         $todaySessions = PomodoroSession::dateRange(
             now()->startOfDay(),
             now()->endOfDay()
         )->get();
-        
+
         $this->assertCount(1, $todaySessions);
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
@@ -184,19 +184,19 @@ class PomodoroSessionTest extends TestCase
     public function today_scope_returns_todays_sessions()
     {
         $user = User::factory()->create();
-        
+
         $todaySession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'started_at' => now()
+            'started_at' => now(),
         ]);
-        
+
         $yesterdaySession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'started_at' => now()->subDay()
+            'started_at' => now()->subDay(),
         ]);
 
         $todaySessions = PomodoroSession::today()->get();
-        
+
         $this->assertCount(1, $todaySessions);
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
@@ -207,19 +207,19 @@ class PomodoroSessionTest extends TestCase
     public function recent_scope_returns_limited_sessions_in_desc_order()
     {
         $user = User::factory()->create();
-        
+
         $sessions = collect();
         for ($i = 0; $i < 5; $i++) {
             $sessions->push(PomodoroSession::factory()->create([
                 'user_id' => $user->id,
-                'started_at' => now()->subMinutes($i * 10)
+                'started_at' => now()->subMinutes($i * 10),
             ]));
         }
 
         $recentSessions = PomodoroSession::recent(3)->get();
-        
+
         $this->assertCount(3, $recentSessions);
-        
+
         // 最新順に並んでいることを確認
         $this->assertEquals($sessions->first()->id, $recentSessions->first()->id);
     }
@@ -230,7 +230,7 @@ class PomodoroSessionTest extends TestCase
     public function can_create_pomodoro_session_with_valid_data()
     {
         $user = User::factory()->create();
-        
+
         $pomodoroSessionData = [
             'user_id' => $user->id,
             'session_type' => 'focus',
@@ -241,8 +241,8 @@ class PomodoroSessionTest extends TestCase
             'settings' => [
                 'focus_duration' => 25,
                 'short_break_duration' => 5,
-                'sound_enabled' => true
-            ]
+                'sound_enabled' => true,
+            ],
         ];
 
         $pomodoroSession = PomodoroSession::create($pomodoroSessionData);
@@ -263,9 +263,9 @@ class PomodoroSessionTest extends TestCase
     {
         $pomodoroSession = PomodoroSession::factory()->make([
             'planned_duration' => 25,
-            'actual_duration' => null
+            'actual_duration' => null,
         ]);
-        
+
         $this->assertEquals(25, $pomodoroSession->duration_in_minutes);
 
         $pomodoroSession->actual_duration = 23;
@@ -291,9 +291,9 @@ class PomodoroSessionTest extends TestCase
     {
         $pomodoroSession = PomodoroSession::factory()->make([
             'planned_duration' => 25,
-            'actual_duration' => 20
+            'actual_duration' => 20,
         ]);
-        
+
         $this->assertEquals(80, $pomodoroSession->completion_percentage);
 
         // 計画時間を超えた場合は100%上限
@@ -311,7 +311,7 @@ class PomodoroSessionTest extends TestCase
     public function can_create_different_session_types()
     {
         $user = User::factory()->create();
-        
+
         $focusSession = PomodoroSession::factory()->focus()->create(['user_id' => $user->id]);
         $shortBreakSession = PomodoroSession::factory()->shortBreak()->create(['user_id' => $user->id]);
         $longBreakSession = PomodoroSession::factory()->longBreak()->create(['user_id' => $user->id]);
@@ -328,10 +328,10 @@ class PomodoroSessionTest extends TestCase
     {
         $user = User::factory()->create();
         $studySession = StudySession::factory()->create(['user_id' => $user->id]);
-        
+
         $pomodoroSession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'study_session_id' => $studySession->id
+            'study_session_id' => $studySession->id,
         ]);
 
         $this->assertEquals($studySession->id, $pomodoroSession->study_session_id);
@@ -344,10 +344,10 @@ class PomodoroSessionTest extends TestCase
     public function study_session_link_can_be_null()
     {
         $user = User::factory()->create();
-        
+
         $pomodoroSession = PomodoroSession::factory()->create([
             'user_id' => $user->id,
-            'study_session_id' => null
+            'study_session_id' => null,
         ]);
 
         $this->assertNull($pomodoroSession->study_session_id);

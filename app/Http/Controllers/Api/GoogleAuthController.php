@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Str;
 
 class GoogleAuthController extends Controller
 {
@@ -18,26 +17,27 @@ class GoogleAuthController extends Controller
     {
         try {
             // Google OAuth設定チェック
-            if (!config('services.google.client_id') || !config('services.google.client_secret')) {
+            if (! config('services.google.client_id') || ! config('services.google.client_secret')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Google認証が設定されていません。管理者にお問い合わせください。'
+                    'message' => 'Google認証が設定されていません。管理者にお問い合わせください。',
                 ], 503);
             }
 
             $redirectUrl = Socialite::driver('google')->redirect()->getTargetUrl();
-            
+
             return response()->json([
                 'success' => true,
-                'redirect_url' => $redirectUrl
+                'redirect_url' => $redirectUrl,
             ]);
 
         } catch (\Exception $e) {
             \Log::error('Google認証初期化エラー:', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Google認証の初期化に失敗しました。設定を確認してください。',
-                'error' => config('app.debug') ? $e->getMessage() : null
+                'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -58,7 +58,7 @@ class GoogleAuthController extends Controller
 
             if ($user) {
                 // 既存ユーザーの場合：Google IDが未設定なら設定
-                if (!$user->google_id) {
+                if (! $user->google_id) {
                     $user->update([
                         'google_id' => $googleUser->getId(),
                         'avatar' => $googleUser->getAvatar(),
@@ -91,22 +91,22 @@ class GoogleAuthController extends Controller
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
-                    'created_at' => $user->created_at->format('Y-m-d H:i:s')
+                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 ],
                 'token' => $token,
-                'is_new_user' => $user->wasRecentlyCreated
+                'is_new_user' => $user->wasRecentlyCreated,
             ]);
 
         } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Google認証のセッションが無効です。再度お試しください。'
+                'message' => 'Google認証のセッションが無効です。再度お試しください。',
             ], 400);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Google認証処理中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -123,7 +123,7 @@ class GoogleAuthController extends Controller
             if ($user->isGoogleUser()) {
                 return response()->json([
                     'success' => false,
-                    'message' => '既にGoogleアカウントと連携済みです'
+                    'message' => '既にGoogleアカウントと連携済みです',
                 ], 400);
             }
 
@@ -135,7 +135,7 @@ class GoogleAuthController extends Controller
             if ($existingGoogleUser) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'このGoogleアカウントは既に他のアカウントと連携されています'
+                    'message' => 'このGoogleアカウントは既に他のアカウントと連携されています',
                 ], 400);
             }
 
@@ -154,14 +154,14 @@ class GoogleAuthController extends Controller
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Google連携中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -175,18 +175,18 @@ class GoogleAuthController extends Controller
             $user = $request->user();
 
             // Google認証が連携されていない場合
-            if (!$user->isGoogleUser()) {
+            if (! $user->isGoogleUser()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Googleアカウントと連携されていません'
+                    'message' => 'Googleアカウントと連携されていません',
                 ], 400);
             }
 
             // パスワードが設定されていない場合は連携解除を拒否
-            if (!$user->password) {
+            if (! $user->password) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'パスワードを設定してからGoogle連携を解除してください'
+                    'message' => 'パスワードを設定してからGoogle連携を解除してください',
                 ], 400);
             }
 
@@ -205,14 +205,14 @@ class GoogleAuthController extends Controller
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
-                ]
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Google連携解除中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

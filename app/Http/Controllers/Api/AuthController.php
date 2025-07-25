@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
@@ -44,22 +43,22 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
-                    'created_at' => $user->created_at->format('Y-m-d H:i:s')
+                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                 ],
-                'token' => $token
+                'token' => $token,
             ], 201);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'ユーザー登録中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -77,18 +76,18 @@ class AuthController extends Controller
 
             $user = User::where('email', $validated['email'])->first();
 
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
+            if (! $user || ! Hash::check($validated['password'], $user->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'メールアドレスまたはパスワードが間違っています'
+                    'message' => 'メールアドレスまたはパスワードが間違っています',
                 ], 401);
             }
 
             // Google認証のみのユーザーの場合はパスワードログイン拒否
-            if ($user->isGoogleUser() && !$user->password) {
+            if ($user->isGoogleUser() && ! $user->password) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'このアカウントはGoogleアカウントでログインしてください'
+                    'message' => 'このアカウントはGoogleアカウントでログインしてください',
                 ], 401);
             }
 
@@ -108,20 +107,20 @@ class AuthController extends Controller
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
                 ],
-                'token' => $token
+                'token' => $token,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'ログイン中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -136,14 +135,14 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'ログアウトしました'
+                'message' => 'ログアウトしました',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'ログアウト中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -165,15 +164,15 @@ class AuthController extends Controller
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
                     'email_verified_at' => $user->email_verified_at?->format('Y-m-d H:i:s'),
-                    'created_at' => $user->created_at->format('Y-m-d H:i:s')
-                ]
+                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'ユーザー情報取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -185,10 +184,21 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            
+
+            // Google認証ユーザーのパスワード変更をブロック
+            if ($user->isGoogleUser() && $request->has('password')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Google認証ユーザーはパスワードを変更できません',
+                    'errors' => [
+                        'password' => ['Google認証ユーザーはパスワードを設定できません'],
+                    ],
+                ], 422);
+            }
+
             $validated = $request->validate([
                 'nickname' => 'sometimes|string|max:255',
-                'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+                'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
                 'password' => ['sometimes', 'confirmed', Password::min(8)],
             ]);
 
@@ -208,20 +218,20 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
-                ]
+                ],
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'プロフィール更新中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -233,14 +243,14 @@ class AuthController extends Controller
     {
         try {
             $user = $request->user();
-            
+
             // パスワード確認（Google認証のみのユーザーは除く）
             if ($user->password) {
                 $validated = $request->validate([
                     'password' => 'required|string',
                 ]);
 
-                if (!Hash::check($validated['password'], $user->password)) {
+                if (! Hash::check($validated['password'], $user->password)) {
                     return response()->json([
                         'success' => false,
                         'message' => 'パスワードが間違っています',
@@ -256,26 +266,26 @@ class AuthController extends Controller
             // 関連データの削除（カスケード削除）
             // トークンを削除
             $user->tokens()->delete();
-            
+
             // ユーザーを削除（他の関連データは外部キー制約で自動削除される）
             $user->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'アカウントを削除しました'
+                'message' => 'アカウントを削除しました',
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'アカウント削除中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

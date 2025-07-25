@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
@@ -14,7 +14,6 @@ use Tests\TestCase;
 class StudyManagementIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
-
 
     /** @test */
     public function complete_study_management_workflow()
@@ -51,7 +50,7 @@ class StudyManagementIntegrationTest extends TestCase
             'データベース設計',
             'アルゴリズム',
             'ネットワーク技術',
-            'プログラミング'
+            'プログラミング',
         ];
 
         $createdSubjects = [];
@@ -68,7 +67,7 @@ class StudyManagementIntegrationTest extends TestCase
         // 5. 試験タイプ一覧を取得して確認
         $examTypesResponse = $this->getJson('/api/user/exam-types', $headers);
         $examTypesResponse->assertStatus(200);
-        
+
         $examTypes = $examTypesResponse->json('exam_types');
         $this->assertCount(1, $examTypes);
         $this->assertEquals('基本情報技術者試験', $examTypes[0]['name']);
@@ -76,10 +75,10 @@ class StudyManagementIntegrationTest extends TestCase
         // 6. 学習分野一覧を取得して確認
         $subjectAreasResponse = $this->getJson('/api/user/subject-areas', $headers);
         $subjectAreasResponse->assertStatus(200);
-        
+
         $subjectAreas = $subjectAreasResponse->json('subject_areas');
         $this->assertCount(4, $subjectAreas);
-        
+
         $subjectNames = collect($subjectAreas)->pluck('name')->toArray();
         foreach ($subjects as $subject) {
             $this->assertContains($subject, $subjectNames);
@@ -167,13 +166,13 @@ class StudyManagementIntegrationTest extends TestCase
         Sanctum::actingAs($user1);
         $user1ExamsResponse = $this->getJson('/api/user/exam-types');
         $user1Exams = $user1ExamsResponse->json('exam_types');
-        
+
         $this->assertCount(1, $user1Exams);
         $this->assertEquals('User1の試験', $user1Exams[0]['name']);
 
         $user1SubjectsResponse = $this->getJson('/api/user/subject-areas');
         $user1Subjects = $user1SubjectsResponse->json('subject_areas');
-        
+
         $this->assertCount(1, $user1Subjects);
         $this->assertEquals('User1の分野', $user1Subjects[0]['name']);
 
@@ -181,13 +180,13 @@ class StudyManagementIntegrationTest extends TestCase
         Sanctum::actingAs($user2);
         $user2ExamsResponse = $this->getJson('/api/user/exam-types');
         $user2Exams = $user2ExamsResponse->json('exam_types');
-        
+
         $this->assertCount(1, $user2Exams);
         $this->assertEquals('User2の試験', $user2Exams[0]['name']);
 
         $user2SubjectsResponse = $this->getJson('/api/user/subject-areas');
         $user2Subjects = $user2SubjectsResponse->json('subject_areas');
-        
+
         $this->assertCount(1, $user2Subjects);
         $this->assertEquals('User2の分野', $user2Subjects[0]['name']);
 
@@ -255,18 +254,18 @@ class StudyManagementIntegrationTest extends TestCase
         // 取得時に両方表示されることを確認
         $examTypesResponse = $this->getJson('/api/user/exam-types');
         $examTypes = $examTypesResponse->json('exam_types');
-        
+
         $this->assertCount(2, $examTypes); // システム標準 + ユーザー固有
-        
+
         $examNames = collect($examTypes)->pluck('name')->toArray();
         $this->assertContains('JSTQB Foundation Level', $examNames);
         $this->assertContains('ユーザー固有試験', $examNames);
 
         $subjectAreasResponse = $this->getJson('/api/user/subject-areas');
         $subjectAreas = $subjectAreasResponse->json('subject_areas');
-        
+
         $this->assertCount(3, $subjectAreas); // システム標準1 + ユーザー固有1 + ユーザーがシステム試験に追加1
-        
+
         $subjectNames = collect($subjectAreas)->pluck('name')->toArray();
         $this->assertContains('テスト計画', $subjectNames);
         $this->assertContains('ユーザー固有分野', $subjectNames);

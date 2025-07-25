@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Models;
 
-use Tests\TestCase;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class SubjectAreaTest extends TestCase
 {
@@ -22,12 +22,12 @@ class SubjectAreaTest extends TestCase
     /** @test */
     public function subject_area_has_correct_fillable_attributes()
     {
-        $subjectArea = new SubjectArea();
+        $subjectArea = new SubjectArea;
         $expected = [
-            'exam_type_id', 'code', 'name', 'description', 
-            'sort_order', 'is_active', 'user_id', 'is_system'
+            'exam_type_id', 'code', 'name', 'description',
+            'sort_order', 'is_active', 'user_id', 'is_system',
         ];
-        
+
         $this->assertEquals($expected, $subjectArea->getFillable());
     }
 
@@ -37,9 +37,9 @@ class SubjectAreaTest extends TestCase
         $subjectArea = SubjectArea::factory()->create([
             'is_active' => 1,
             'is_system' => 1,
-            'sort_order' => '5'
+            'sort_order' => '5',
         ]);
-        
+
         $this->assertIsBool($subjectArea->is_active);
         $this->assertIsBool($subjectArea->is_system);
         $this->assertIsInt($subjectArea->sort_order);
@@ -53,7 +53,7 @@ class SubjectAreaTest extends TestCase
     {
         $examType = ExamType::factory()->create();
         $subjectArea = SubjectArea::factory()->create(['exam_type_id' => $examType->id]);
-        
+
         $this->assertInstanceOf(ExamType::class, $subjectArea->examType);
         $this->assertEquals($examType->id, $subjectArea->examType->id);
         $this->assertEquals($examType->name, $subjectArea->examType->name);
@@ -64,7 +64,7 @@ class SubjectAreaTest extends TestCase
     {
         $subjectArea = SubjectArea::factory()->create();
         $studySession = StudySession::factory()->create(['subject_area_id' => $subjectArea->id]);
-        
+
         $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $subjectArea->studySessions);
         $this->assertInstanceOf(StudySession::class, $subjectArea->studySessions->first());
         $this->assertEquals($studySession->id, $subjectArea->studySessions->first()->id);
@@ -76,9 +76,9 @@ class SubjectAreaTest extends TestCase
         $examType = ExamType::factory()->create();
         SubjectArea::factory()->create(['exam_type_id' => $examType->id, 'is_active' => true]);
         SubjectArea::factory()->create(['exam_type_id' => $examType->id, 'is_active' => false]);
-        
+
         $activeSubjectAreas = SubjectArea::active()->get();
-        
+
         $this->assertGreaterThan(0, $activeSubjectAreas->count());
         foreach ($activeSubjectAreas as $subjectArea) {
             $this->assertTrue($subjectArea->is_active);
@@ -92,9 +92,9 @@ class SubjectAreaTest extends TestCase
         SubjectArea::factory()->create(['exam_type_id' => $examType->id, 'sort_order' => 3]);
         SubjectArea::factory()->create(['exam_type_id' => $examType->id, 'sort_order' => 1]);
         SubjectArea::factory()->create(['exam_type_id' => $examType->id, 'sort_order' => 2]);
-        
+
         $orderedSubjectAreas = SubjectArea::ordered()->where('exam_type_id', $examType->id)->get();
-        
+
         $this->assertEquals(1, $orderedSubjectAreas->first()->sort_order);
         $this->assertEquals(3, $orderedSubjectAreas->last()->sort_order);
     }
@@ -111,9 +111,9 @@ class SubjectAreaTest extends TestCase
             'sort_order' => 1,
             'is_active' => true,
         ];
-        
+
         $subjectArea = SubjectArea::create($subjectAreaData);
-        
+
         $this->assertDatabaseHas('subject_areas', $subjectAreaData);
         $this->assertEquals($subjectAreaData['code'], $subjectArea->code);
         $this->assertEquals($subjectAreaData['name'], $subjectArea->name);
@@ -125,13 +125,13 @@ class SubjectAreaTest extends TestCase
         $examType = ExamType::factory()->create();
         SubjectArea::factory()->create([
             'exam_type_id' => $examType->id,
-            'code' => 'unique_code'
+            'code' => 'unique_code',
         ]);
-        
+
         $this->expectException(\Illuminate\Database\QueryException::class);
         SubjectArea::factory()->create([
             'exam_type_id' => $examType->id,
-            'code' => 'unique_code'
+            'code' => 'unique_code',
         ]);
     }
-} 
+}

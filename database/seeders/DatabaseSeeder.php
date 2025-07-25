@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // テストユーザーの作成
-        if (!User::where('email', 'test@example.com')->exists()) {
+        if (! User::where('email', 'test@example.com')->exists()) {
             User::factory()->create([
                 'nickname' => 'Test User',
                 'email' => 'test@example.com',

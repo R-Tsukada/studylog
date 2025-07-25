@@ -2,27 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class StudyGoal extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'exam_type_id',
         'daily_minutes_goal',
         'weekly_minutes_goal',
         'exam_date',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'exam_date' => 'date',
         'is_active' => 'boolean',
         'daily_minutes_goal' => 'integer',
-        'weekly_minutes_goal' => 'integer'
+        'weekly_minutes_goal' => 'integer',
     ];
 
     // リレーション

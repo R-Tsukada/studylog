@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\StudySession;
-use App\Models\PomodoroSession;
 use App\Models\DailyStudySummary;
+use App\Models\PomodoroSession;
+use App\Models\StudySession;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class StudyActivityService
 {
@@ -94,7 +94,7 @@ class StudyActivityService
 
         // 時間計測統計
         $timeTrackingStats = $this->getTimeTrackingStats($userId, $startDate, $endDate);
-        
+
         // ポモドーロ統計
         $pomodoroStats = $this->getPomodoroStats($userId, $startDate, $endDate);
 
@@ -146,17 +146,17 @@ class StudyActivityService
     {
         $recentSessions = $this->getUnifiedHistory($userId, Carbon::now()->subDays(7), null, 10);
         $userInsights = $this->getStudyInsights($userId);
-        
+
         $currentHour = Carbon::now()->hour;
         $isAfternoon = $currentHour >= 13 && $currentHour <= 17;
-        
+
         // 最近のセッションパターン分析
         $recentMethod = $recentSessions->first()['type'] ?? null;
         $avgSessionLength = $recentSessions->avg('duration_minutes') ?? 30;
-        
+
         // 推奨ロジック
         $suggestions = [];
-        
+
         // 長時間学習の場合は時間計測を推奨
         if ($avgSessionLength > 60) {
             $suggestions[] = [
@@ -165,7 +165,7 @@ class StudyActivityService
                 'reason' => '最近の学習セッションが長時間のため、自由な時間計測が適しています',
             ];
         }
-        
+
         // 午後の時間帯はポモドーロを推奨
         if ($isAfternoon) {
             $suggestions[] = [
@@ -174,7 +174,7 @@ class StudyActivityService
                 'reason' => '午後の時間帯は集中力が下がりやすいため、ポモドーロテクニックがおすすめです',
             ];
         }
-        
+
         // ユーザーの好みに基づく推奨
         $preferredMethod = $userInsights['preferred_method'];
         if ($preferredMethod) {
@@ -184,7 +184,7 @@ class StudyActivityService
                 'reason' => 'あなたの学習パターンに基づく推奨です',
             ];
         }
-        
+
         // デフォルト推奨
         if (empty($suggestions)) {
             $suggestions[] = [
@@ -193,10 +193,10 @@ class StudyActivityService
                 'reason' => '初回またはパターンが不明な場合の推奨です',
             ];
         }
-        
+
         // 信頼度でソート
-        usort($suggestions, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
-        
+        usort($suggestions, fn ($a, $b) => $b['confidence'] <=> $a['confidence']);
+
         return [
             'recommended' => $suggestions[0],
             'alternatives' => array_slice($suggestions, 1, 2),
@@ -238,7 +238,7 @@ class StudyActivityService
             'total_sessions' => $sessions->count(),
             'focus_sessions' => $focusSessions->count(),
             'total_focus_time' => $focusSessions->sum('actual_duration') ?: 0,
-            'completion_rate' => $sessions->count() > 0 ? 
+            'completion_rate' => $sessions->count() > 0 ?
                 round((1 - $sessions->where('was_interrupted', true)->count() / $sessions->count()) * 100, 1) : 0,
             'average_focus_duration' => $focusSessions->avg('actual_duration') ?: 0,
         ];
@@ -250,14 +250,14 @@ class StudyActivityService
             ->completed()
             ->whereBetween('started_at', [$startDate, $endDate])
             ->get()
-            ->groupBy(fn($session) => $session->started_at->format('Y-m-d'));
+            ->groupBy(fn ($session) => $session->started_at->format('Y-m-d'));
 
         $pomodoroSessions = PomodoroSession::byUser($userId)
             ->completed()
             ->focusSessions()
             ->whereBetween('started_at', [$startDate, $endDate])
             ->get()
-            ->groupBy(fn($session) => $session->started_at->format('Y-m-d'));
+            ->groupBy(fn ($session) => $session->started_at->format('Y-m-d'));
 
         $dailyData = [];
         $current = $startDate->copy();
@@ -283,7 +283,7 @@ class StudyActivityService
     private function getSubjectBreakdown($userId, $startDate, $endDate): array
     {
         $unifiedHistory = $this->getUnifiedHistory($userId, $startDate, $endDate, 1000);
-        
+
         return $unifiedHistory
             ->groupBy('subject_area_name')
             ->map(function ($sessions, $subjectName) {
@@ -373,7 +373,7 @@ class StudyActivityService
         }
 
         // 手法に基づく推奨
-        $timeTrackingRate = $stats['by_method']['time_tracking']['total_duration'] / 
+        $timeTrackingRate = $stats['by_method']['time_tracking']['total_duration'] /
                            max($stats['overview']['total_study_time'], 1);
 
         if ($timeTrackingRate > 0.8) {
@@ -422,7 +422,7 @@ class StudyActivityService
     public function updateDailySummaryFromStudySession(StudySession $studySession): DailyStudySummary
     {
         $studyDate = $studySession->started_at->toDateString();
-        
+
         return DB::transaction(function () use ($studySession, $studyDate) {
             $summary = DailyStudySummary::firstOrCreate([
                 'user_id' => $studySession->user_id,
@@ -454,7 +454,7 @@ class StudyActivityService
     public function updateDailySummaryFromPomodoro(PomodoroSession $pomodoroSession): DailyStudySummary
     {
         $studyDate = $pomodoroSession->started_at->toDateString();
-        
+
         return DB::transaction(function () use ($pomodoroSession, $studyDate) {
             $summary = DailyStudySummary::firstOrCreate([
                 'user_id' => $pomodoroSession->user_id,
@@ -487,9 +487,9 @@ class StudyActivityService
     {
         $startDate = $startDate ?? Carbon::now()->subYear()->toDateString();
         $endDate = $endDate ?? Carbon::now()->toDateString();
-        
+
         $cacheKey = "grass_data:{$userId}:{$startDate}:{$endDate}";
-        
+
         return Cache::remember($cacheKey, now()->addHours(1), function () use ($userId, $startDate, $endDate) {
             return $this->buildGrassData($userId, $startDate, $endDate);
         });
@@ -507,11 +507,11 @@ class StudyActivityService
         } catch (\Exception $e) {
             throw new \InvalidArgumentException('Invalid date format provided');
         }
-        
+
         if ($start > $end) {
             throw new \InvalidArgumentException('Start date cannot be after end date');
         }
-        
+
         // 期間制限（最大1年間）
         if ($start->diffInDays($end) > 365) {
             throw new \InvalidArgumentException('Date range cannot exceed 365 days');
@@ -545,7 +545,7 @@ class StudyActivityService
                     'focus_sessions' => 0,
                 ];
             }
-            
+
             $current->addDay();
         }
 
@@ -566,9 +566,9 @@ class StudyActivityService
     {
         $startDate = Carbon::create($year, $month, 1)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
-        
+
         $cacheKey = "monthly_stats:{$userId}:{$year}:{$month}";
-        
+
         return Cache::remember($cacheKey, now()->addHours(6), function () use ($userId, $startDate, $endDate) {
             $summaries = DailyStudySummary::byUser($userId)
                 ->dateRange($startDate->toDateString(), $endDate->toDateString())
@@ -576,7 +576,7 @@ class StudyActivityService
 
             $totalMinutes = $summaries->sum('total_minutes');
             $studyDays = $summaries->where('total_minutes', '>', 0)->count();
-            
+
             return [
                 'year' => $startDate->year,
                 'month' => $startDate->month,
@@ -598,7 +598,7 @@ class StudyActivityService
             ->where('study_date', $date)
             ->first();
 
-        if (!$summary) {
+        if (! $summary) {
             return [
                 'date' => $date,
                 'summary' => null,
@@ -668,7 +668,7 @@ class StudyActivityService
 
                 foreach ($patterns as $pattern) {
                     $keys = Cache::getRedis()->keys($pattern);
-                    if (!empty($keys)) {
+                    if (! empty($keys)) {
                         Cache::deleteMultiple($keys);
                     }
                 }
@@ -676,16 +676,16 @@ class StudyActivityService
                 // 他のキャッシュドライバー用の個別削除
                 $dateRanges = [
                     Carbon::now()->subYear()->format('Y-m-d'),
-                    Carbon::now()->format('Y-m-d')
+                    Carbon::now()->format('Y-m-d'),
                 ];
-                
+
                 // よく使われるキャッシュキーを個別に削除
                 foreach ($dateRanges as $startDate) {
                     foreach ($dateRanges as $endDate) {
                         Cache::forget("grass_data:{$userId}:{$startDate}:{$endDate}");
                     }
                 }
-                
+
                 // 月別統計のキャッシュクリア
                 for ($year = Carbon::now()->year - 1; $year <= Carbon::now()->year; $year++) {
                     for ($month = 1; $month <= 12; $month++) {
@@ -697,7 +697,7 @@ class StudyActivityService
             // キャッシュクリアに失敗してもメイン機能には影響させない
             \Log::warning('草表示キャッシュクリアに失敗しました:', [
                 'user_id' => $userId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -708,11 +708,11 @@ class StudyActivityService
     private function calculateGrassStats(array $grassData): array
     {
         $totalDays = count($grassData);
-        $studyDays = count(array_filter($grassData, fn($day) => $day['total_minutes'] > 0));
+        $studyDays = count(array_filter($grassData, fn ($day) => $day['total_minutes'] > 0));
         $totalMinutes = array_sum(array_column($grassData, 'total_minutes'));
-        
+
         $levelCounts = array_count_values(array_column($grassData, 'level'));
-        
+
         return [
             'total_days' => $totalDays,
             'study_days' => $studyDays,
@@ -741,7 +741,7 @@ class StudyActivityService
     {
         $maxStreak = 0;
         $currentStreak = 0;
-        
+
         foreach ($grassData as $day) {
             if ($day['total_minutes'] > 0) {
                 $currentStreak++;
@@ -750,7 +750,7 @@ class StudyActivityService
                 $currentStreak = 0;
             }
         }
-        
+
         return $maxStreak;
     }
 
@@ -760,7 +760,7 @@ class StudyActivityService
     private function calculateCurrentStreak(array $grassData): int
     {
         $streak = 0;
-        
+
         // 最新の日から遡って計算
         for ($i = count($grassData) - 1; $i >= 0; $i--) {
             if ($grassData[$i]['total_minutes'] > 0) {
@@ -769,7 +769,7 @@ class StudyActivityService
                 break;
             }
         }
-        
+
         return $streak;
     }
 }

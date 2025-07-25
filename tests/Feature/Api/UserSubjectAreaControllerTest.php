@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
@@ -14,7 +14,6 @@ use Tests\TestCase;
 class UserSubjectAreaControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
-
 
     /** @test */
     public function it_can_get_user_subject_areas_list()
@@ -66,14 +65,14 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->getJson('/api/user/subject-areas');
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                ])
-                ->assertJsonCount(2, 'subject_areas'); // ユーザー固有 + システム標準
+            ->assertJson([
+                'success' => true,
+            ])
+            ->assertJsonCount(2, 'subject_areas'); // ユーザー固有 + システム標準
 
         $responseData = $response->json('subject_areas');
         $subjectNames = collect($responseData)->pluck('name')->toArray();
-        
+
         $this->assertContains('ユーザー固有分野', $subjectNames);
         $this->assertContains('システム標準分野', $subjectNames);
         $this->assertNotContains('他のユーザーの分野', $subjectNames);
@@ -98,16 +97,16 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->postJson('/api/user/subject-areas', $subjectData);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '学習分野を作成しました',
-                ])
-                ->assertJsonStructure([
-                    'subject_area' => [
-                        'id', 'name', 'exam_type_id', 
-                        'exam_type_name', 'is_system'
-                    ]
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '学習分野を作成しました',
+            ])
+            ->assertJsonStructure([
+                'subject_area' => [
+                    'id', 'name', 'exam_type_id',
+                    'exam_type_name', 'is_system',
+                ],
+            ]);
 
         $this->assertDatabaseHas('subject_areas', [
             'exam_type_id' => $examType->id,
@@ -137,10 +136,10 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->postJson('/api/user/subject-areas', $subjectData);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '学習分野を作成しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '学習分野を作成しました',
+            ]);
 
         $this->assertDatabaseHas('subject_areas', [
             'exam_type_id' => $systemExam->id,
@@ -160,11 +159,11 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->postJson('/api/user/subject-areas', []);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'バリデーションエラー',
-                ])
-                ->assertJsonValidationErrors(['exam_type_id', 'name']);
+            ->assertJson([
+                'success' => false,
+                'message' => 'バリデーションエラー',
+            ])
+            ->assertJsonValidationErrors(['exam_type_id', 'name']);
 
         // 存在しない試験タイプIDの場合
         $response = $this->postJson('/api/user/subject-areas', [
@@ -173,7 +172,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJsonValidationErrors(['exam_type_id']);
+            ->assertJsonValidationErrors(['exam_type_id']);
     }
 
     /** @test */
@@ -181,7 +180,7 @@ class UserSubjectAreaControllerTest extends TestCase
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
-        
+
         Sanctum::actingAs($user1);
 
         // user2の試験タイプを作成
@@ -196,10 +195,10 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
 
         $response->assertStatus(404)
-                ->assertJson([
-                    'success' => false,
-                    'message' => '指定された試験タイプが見つかりません',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => '指定された試験タイプが見つかりません',
+            ]);
     }
 
     /** @test */
@@ -228,10 +227,10 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'この試験タイプには既に同じ名前の学習分野が存在します',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'この試験タイプには既に同じ名前の学習分野が存在します',
+            ]);
     }
 
     /** @test */
@@ -265,10 +264,10 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '学習分野を作成しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '学習分野を作成しました',
+            ]);
     }
 
     /** @test */
@@ -302,10 +301,10 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->putJson("/api/user/subject-areas/{$subjectArea->id}", $updateData);
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                    'message' => '学習分野を更新しました',
-                ]);
+            ->assertJson([
+                'success' => true,
+                'message' => '学習分野を更新しました',
+            ]);
 
         $this->assertDatabaseHas('subject_areas', [
             'id' => $subjectArea->id,
@@ -319,7 +318,7 @@ class UserSubjectAreaControllerTest extends TestCase
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
-        
+
         Sanctum::actingAs($user1);
 
         $examType = ExamType::factory()->create([
@@ -340,10 +339,10 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
 
         $response->assertStatus(404)
-                ->assertJson([
-                    'success' => false,
-                    'message' => '指定された学習分野が見つかりません',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => '指定された学習分野が見つかりません',
+            ]);
     }
 
     /** @test */
@@ -399,10 +398,10 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->deleteJson("/api/user/subject-areas/{$subjectArea->id}");
 
         $response->assertStatus(409)
-                ->assertJson([
-                    'success' => false,
-                    'message' => 'この学習分野には学習履歴が存在します。削除すると関連データも削除されます。',
-                ]);
+            ->assertJson([
+                'success' => false,
+                'message' => 'この学習分野には学習履歴が存在します。削除すると関連データも削除されます。',
+            ]);
 
         // データは削除されていないはず
         $this->assertDatabaseHas('subject_areas', [
@@ -431,9 +430,9 @@ class UserSubjectAreaControllerTest extends TestCase
         $response = $this->deleteJson("/api/user/subject-areas/{$subjectArea->id}");
 
         $response->assertStatus(200)
-                ->assertJson([
-                    'success' => true,
-                ]);
+            ->assertJson([
+                'success' => true,
+            ]);
 
         $this->assertDatabaseMissing('subject_areas', [
             'id' => $subjectArea->id,

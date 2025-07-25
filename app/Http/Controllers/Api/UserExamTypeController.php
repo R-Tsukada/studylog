@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExamType;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class UserExamTypeController extends Controller
@@ -17,32 +17,32 @@ class UserExamTypeController extends Controller
     {
         try {
             $userId = auth()->id();
-            
+
             // システム標準 + ユーザー固有の試験タイプを取得
             $examTypes = ExamType::where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
-                      ->orWhere('is_system', true);
+                    ->orWhere('is_system', true);
             })
-            ->with(['subjectAreas' => function ($query) use ($userId) {
-                $query->where(function ($subQuery) use ($userId) {
-                    $subQuery->where('user_id', $userId)
-                             ->orWhere('is_system', true);
-                });
-            }])
-            ->orderBy('is_system', 'desc')
-            ->orderBy('name')
-            ->get();
+                ->with(['subjectAreas' => function ($query) use ($userId) {
+                    $query->where(function ($subQuery) use ($userId) {
+                        $subQuery->where('user_id', $userId)
+                            ->orWhere('is_system', true);
+                    });
+                }])
+                ->orderBy('is_system', 'desc')
+                ->orderBy('name')
+                ->get();
 
             return response()->json([
                 'success' => true,
-                'exam_types' => $examTypes
+                'exam_types' => $examTypes,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '試験タイプの取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -67,14 +67,14 @@ class UserExamTypeController extends Controller
             $exists = ExamType::where('name', $validated['name'])
                 ->where(function ($query) use ($userId) {
                     $query->where('user_id', $userId)
-                          ->orWhere('is_system', true);
+                        ->orWhere('is_system', true);
                 })
                 ->exists();
 
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'この名前の試験タイプは既に存在します'
+                    'message' => 'この名前の試験タイプは既に存在します',
                 ], 422);
             }
 
@@ -95,20 +95,20 @@ class UserExamTypeController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '試験タイプを作成しました',
-                'exam_type' => $examType
+                'exam_type' => $examType,
             ], 201);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '試験タイプの作成中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -133,10 +133,10 @@ class UserExamTypeController extends Controller
                 ->where('user_id', $userId)
                 ->first();
 
-            if (!$examType) {
+            if (! $examType) {
                 return response()->json([
                     'success' => false,
-                    'message' => '指定された試験タイプが見つかりません'
+                    'message' => '指定された試験タイプが見つかりません',
                 ], 404);
             }
 
@@ -144,7 +144,7 @@ class UserExamTypeController extends Controller
             if ($examType->is_system) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'システム標準の試験タイプは編集できません'
+                    'message' => 'システム標準の試験タイプは編集できません',
                 ], 403);
             }
 
@@ -153,14 +153,14 @@ class UserExamTypeController extends Controller
                 ->where('id', '!=', $id)
                 ->where(function ($query) use ($userId) {
                     $query->where('user_id', $userId)
-                          ->orWhere('is_system', true);
+                        ->orWhere('is_system', true);
                 })
                 ->exists();
 
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'この名前の試験タイプは既に存在します'
+                    'message' => 'この名前の試験タイプは既に存在します',
                 ], 422);
             }
 
@@ -175,20 +175,20 @@ class UserExamTypeController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '試験タイプを更新しました',
-                'exam_type' => $examType
+                'exam_type' => $examType,
             ]);
 
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '試験タイプの更新中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -205,10 +205,10 @@ class UserExamTypeController extends Controller
                 ->where('user_id', $userId)
                 ->first();
 
-            if (!$examType) {
+            if (! $examType) {
                 return response()->json([
                     'success' => false,
-                    'message' => '指定された試験タイプが見つかりません'
+                    'message' => '指定された試験タイプが見つかりません',
                 ], 404);
             }
 
@@ -216,7 +216,7 @@ class UserExamTypeController extends Controller
             if ($examType->is_system) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'システム標準の試験タイプは削除できません'
+                    'message' => 'システム標準の試験タイプは削除できません',
                 ], 403);
             }
 
@@ -228,7 +228,7 @@ class UserExamTypeController extends Controller
             if ($hasStudySessions) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'この試験タイプには学習履歴が存在します。削除すると関連データも削除されます。'
+                    'message' => 'この試験タイプには学習履歴が存在します。削除すると関連データも削除されます。',
                 ], 409);
             }
 
@@ -237,14 +237,14 @@ class UserExamTypeController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "試験タイプ「{$examTypeName}」を削除しました"
+                'message' => "試験タイプ「{$examTypeName}」を削除しました",
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '試験タイプの削除中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -259,21 +259,21 @@ class UserExamTypeController extends Controller
         if (empty($baseCode)) {
             $baseCode = 'exam';
         }
-        
+
         // 最大10文字まで
         $baseCode = strtolower(substr($baseCode, 0, 10));
-        
+
         // ユーザーIDと現在時刻を使ってユニークにする
-        $uniqueCode = $baseCode . '_' . $userId . '_' . time();
-        
+        $uniqueCode = $baseCode.'_'.$userId.'_'.time();
+
         // 重複チェック（念のため）
         $counter = 1;
         $finalCode = $uniqueCode;
         while (ExamType::where('code', $finalCode)->exists()) {
-            $finalCode = $uniqueCode . '_' . $counter;
+            $finalCode = $uniqueCode.'_'.$counter;
             $counter++;
         }
-        
+
         return $finalCode;
     }
 }

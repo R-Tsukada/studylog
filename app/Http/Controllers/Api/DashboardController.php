@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\StudySession;
 use App\Models\StudyGoal;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use App\Models\StudySession;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class DashboardController extends Controller
 {
@@ -20,7 +19,7 @@ class DashboardController extends Controller
             $userId = auth()->id();
 
             $todayTotalTime = $this->getTotalTodayStudyTime($userId);
-            
+
             $dashboardData = [
                 'continuous_days' => $this->calculateContinuousDays($userId),
                 'today_study_time' => $todayTotalTime['formatted_time'],
@@ -30,19 +29,19 @@ class DashboardController extends Controller
                 'this_week_total' => $this->getThisWeekTotal($userId),
                 'this_month_total' => $this->getThisMonthTotal($userId),
                 'recent_subjects' => $this->getRecentSubjects($userId),
-                'active_goals' => $this->getActiveGoals($userId)
+                'active_goals' => $this->getActiveGoals($userId),
             ];
 
             return response()->json([
                 'success' => true,
-                'data' => $dashboardData
+                'data' => $dashboardData,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'ダッシュボードデータの取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -69,6 +68,7 @@ class DashboardController extends Controller
                 // 今日に学習記録がない場合は、昨日から開始
                 if ($continuousDays === 0 && $currentDate->isToday()) {
                     $currentDate = $currentDate->subDay();
+
                     continue;
                 }
                 break;
@@ -93,7 +93,7 @@ class DashboardController extends Controller
             ->today()
             ->sum('duration_minutes');
     }
-    
+
     /**
      * 今日の合計学習時間を取得（学習セッション＋ポモドーロ合算）
      */
@@ -101,21 +101,21 @@ class DashboardController extends Controller
     {
         // 学習セッションの時間
         $studySessionTime = $this->getTodayStudyTime($userId);
-        
+
         // ポモドーロセッションの時間（完了したfocusセッションのみ）
         $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
             ->where('session_type', 'focus')
             ->where('is_completed', true)
             ->whereDate('started_at', today())
             ->sum('actual_duration');
-        
+
         $totalTime = $studySessionTime + $pomodoroTime;
-        
+
         return [
             'total_minutes' => $totalTime,
             'study_session_minutes' => $studySessionTime,
             'pomodoro_minutes' => $pomodoroTime,
-            'formatted_time' => $this->formatMinutesToHours($totalTime)
+            'formatted_time' => $this->formatMinutesToHours($totalTime),
         ];
     }
 
@@ -141,13 +141,13 @@ class DashboardController extends Controller
             ->whereNotNull('daily_minutes_goal')
             ->first();
 
-        if (!$activeGoal || $activeGoal->daily_minutes_goal <= 0) {
+        if (! $activeGoal || $activeGoal->daily_minutes_goal <= 0) {
             return 0; // 目標が設定されていない場合
         }
 
         // 学習セッションの今日の合計時間
         $studySessionTime = $this->getTodayStudyTime($userId);
-        
+
         // ポモドーロセッションの今日の合計時間（完了したfocusセッションのみ）
         $pomodoroTime = \App\Models\PomodoroSession::where('user_id', $userId)
             ->where('session_type', 'focus')
@@ -180,7 +180,7 @@ class DashboardController extends Controller
         return [
             'total_minutes' => $totalMinutes,
             'session_count' => $sessionCount,
-            'formatted_time' => $this->formatMinutesToHours($totalMinutes)
+            'formatted_time' => $this->formatMinutesToHours($totalMinutes),
         ];
     }
 
@@ -202,7 +202,7 @@ class DashboardController extends Controller
         return [
             'total_minutes' => $totalMinutes,
             'session_count' => $sessionCount,
-            'formatted_time' => $this->formatMinutesToHours($totalMinutes)
+            'formatted_time' => $this->formatMinutesToHours($totalMinutes),
         ];
     }
 
@@ -227,7 +227,7 @@ class DashboardController extends Controller
                     'started_at' => $session->started_at,
                     'last_studied_at' => $session->started_at->format('Y-m-d'),
                     'duration_minutes' => $session->duration_minutes,
-                    'notes' => $session->study_comment // 学習セッションのコメントをnotesとして統一
+                    'notes' => $session->study_comment, // 学習セッションのコメントをnotesとして統一
                 ];
             });
 
@@ -243,12 +243,12 @@ class DashboardController extends Controller
                 return [
                     'id' => $session->id,
                     'type' => 'pomodoro_session',
-                    'subject_area_name' => $session->subjectArea ? $session->subjectArea->name : 'ポモドーロ学習',
-                    'exam_type_name' => $session->subjectArea && $session->subjectArea->examType ? $session->subjectArea->examType->name : null,
+                    'subject_area_name' => $session->subjectArea?->name ?? 'ポモドーロ学習',
+                    'exam_type_name' => $session->subjectArea?->examType?->name,
                     'started_at' => $session->started_at,
                     'last_studied_at' => $session->started_at->format('Y-m-d'),
                     'duration_minutes' => $session->actual_duration,
-                    'notes' => $session->notes // メモを追加
+                    'notes' => $session->notes, // メモを追加
                 ];
             });
 
@@ -281,11 +281,11 @@ class DashboardController extends Controller
             }
 
             return [
-                'exam_type_name' => $goal->examType->name,
+                'exam_type_name' => $goal->examType?->name,
                 'daily_minutes_goal' => $goal->daily_minutes_goal,
                 'weekly_minutes_goal' => $goal->weekly_minutes_goal,
                 'exam_date' => $goal->exam_date,
-                'days_until_exam' => $daysUntilExam
+                'days_until_exam' => $daysUntilExam,
             ];
         })->toArray();
     }
@@ -322,19 +322,19 @@ class DashboardController extends Controller
             $stats = [
                 'daily_breakdown' => $this->getDailyBreakdown($userId),
                 'subject_breakdown' => $this->getSubjectBreakdown($userId),
-                'weekly_trend' => $this->getWeeklyTrend($userId)
+                'weekly_trend' => $this->getWeeklyTrend($userId),
             ];
 
             return response()->json([
                 'success' => true,
-                'data' => $stats
+                'data' => $stats,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => '統計データの取得中にエラーが発生しました',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -355,7 +355,7 @@ class DashboardController extends Controller
             $breakdown[] = [
                 'date' => $date->format('Y-m-d'),
                 'minutes' => $minutes,
-                'formatted_time' => $this->formatMinutesToHours($minutes)
+                'formatted_time' => $this->formatMinutesToHours($minutes),
             ];
         }
 
@@ -376,11 +376,12 @@ class DashboardController extends Controller
         $breakdown = $sessions->groupBy('subjectArea.name')
             ->map(function ($sessions, $subjectName) {
                 $totalMinutes = $sessions->sum('duration_minutes');
+
                 return [
                     'subject_name' => $subjectName,
                     'total_minutes' => $totalMinutes,
                     'session_count' => $sessions->count(),
-                    'formatted_time' => $this->formatMinutesToHours($totalMinutes)
+                    'formatted_time' => $this->formatMinutesToHours($totalMinutes),
                 ];
             })->values()
             ->sortByDesc('total_minutes')
@@ -408,11 +409,10 @@ class DashboardController extends Controller
                 'week_start' => $weekStart->format('Y-m-d'),
                 'week_end' => $weekEnd->format('Y-m-d'),
                 'minutes' => $minutes,
-                'formatted_time' => $this->formatMinutesToHours($minutes)
+                'formatted_time' => $this->formatMinutesToHours($minutes),
             ];
         }
 
         return $trend;
     }
-
 }

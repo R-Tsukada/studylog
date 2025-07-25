@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\DailyStudySummary;
-use App\Models\StudySession;
 use App\Models\PomodoroSession;
-use Carbon\Carbon;
+use App\Models\StudySession;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class MigrateGrassDisplayData extends Command
@@ -35,23 +34,24 @@ class MigrateGrassDisplayData extends Command
         $endDate = $this->option('end_date') ?? now()->toDateString();
         $dryRun = $this->option('dry-run');
 
-        $this->info("草表示データ移行を開始します...");
-        
+        $this->info('草表示データ移行を開始します...');
+
         if ($dryRun) {
-            $this->warn("*** DRY RUN MODE - 実際の更新は行いません ***");
+            $this->warn('*** DRY RUN MODE - 実際の更新は行いません ***');
         }
 
         $query = DailyStudySummary::whereBetween('study_date', [$startDate, $endDate]);
-        
+
         if ($userId) {
             $query->where('user_id', $userId);
         }
 
         $summaries = $query->get();
-        $this->info("対象レコード数: " . $summaries->count());
+        $this->info('対象レコード数: '.$summaries->count());
 
         if ($summaries->count() === 0) {
-            $this->warn("移行対象のレコードが見つかりませんでした。");
+            $this->warn('移行対象のレコードが見つかりませんでした。');
+
             return 0;
         }
 
@@ -59,30 +59,34 @@ class MigrateGrassDisplayData extends Command
         $updatedCount = 0;
 
         DB::beginTransaction();
-        
+
         try {
-            foreach ($summaries as $summary) {
-                $updated = $this->migrateDailySummary($summary, $dryRun);
-                if ($updated) {
-                    $updatedCount++;
+            // バッチ処理でN+1問題を回避 - 小さなチャンクに分けて処理
+            $summaries->chunk(50)->each(function ($chunk) use (&$updatedCount, $progressBar, $dryRun) {
+                foreach ($chunk as $summary) {
+                    $updated = $this->migrateDailySummary($summary, $dryRun);
+                    if ($updated) {
+                        $updatedCount++;
+                    }
+                    $progressBar->advance();
                 }
-                $progressBar->advance();
-            }
-            
+            });
+
             $progressBar->finish();
             $this->newLine();
-            
-            if (!$dryRun) {
+
+            if (! $dryRun) {
                 DB::commit();
                 $this->info("移行完了: {$updatedCount}件のレコードを更新しました");
             } else {
                 DB::rollBack();
                 $this->info("DRY RUN完了: {$updatedCount}件のレコードが更新対象です");
             }
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->error("移行中にエラーが発生しました: " . $e->getMessage());
+            $this->error('移行中にエラーが発生しました: '.$e->getMessage());
+
             return 1;
         }
 
@@ -113,7 +117,7 @@ class MigrateGrassDisplayData extends Command
 
         // 新しい合計時間を計算
         $newTotalMinutes = $studySessionMinutes + $pomodoroMinutes;
-        
+
         // 草レベルを計算
         $grassLevel = $this->calculateGrassLevel($newTotalMinutes);
 
@@ -126,7 +130,7 @@ class MigrateGrassDisplayData extends Command
             $summary->total_minutes !== $newTotalMinutes
         );
 
-        if ($needsUpdate && !$dryRun) {
+        if ($needsUpdate && ! $dryRun) {
             $summary->update([
                 'study_session_minutes' => $studySessionMinutes,
                 'pomodoro_minutes' => $pomodoroMinutes,
@@ -141,9 +145,16 @@ class MigrateGrassDisplayData extends Command
 
     private function calculateGrassLevel(int $totalMinutes): int
     {
-        if ($totalMinutes === 0) return 0;
-        if ($totalMinutes <= 60) return 1;
-        if ($totalMinutes <= 120) return 2;
+        if ($totalMinutes === 0) {
+            return 0;
+        }
+        if ($totalMinutes <= 60) {
+            return 1;
+        }
+        if ($totalMinutes <= 120) {
+            return 2;
+        }
+
         return 3;
     }
 }

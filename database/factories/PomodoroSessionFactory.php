@@ -17,21 +17,21 @@ class PomodoroSessionFactory extends Factory
     public function definition(): array
     {
         $sessionType = $this->faker->randomElement(['focus', 'short_break', 'long_break']);
-        $plannedDuration = match($sessionType) {
+        $plannedDuration = match ($sessionType) {
             'focus' => $this->faker->randomElement([15, 25, 50]),
             'short_break' => $this->faker->randomElement([5, 10, 15]),
             'long_break' => $this->faker->randomElement([15, 20, 30]),
         };
-        
+
         $startedAt = $this->faker->dateTimeBetween('-30 days', 'now');
         $isCompleted = $this->faker->boolean(80); // 80%の確率で完了
         $wasInterrupted = $isCompleted ? $this->faker->boolean(20) : $this->faker->boolean(50);
-        
+
         $actualDuration = null;
         $completedAt = null;
-        
+
         if ($isCompleted) {
-            $actualDuration = $wasInterrupted 
+            $actualDuration = $wasInterrupted
                 ? $this->faker->numberBetween(1, $plannedDuration - 1)
                 : $this->faker->numberBetween($plannedDuration - 2, $plannedDuration + 2);
             $completedAt = \Carbon\Carbon::parse($startedAt)->addMinutes($actualDuration);
@@ -85,11 +85,11 @@ class PomodoroSessionFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $actualDuration = $this->faker->numberBetween(
-                $attributes['planned_duration'] - 2, 
+                $attributes['planned_duration'] - 2,
                 $attributes['planned_duration'] + 2
             );
             $startedAt = $attributes['started_at'] ?? now()->subMinutes($actualDuration);
-            
+
             return [
                 'actual_duration' => $actualDuration,
                 'completed_at' => \Carbon\Carbon::parse($startedAt)->addMinutes($actualDuration),
@@ -104,7 +104,7 @@ class PomodoroSessionFactory extends Factory
         return $this->state(function (array $attributes) {
             $actualDuration = $this->faker->numberBetween(1, $attributes['planned_duration'] - 1);
             $startedAt = $attributes['started_at'] ?? now()->subMinutes($actualDuration);
-            
+
             return [
                 'actual_duration' => $actualDuration,
                 'completed_at' => \Carbon\Carbon::parse($startedAt)->addMinutes($actualDuration),

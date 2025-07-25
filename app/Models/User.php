@@ -65,7 +65,7 @@ class User extends Authenticatable
     // ヘルパーメソッド
     public function isGoogleUser(): bool
     {
-        return !is_null($this->google_id);
+        return ! is_null($this->google_id);
     }
 
     public function getAvatarUrlAttribute(): string
@@ -73,9 +73,10 @@ class User extends Authenticatable
         if ($this->avatar) {
             return $this->avatar;
         }
-        
+
         // Gravatar URLをフォールバックとして使用
         $hash = md5(strtolower(trim($this->email)));
+
         return "https://www.gravatar.com/avatar/{$hash}?d=identicon&s=100";
     }
 }

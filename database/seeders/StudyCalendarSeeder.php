@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\ExamType;
-use App\Models\SubjectArea;
 use App\Models\StudySession;
+use App\Models\SubjectArea;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class StudyCalendarSeeder extends Seeder
 {
@@ -16,9 +16,16 @@ class StudyCalendarSeeder extends Seeder
      */
     public function run(): void
     {
+        // 本番環境では実行しない
+        if (app()->environment('production')) {
+            $this->command->warn('本番環境ではテストデータの作成をスキップします。');
+
+            return;
+        }
+
         // テストユーザーを作成（または既存のものを使用）
         $user = User::firstOrCreate([
-            'email' => 'demo@example.com'
+            'email' => 'demo@example.com',
         ], [
             'nickname' => 'デモユーザー',
             'password' => bcrypt('password'),
@@ -37,7 +44,7 @@ class StudyCalendarSeeder extends Seeder
                 ['code' => $examData['code']],
                 [
                     'name' => $examData['name'],
-                    'description' => $examData['name'] . 'の学習',
+                    'description' => $examData['name'].'の学習',
                     'is_active' => true,
                     'is_system' => false,
                     'user_id' => $user->id,
@@ -54,7 +61,7 @@ class StudyCalendarSeeder extends Seeder
                     'name' => $subjectName,
                 ], [
                     'code' => strtolower(str_replace(' ', '_', $subjectName)),
-                    'description' => $subjectName . 'の学習分野',
+                    'description' => $subjectName.'の学習分野',
                     'sort_order' => 1,
                     'is_active' => true,
                     'is_system' => false,
@@ -80,22 +87,22 @@ class StudyCalendarSeeder extends Seeder
         $startDate = $endDate->copy()->subMonths(6);
 
         $currentDate = $startDate->copy();
-        
+
         while ($currentDate->lte($endDate)) {
             // 学習パターンを決定（現実的な学習習慣を模倣）
             $studyProbability = $this->getStudyProbability($currentDate);
-            
+
             if (rand(1, 100) <= $studyProbability) {
                 $sessionsToday = $this->determineSessionsForDay($currentDate);
-                
+
                 foreach ($sessionsToday as $sessionData) {
                     $subject = $subjects->random();
-                    
+
                     $startTime = $currentDate->copy()->setTime(
-                        $sessionData['hour'], 
+                        $sessionData['hour'],
                         rand(0, 59)
                     );
-                    
+
                     StudySession::create([
                         'user_id' => $user->id,
                         'subject_area_id' => $subject->id,
@@ -106,7 +113,7 @@ class StudyCalendarSeeder extends Seeder
                     ]);
                 }
             }
-            
+
             $currentDate->addDay();
         }
     }
@@ -118,29 +125,29 @@ class StudyCalendarSeeder extends Seeder
     {
         // 基本確率
         $baseProbability = 60;
-        
+
         // 曜日による調整
         if ($date->isWeekend()) {
             $baseProbability += 20; // 週末は学習しやすい
         }
-        
+
         // 月末・月初は忙しいので学習確率下がる
         if ($date->day <= 3 || $date->day >= 28) {
             $baseProbability -= 15;
         }
-        
+
         // 試験前（仮に毎月15日が模擬試験とする）
         $daysUntilExam = abs($date->day - 15);
         if ($daysUntilExam <= 3) {
             $baseProbability += 30; // 試験前は頑張る
         }
-        
+
         // 最近の日付ほど学習確率を上げる（継続的な学習）
         $daysFromToday = $date->diffInDays(now());
         if ($daysFromToday <= 30) {
             $baseProbability += 20;
         }
-        
+
         return min(95, max(10, $baseProbability));
     }
 
@@ -151,14 +158,14 @@ class StudyCalendarSeeder extends Seeder
     {
         $sessions = [];
         $sessionCount = $this->getRandomSessionCount($date);
-        
+
         for ($i = 0; $i < $sessionCount; $i++) {
             $sessions[] = [
                 'hour' => $this->getRandomStudyHour($i),
-                'duration' => $this->getRandomDuration($date)
+                'duration' => $this->getRandomDuration($date),
             ];
         }
-        
+
         return $sessions;
     }
 
@@ -186,8 +193,9 @@ class StudyCalendarSeeder extends Seeder
             [12, 14], // 昼休み
             [19, 22], // 夜の学習
         ];
-        
+
         $slot = $timeSlots[$sessionIndex % count($timeSlots)];
+
         return rand($slot[0], $slot[1]);
     }
 
@@ -222,7 +230,7 @@ class StudyCalendarSeeder extends Seeder
             "{$subjectName}について調べ物",
             "{$subjectName}の模擬試験",
         ];
-        
+
         return $comments[array_rand($comments)];
     }
 
@@ -239,7 +247,7 @@ class StudyCalendarSeeder extends Seeder
                 'テスト分析・設計',
                 'テスト実装・実行',
                 'テスト完了基準',
-                'テストツール'
+                'テストツール',
             ],
             'aws_saa' => [
                 'EC2・コンピューティング',
@@ -248,7 +256,7 @@ class StudyCalendarSeeder extends Seeder
                 'RDS・データベース',
                 'IAM・セキュリティ',
                 'CloudFormation',
-                'モニタリング・ログ'
+                'モニタリング・ログ',
             ],
             'java_se11' => [
                 'Java基本文法',
@@ -257,8 +265,8 @@ class StudyCalendarSeeder extends Seeder
                 'ストリーム API',
                 '例外処理',
                 'モジュールシステム',
-                'ラムダ式'
-            ]
+                'ラムダ式',
+            ],
         ];
 
         return $subjects[$examCode] ?? ['基本学習'];

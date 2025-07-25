@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\StudyActivityService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -34,7 +34,7 @@ class AnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -43,7 +43,7 @@ class AnalyticsController extends Controller
             $startDate = $request->get('start_date');
             $endDate = $request->get('end_date');
             $limit = $request->get('limit', 50);
-            
+
             $history = $this->studyActivityService->getUnifiedHistory(
                 $user->id,
                 $startDate,
@@ -53,14 +53,15 @@ class AnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $history->toArray()
+                'data' => $history->toArray(),
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('統合履歴取得エラー: ' . $e->getMessage());
+            \Log::error('統合履歴取得エラー: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => '履歴の取得に失敗しました'
+                'message' => '履歴の取得に失敗しました',
             ], 500);
         }
     }
@@ -79,7 +80,7 @@ class AnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -96,14 +97,15 @@ class AnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $stats
+                'data' => $stats,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('統合統計取得エラー: ' . $e->getMessage());
+            \Log::error('統合統計取得エラー: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => '統計の取得に失敗しました'
+                'message' => '統計の取得に失敗しました',
             ], 500);
         }
     }
@@ -119,14 +121,15 @@ class AnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $insights
+                'data' => $insights,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('インサイト取得エラー: ' . $e->getMessage());
+            \Log::error('インサイト取得エラー: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'インサイトの取得に失敗しました'
+                'message' => 'インサイトの取得に失敗しました',
             ], 500);
         }
     }
@@ -144,7 +147,7 @@ class AnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -159,14 +162,15 @@ class AnalyticsController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $suggestion
+                'data' => $suggestion,
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('推奨取得エラー: ' . $e->getMessage());
+            \Log::error('推奨取得エラー: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => '推奨の取得に失敗しました'
+                'message' => '推奨の取得に失敗しました',
             ], 500);
         }
     }
@@ -187,7 +191,7 @@ class AnalyticsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -209,16 +213,16 @@ class AnalyticsController extends Controller
             // 変化率計算
             $period1Total = $period1Stats['overview']['total_study_time'];
             $period2Total = $period2Stats['overview']['total_study_time'];
-            
-            $totalTimeChange = $period2Total > 0 
-                ? (($period1Total - $period2Total) / $period2Total) * 100 
+
+            $totalTimeChange = $period2Total > 0
+                ? (($period1Total - $period2Total) / $period2Total) * 100
                 : 0;
 
             $period1Sessions = $period1Stats['overview']['total_sessions'];
             $period2Sessions = $period2Stats['overview']['total_sessions'];
-            
-            $sessionCountChange = $period2Sessions > 0 
-                ? (($period1Sessions - $period2Sessions) / $period2Sessions) * 100 
+
+            $sessionCountChange = $period2Sessions > 0
+                ? (($period1Sessions - $period2Sessions) / $period2Sessions) * 100
                 : 0;
 
             return response()->json([
@@ -229,15 +233,16 @@ class AnalyticsController extends Controller
                     'changes' => [
                         'total_study_time_change' => round($totalTimeChange, 1),
                         'session_count_change' => round($sessionCountChange, 1),
-                    ]
-                ]
+                    ],
+                ],
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('比較分析エラー: ' . $e->getMessage());
+            \Log::error('比較分析エラー: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => '比較分析の取得に失敗しました'
+                'message' => '比較分析の取得に失敗しました',
             ], 500);
         }
     }

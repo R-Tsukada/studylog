@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use App\Models\DailyStudySummary;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class DailyStudySummaryFactory extends Factory
 {
@@ -15,15 +15,15 @@ class DailyStudySummaryFactory extends Factory
     {
         $totalMinutes = $this->faker->numberBetween(30, 240);
         $sessionCount = $this->faker->numberBetween(1, 4);
-        
+
         return [
             'user_id' => User::factory(),
             'study_date' => $this->faker->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
             'total_minutes' => $totalMinutes,
             'session_count' => $sessionCount,
             'subject_breakdown' => [
-                'テストの基礎' => (int)($totalMinutes * 0.4),
-                'テスト技法' => (int)($totalMinutes * 0.6),
+                'テストの基礎' => (int) ($totalMinutes * 0.4),
+                'テスト技法' => (int) ($totalMinutes * 0.6),
             ],
         ];
     }
@@ -60,4 +60,4 @@ class DailyStudySummaryFactory extends Factory
             'subject_breakdown' => [],
         ]);
     }
-} 
+}

@@ -1,15 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\StudySessionController;
-use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\PomodoroController;
 use App\Http\Controllers\Api\StudyAnalyticsController;
 use App\Http\Controllers\Api\StudyGoalController;
+use App\Http\Controllers\Api\StudySessionController;
+use Illuminate\Support\Facades\Route;
 
 // 認証が不要なエンドポイント
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -26,15 +25,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/auth/account', [AuthController::class, 'deleteAccount']);
     Route::post('/auth/google/link', [GoogleAuthController::class, 'linkGoogleAccount']);
     Route::delete('/auth/google/unlink', [GoogleAuthController::class, 'unlinkGoogleAccount']);
-    
+
     // ユーザー設定管理
     Route::apiResource('user/exam-types', App\Http\Controllers\Api\UserExamTypeController::class);
     Route::apiResource('user/subject-areas', App\Http\Controllers\Api\UserSubjectAreaController::class);
-    
+
     // Dashboard API（認証済みユーザーのデータのみ）
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/statistics', [DashboardController::class, 'statistics']);
-    
+
     // Study Session API（認証済みユーザーのセッションのみ）
     Route::prefix('study-sessions')->group(function () {
         Route::get('/', [StudySessionController::class, 'index']);
@@ -46,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [StudySessionController::class, 'update']);
         Route::delete('/{id}', [StudySessionController::class, 'destroy']);
     });
-    
+
     // Pomodoro Session API（認証済みユーザーのセッションのみ）
     Route::prefix('pomodoro')->group(function () {
         Route::get('/', [PomodoroController::class, 'index']);
@@ -58,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{pomodoroSession}/complete', [PomodoroController::class, 'complete']);
         Route::delete('/{pomodoroSession}', [PomodoroController::class, 'destroy']);
     });
-    
+
     // Study Analytics API（統合分析）
     Route::prefix('analytics')->group(function () {
         Route::get('/history', [StudyAnalyticsController::class, 'history']);
@@ -66,14 +65,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/insights', [StudyAnalyticsController::class, 'insights']);
         Route::get('/suggest', [StudyAnalyticsController::class, 'suggest']);
         Route::get('/comparison', [StudyAnalyticsController::class, 'comparison']);
-        
+
         // 草表示機能
         Route::get('/grass-data', [StudyAnalyticsController::class, 'grassData']);
         Route::get('/monthly-stats', [StudyAnalyticsController::class, 'monthlyStats']);
         Route::get('/day-detail', [StudyAnalyticsController::class, 'dayDetail']);
         Route::post('/clear-grass-cache', [StudyAnalyticsController::class, 'clearGrassCache']);
     });
-    
+
     // Study Goal API（学習目標設定）
     Route::prefix('study-goals')->group(function () {
         Route::get('/', [StudyGoalController::class, 'index']);
