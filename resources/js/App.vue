@@ -9,9 +9,26 @@
             📚 Study Log - すたログ
           </router-link>
           <div class="flex items-center gap-4">
-            <div class="text-sm">
-              👤 {{ user.nickname }}
-            </div>
+            <button 
+              @click="navigateToMyPage"
+              class="flex items-center gap-2 text-sm hover:bg-blue-600 px-3 py-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
+              title="マイページに移動"
+            >
+              <img 
+                v-if="user.avatar_url" 
+                :src="user.avatar_url" 
+                :alt="user.nickname"
+                class="w-6 h-6 rounded-full object-cover border border-gray-300"
+                @error="handleImageError"
+              />
+              <div 
+                v-else 
+                class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-xs font-bold text-white"
+              >
+                {{ user.nickname.charAt(0).toUpperCase() }}
+              </div>
+              <span>{{ user.nickname }}</span>
+            </button>
             <button 
               @click="logout"
               class="text-xs px-3 py-1 rounded transition-colors text-white"
@@ -642,6 +659,17 @@ export default {
     // ログアウトボタンホバーハンドラー
     handleLogoutButtonHover(event, isHover) {
       event.target.style.backgroundColor = isHover ? 'var(--color-muted-blue-light)' : 'var(--color-muted-blue-dark)'
+    },
+
+    // マイページに移動
+    navigateToMyPage() {
+      this.$router.push('/mypage')
+    },
+
+    // 画像エラーハンドリング
+    handleImageError(event) {
+      // 画像読み込みエラー時は非表示にする
+      event.target.style.display = 'none'
     }
   },
   

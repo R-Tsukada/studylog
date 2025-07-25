@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage.vue'
 import Dashboard from './pages/Dashboard.vue'
 import History from './pages/History.vue'
 import Settings from './pages/Settings.vue'
+import MyPage from './pages/MyPage.vue'
 
 const routes = [
   {
@@ -45,6 +46,12 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     component: Settings,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/mypage',
+    name: 'MyPage',
+    component: MyPage,
     meta: { requiresAuth: true }
   },
   {
