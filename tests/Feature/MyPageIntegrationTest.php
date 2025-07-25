@@ -33,9 +33,17 @@ class MyPageIntegrationTest extends TestCase
         // 未認証でマイページにアクセス
         $response = $this->get('/mypage');
 
-        // ログインページにリダイレクトされることを確認
-        // SPAの場合、JavaScriptでリダイレクトされるため、基本的には200が返される
+        // SPAアプリケーションが正常に読み込まれることを確認
         $response->assertStatus(200);
+        
+        // Vueアプリのコンテナが存在することを確認（Vue Routerで認証処理される）
+        $response->assertSee('id="app"', false);
+        
+        // アプリケーションタイトルが正しく設定されていることを確認
+        $response->assertSee('<title>Study Log - すたログ</title>', false);
+        
+        // Vue.jsアプリケーションの基本構造が含まれていることを確認
+        $response->assertSee('resources/js/app.js', false);
     }
 
     /** @test */
