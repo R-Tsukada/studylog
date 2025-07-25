@@ -31,7 +31,7 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         
         // テストデータ作成
         $this->user = User::factory()->create([
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com'
         ]);
         

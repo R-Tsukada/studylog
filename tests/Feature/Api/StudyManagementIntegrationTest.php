@@ -21,7 +21,7 @@ class StudyManagementIntegrationTest extends TestCase
     {
         // 1. ユーザー登録
         $registrationResponse = $this->postJson('/api/auth/register', [
-            'name' => 'テストユーザー',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',

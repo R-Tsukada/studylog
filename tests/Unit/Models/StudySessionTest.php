@@ -53,7 +53,7 @@ class StudySessionTest extends TestCase
         
         $this->assertInstanceOf(User::class, $studySession->user);
         $this->assertEquals($user->id, $studySession->user->id);
-        $this->assertEquals($user->name, $studySession->user->name);
+        $this->assertEquals($user->nickname, $studySession->user->nickname);
     }
 
     /** @test */

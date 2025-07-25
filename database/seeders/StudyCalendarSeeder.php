@@ -20,7 +20,7 @@ class StudyCalendarSeeder extends Seeder
         $user = User::firstOrCreate([
             'email' => 'demo@example.com'
         ], [
-            'name' => 'デモユーザー',
+            'nickname' => 'デモユーザー',
             'password' => bcrypt('password'),
             'email_verified_at' => now(),
         ]);

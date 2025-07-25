@@ -66,7 +66,7 @@ class DailyStudySummaryTest extends TestCase
         
         $this->assertInstanceOf(User::class, $summary->user);
         $this->assertEquals($user->id, $summary->user->id);
-        $this->assertEquals($user->name, $summary->user->name);
+        $this->assertEquals($user->nickname, $summary->user->nickname);
     }
 
     /** @test */
