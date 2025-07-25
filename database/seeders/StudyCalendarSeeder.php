@@ -16,6 +16,13 @@ class StudyCalendarSeeder extends Seeder
      */
     public function run(): void
     {
+        // 本番環境では実行しない
+        if (app()->environment('production')) {
+            $this->command->warn('本番環境ではテストデータの作成をスキップします。');
+
+            return;
+        }
+
         // テストユーザーを作成（または既存のものを使用）
         $user = User::firstOrCreate([
             'email' => 'demo@example.com',

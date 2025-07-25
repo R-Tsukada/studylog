@@ -61,13 +61,16 @@ class MigrateGrassDisplayData extends Command
         DB::beginTransaction();
 
         try {
-            foreach ($summaries as $summary) {
-                $updated = $this->migrateDailySummary($summary, $dryRun);
-                if ($updated) {
-                    $updatedCount++;
+            // バッチ処理でN+1問題を回避 - 小さなチャンクに分けて処理
+            $summaries->chunk(50)->each(function ($chunk) use (&$updatedCount, $progressBar, $dryRun) {
+                foreach ($chunk as $summary) {
+                    $updated = $this->migrateDailySummary($summary, $dryRun);
+                    if ($updated) {
+                        $updatedCount++;
+                    }
+                    $progressBar->advance();
                 }
-                $progressBar->advance();
-            }
+            });
 
             $progressBar->finish();
             $this->newLine();

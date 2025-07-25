@@ -185,6 +185,17 @@ class AuthController extends Controller
         try {
             $user = $request->user();
 
+            // Google認証ユーザーのパスワード変更をブロック
+            if ($user->isGoogleUser() && $request->has('password')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Google認証ユーザーはパスワードを変更できません',
+                    'errors' => [
+                        'password' => ['Google認証ユーザーはパスワードを設定できません'],
+                    ],
+                ], 422);
+            }
+
             $validated = $request->validate([
                 'nickname' => 'sometimes|string|max:255',
                 'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,

@@ -243,8 +243,8 @@ class DashboardController extends Controller
                 return [
                     'id' => $session->id,
                     'type' => 'pomodoro_session',
-                    'subject_area_name' => $session->subjectArea ? $session->subjectArea->name : 'ポモドーロ学習',
-                    'exam_type_name' => $session->subjectArea && $session->subjectArea->examType ? $session->subjectArea->examType->name : null,
+                    'subject_area_name' => $session->subjectArea?->name ?? 'ポモドーロ学習',
+                    'exam_type_name' => $session->subjectArea?->examType?->name,
                     'started_at' => $session->started_at,
                     'last_studied_at' => $session->started_at->format('Y-m-d'),
                     'duration_minutes' => $session->actual_duration,
@@ -281,7 +281,7 @@ class DashboardController extends Controller
             }
 
             return [
-                'exam_type_name' => $goal->examType->name,
+                'exam_type_name' => $goal->examType?->name,
                 'daily_minutes_goal' => $goal->daily_minutes_goal,
                 'weekly_minutes_goal' => $goal->weekly_minutes_goal,
                 'exam_date' => $goal->exam_date,

@@ -221,7 +221,6 @@ class PomodoroController extends Controller
 
             return response()->json([
                 'message' => 'ポモドーロ統計の取得中にエラーが発生しました',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }
