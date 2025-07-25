@@ -57,8 +57,8 @@
         </div>
       </div>
 
-      <!-- ステップ1: パスワード確認（Googleユーザー以外） -->
-      <div v-if="!user.is_google_user" class="bg-white rounded-lg p-4 border border-red-200">
+      <!-- ステップ1: パスワード確認 -->
+      <div class="bg-white rounded-lg p-4 border border-red-200">
         <label class="block text-sm font-medium text-red-700 mb-3">
           <span class="flex items-center gap-2">
             🔒 削除確認のため、現在のパスワードを入力してください
@@ -78,7 +78,8 @@
         </p>
       </div>
 
-      <!-- Googleユーザーの場合の認証確認 -->  
+      <!-- Googleユーザーの場合の認証確認 - 未実装のためコメントアウト -->  
+      <!-- 
       <div v-else class="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <div class="flex items-start">
           <div class="text-blue-500 text-lg mr-3">🔐</div>
@@ -90,6 +91,7 @@
           </div>
         </div>
       </div>
+      -->
 
       <!-- ステップ2: 最終確認チェックボックス -->
       <div class="bg-white rounded-lg p-4 border border-red-200">
@@ -197,7 +199,7 @@ export default {
   computed: {
     currentStep() {
       if (!this.showConfirmation) return 0
-      if (!this.user.is_google_user && !this.password) return 1
+      if (!this.password) return 1
       if (!this.allConfirmationsChecked) return 2
       return 3
     },
@@ -209,8 +211,7 @@ export default {
     },
     
     canDelete() {
-      const authValid = this.user.is_google_user || this.password.length > 0
-      return authValid && this.allConfirmationsChecked
+      return this.password.length > 0 && this.allConfirmationsChecked
     }
   },
   methods: {
@@ -248,12 +249,8 @@ export default {
       
       try {
         const deleteData = {
-          confirmation: '削除します'  // 必須の確認フィールド
-        }
-        
-        // Googleユーザー以外はパスワード確認が必要
-        if (!this.user.is_google_user) {
-          deleteData.password = this.password
+          confirmation: '削除します',  // 必須の確認フィールド
+          password: this.password      // パスワード確認が必要
         }
         
         const response = await axios.delete('/api/auth/account', {

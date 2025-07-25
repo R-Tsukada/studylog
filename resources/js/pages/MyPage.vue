@@ -26,9 +26,12 @@
           <p class="text-gray-600 mb-1">{{ user.email }}</p>
           <p class="text-sm text-gray-500">
             登録日: {{ formatDate(user.created_at) }}
+            <!-- Google連携表示 - 未実装のためコメントアウト -->
+            <!-- 
             <span v-if="user.is_google_user" class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
               Google連携
             </span>
+            -->
           </p>
         </div>
       </div>

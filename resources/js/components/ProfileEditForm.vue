@@ -39,7 +39,7 @@
     </div>
 
     <!-- パスワード変更セクション -->
-    <div v-if="!user.is_google_user" class="border-t pt-6">
+    <div class="border-t pt-6">
       <h3 class="text-lg font-medium text-gray-800 mb-4">パスワード変更</h3>
       
       <div class="space-y-4">
@@ -84,7 +84,8 @@
       </div>
     </div>
 
-    <!-- Google認証ユーザーの場合のパスワード変更不可メッセージ -->
+    <!-- Google認証ユーザーの場合のパスワード変更不可メッセージ - 未実装のためコメントアウト -->
+    <!-- 
     <div v-else class="bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div class="flex items-start">
         <div class="flex-shrink-0">
@@ -100,6 +101,7 @@
         </div>
       </div>
     </div>
+    -->
 
     <!-- 送信ボタン -->
     <div class="flex justify-end pt-4">
