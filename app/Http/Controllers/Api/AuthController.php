@@ -20,13 +20,13 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'nickname' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => ['required', 'confirmed', Password::min(8)],
             ]);
 
             $user = User::create([
-                'name' => $validated['name'],
+                'nickname' => $validated['nickname'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'email_verified_at' => now(), // 今回は自動で認証済みとする
@@ -40,7 +40,7 @@ class AuthController extends Controller
                 'message' => 'ユーザー登録が完了しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -103,7 +103,7 @@ class AuthController extends Controller
                 'message' => 'ログインしました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -160,7 +160,7 @@ class AuthController extends Controller
                 'success' => true,
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -187,7 +187,7 @@ class AuthController extends Controller
             $user = $request->user();
             
             $validated = $request->validate([
-                'name' => 'sometimes|string|max:255',
+                'nickname' => 'sometimes|string|max:255',
                 'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
                 'password' => ['sometimes', 'confirmed', Password::min(8)],
             ]);
@@ -204,7 +204,7 @@ class AuthController extends Controller
                 'message' => 'プロフィールを更新しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),

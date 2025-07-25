@@ -67,7 +67,7 @@ class GoogleAuthController extends Controller
             } else {
                 // 新規ユーザーの場合：作成
                 $user = User::create([
-                    'name' => $googleUser->getName(),
+                    'nickname' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
@@ -87,7 +87,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Google認証でログインしました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -150,7 +150,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Googleアカウントと連携しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
@@ -201,7 +201,7 @@ class GoogleAuthController extends Controller
                 'message' => 'Googleアカウントとの連携を解除しました',
                 'user' => [
                     'id' => $user->id,
-                    'name' => $user->name,
+                    'nickname' => $user->nickname,
                     'email' => $user->email,
                     'avatar_url' => $user->avatar_url,
                     'is_google_user' => $user->isGoogleUser(),
