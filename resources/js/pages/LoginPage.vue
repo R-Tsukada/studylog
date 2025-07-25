@@ -52,10 +52,11 @@
         
         <button 
           @click="loginWithGoogle"
-          :disabled="loading"
-          class="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg mb-4"
+          disabled
+          class="w-full bg-gray-400 cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg mb-4 opacity-60"
+          title="Google認証機能は現在準備中です"
         >
-          🔍 Googleでログイン
+          🔍 Googleでログイン（準備中）
         </button>
         
         <p class="text-center text-sm text-gray-600">
@@ -221,6 +222,11 @@ export default {
     },
     
     async loginWithGoogle() {
+      // Google認証機能は現在未実装のため無効化
+      this.showError('Google認証機能は現在準備中です。通常のメールアドレス・パスワードでログインしてください。')
+      return
+      
+      /* 以下は将来の実装用にコメントアウト
       this.loading = true
       this.errorMessage = ''
       
@@ -238,6 +244,7 @@ export default {
       } finally {
         this.loading = false
       }
+      */
     },
     
     handleAuthSuccess(data) {
