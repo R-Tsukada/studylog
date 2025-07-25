@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
     <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">📚 資格学習アプリ</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">📚 Study Log - すたログ</h1>
         <p class="text-gray-600">学習記録で目標達成をサポート</p>
       </div>
 
@@ -71,13 +71,13 @@
         <h2 class="text-xl font-semibold mb-4 text-center">新規登録</h2>
         <form @submit.prevent="register">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">お名前</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">ニックネーム</label>
             <input 
               type="text" 
-              v-model="registerForm.name"
+              v-model="registerForm.nickname"
               required
               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="お名前"
+              placeholder="ニックネーム"
             />
           </div>
           <div class="mb-4">
@@ -156,7 +156,7 @@ export default {
         password: ''
       },
       registerForm: {
-        name: '',
+        nickname: '',
         email: '',
         password: '',
         password_confirmation: ''
