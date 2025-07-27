@@ -180,8 +180,8 @@
 
 <script>
 import { reactive, computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
-import OnboardingAPI from '../../utils/OnboardingAPI.js'
-import OnboardingStorage from '../../utils/OnboardingStorage.js'
+import OnboardingAPI from '../../utils/OnboardingAPI'
+import OnboardingStorage from '../../utils/OnboardingStorage'
 
 // ステップコンポーネント
 import WelcomeStep from './steps/WelcomeStep.vue'
