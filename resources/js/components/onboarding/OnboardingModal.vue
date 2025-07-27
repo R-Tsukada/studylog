@@ -375,10 +375,10 @@ export default {
     const syncProgress = async () => {
       try {
         await OnboardingAPI.updateProgress({
-          currentStep: state.currentStep,
-          completedSteps: state.completedSteps,
-          stepData: OnboardingStorage.getAllStepData(),
-          timestamp: new Date().toISOString()
+          current_step: state.currentStep,
+          completed_steps: state.completedSteps,
+          step_data: OnboardingStorage.getAllStepData(),
+          timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
         })
 
         // ローカルストレージにも保存
