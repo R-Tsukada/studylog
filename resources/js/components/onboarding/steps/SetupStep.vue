@@ -30,6 +30,7 @@
           <option v-for="exam in examTypes" :key="exam.value" :value="exam.value">
             {{ exam.label }}
           </option>
+          <option value="custom">カスタム試験を作成</option>
         </select>
         <p 
           v-if="errors.examType" 
@@ -39,6 +40,14 @@
         >
           {{ errors.examType }}
         </p>
+      </div>
+
+      <!-- カスタム試験フォーム -->
+      <div v-if="form.examType === 'custom'" class="bg-gray-50 border border-gray-200 rounded-md p-4">
+        <CustomExamForm
+          v-model="form.customExam"
+          @validation-change="handleCustomExamValidation"
+        />
       </div>
 
       <!-- 試験日程 -->
@@ -202,9 +211,13 @@
 <script>
 import { reactive, computed, watch, onMounted } from 'vue'
 import { examTypes, subjectsByExam } from '../../../utils/examConfig'
+import CustomExamForm from '../CustomExamForm.vue'
 
 export default {
   name: 'SetupStep',
+  components: {
+    CustomExamForm
+  },
   emits: ['step-data', 'validation-change'],
   setup(_, { emit }) {
     // フォームデータ
@@ -214,11 +227,23 @@ export default {
       subjects: [],
       dailyGoalMinutes: 60,
       displayName: '',
-      occupation: ''
+      occupation: '',
+      customExam: {
+        name: '',
+        description: '',
+        color: '#9333EA',
+        notes: ''
+      }
     })
 
     // エラー状態
     const errors = reactive({})
+    
+    // カスタム試験のバリデーション状態
+    const customExamValidation = reactive({
+      isValid: false,
+      errors: {}
+    })
 
     // 計算プロパティ
     const availableSubjects = computed(() => {
@@ -231,7 +256,14 @@ export default {
     })
 
     const isValid = computed(() => {
-      return Object.keys(errors).length === 0 && form.examType !== ''
+      const basicValid = Object.keys(errors).length === 0 && form.examType !== ''
+      
+      // カスタム試験の場合は追加バリデーション
+      if (form.examType === 'custom') {
+        return basicValid && customExamValidation.isValid
+      }
+      
+      return basicValid
     })
 
     // メソッド
@@ -284,7 +316,25 @@ export default {
     const handleExamTypeChange = () => {
       // 資格変更時に学習分野をクリア
       form.subjects = []
+      
+      // カスタム試験でない場合はカスタム試験データをクリア
+      if (form.examType !== 'custom') {
+        form.customExam = {
+          name: '',
+          description: '',
+          color: '#9333EA',
+          notes: ''
+        }
+        customExamValidation.isValid = false
+        customExamValidation.errors = {}
+      }
+      
       validateForm()
+    }
+
+    const handleCustomExamValidation = (validation) => {
+      customExamValidation.isValid = validation.isValid
+      customExamValidation.errors = validation.errors
     }
 
     const handleSubmit = () => {
@@ -294,13 +344,34 @@ export default {
     }
 
     const emitStepData = () => {
+      // バックエンドのOnboardingCompleteRequestで期待される形式
+      const stepData = {
+        exam_type: form.examType,
+        exam_date: form.examDate || null,
+        daily_goal_minutes: form.dailyGoalMinutes
+      }
+
+      // カスタム試験の場合は追加データを含める
+      if (form.examType === 'custom' && form.customExam.name) {
+        stepData.custom_exam_name = form.customExam.name
+        stepData.custom_exam_description = form.customExam.description || null
+        stepData.custom_exam_color = form.customExam.color
+        stepData.custom_exam_notes = form.customExam.notes || null
+      }
+
       const data = {
+        // 既存のプロフィール情報（後方互換性のため）
         examType: form.examType,
         examDate: form.examDate || null,
         subjects: form.subjects,
         dailyGoalMinutes: form.dailyGoalMinutes,
         displayName: form.displayName || null,
-        occupation: form.occupation || null
+        occupation: form.occupation || null,
+        
+        // バックエンド用のstep_data形式
+        step_data: {
+          setup_step: stepData
+        }
       }
       
       emit('step-data', data)
@@ -340,6 +411,7 @@ export default {
       isValid,
       formatMinutes,
       handleExamTypeChange,
+      handleCustomExamValidation,
       handleSubmit
     }
   }

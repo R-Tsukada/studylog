@@ -352,11 +352,11 @@ export default {
         // 全ステップ完了済みにマーク
         state.completedSteps = [1, 2, 3, 4]
 
-        // サーバーに完了を記録
+        // サーバーに完了を記録（step_dataを含める）
         await OnboardingAPI.complete({
-          completedSteps: state.completedSteps,
-          totalTimeSpent: calculateTotalTime(),
-          completion_source: 'web_app'
+          completed_steps: state.completedSteps,
+          total_time_spent: calculateTotalTime(),
+          step_data: OnboardingStorage.getAllStepData()
         })
 
         // 状態リセット
