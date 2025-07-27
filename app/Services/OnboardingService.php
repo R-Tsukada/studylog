@@ -17,9 +17,13 @@ class OnboardingService
     {
         $cacheKey = $this->generateCacheKey('analytics', $startDate, $endDate, $groupBy, $limit);
 
-        return Cache::remember($cacheKey, now()->addMinutes(30), function () use ($startDate, $endDate, $groupBy, $limit) {
-            return $this->calculateAnalytics($startDate, $endDate, $groupBy, $limit);
-        });
+        return Cache::remember(
+            $cacheKey,
+            now()->addMinutes(config('onboarding.analytics_cache_duration', 30)),
+            function () use ($startDate, $endDate, $groupBy, $limit) {
+                return $this->calculateAnalytics($startDate, $endDate, $groupBy, $limit);
+            }
+        );
     }
 
     /**

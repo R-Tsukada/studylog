@@ -25,6 +25,9 @@ return [
     // ログ設定
     'enable_detailed_logging' => env('ONBOARDING_DETAILED_LOGGING', true),
 
+    // キャッシュ設定
+    'analytics_cache_duration' => env('ONBOARDING_ANALYTICS_CACHE_MINUTES', 30),
+
     // 管理者権限
     'admin_role' => env('ONBOARDING_ADMIN_ROLE', 'admin'),
     'analytics_permissions' => [
