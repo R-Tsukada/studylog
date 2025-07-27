@@ -15,6 +15,15 @@ class OnboardingService
      */
     public function getAnalytics(string $startDate, string $endDate, ?string $groupBy = null, ?int $limit = null): array
     {
+        // Validate date formats
+        if (!strtotime($startDate) || !strtotime($endDate)) {
+            throw new \InvalidArgumentException('Invalid date format provided');
+        }
+        
+        if (strtotime($startDate) > strtotime($endDate)) {
+            throw new \InvalidArgumentException('Start date must be before or equal to end date');
+        }
+
         $cacheKey = $this->generateCacheKey('analytics', $startDate, $endDate, $groupBy, $limit);
 
         return Cache::remember(
