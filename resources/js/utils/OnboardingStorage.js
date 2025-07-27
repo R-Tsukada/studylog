@@ -152,7 +152,18 @@ class OnboardingStorage {
      * セッションIDを生成
      */
     generateSessionId() {
-        return 'onboarding_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const timestamp = Date.now();
+        
+        // 暗号学的に安全な乱数生成を試行
+        try {
+            const randomValue = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
+            return `onboarding_${timestamp}_${randomValue}`;
+        } catch (error) {
+            // フォールバック: crypto.getRandomValuesが利用できない場合
+            console.warn('crypto.getRandomValues not available, falling back to Math.random:', error);
+            const fallbackRandom = Math.random().toString(36).substr(2, 9);
+            return `onboarding_${timestamp}_${fallbackRandom}`;
+        }
     }
 
     /**
