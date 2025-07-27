@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -152,59 +153,62 @@ class User extends Authenticatable
         ?string $userAgent = null,
         ?string $ipAddress = null
     ): void {
-        $totalSteps = config('onboarding.total_steps', 4);
+        DB::transaction(function () use ($currentStep, $completedSteps, $stepData, $userAgent, $ipAddress) {
+            $totalSteps = config('onboarding.total_steps', 4);
 
-        // 入力値検証
-        if ($currentStep < 1 || $currentStep > $totalSteps) {
-            throw new \InvalidArgumentException("Invalid step number: {$currentStep}");
-        }
+            // 入力値検証
+            if ($currentStep < 1 || $currentStep > $totalSteps) {
+                throw new \InvalidArgumentException("Invalid step number: {$currentStep}");
+            }
 
-        $progress = $this->onboarding_progress ?? [];
+            $progress = $this->onboarding_progress ?? [];
 
-        $progress['current_step'] = $currentStep;
-        $progress['completed_steps'] = array_unique(array_merge(
-            $progress['completed_steps'] ?? [],
-            array_filter($completedSteps, fn ($step) => $step >= 1 && $step <= $totalSteps)
-        ));
-        $progress['step_data'] = array_merge(
-            $progress['step_data'] ?? [],
-            $stepData
-        );
-        $progress['last_activity_at'] = now()->toISOString();
-
-        // 開始時刻が未設定の場合は設定
-        if (! isset($progress['started_at'])) {
-            $progress['started_at'] = now()->toISOString();
-
-            // 開始ログ記録
-            OnboardingLog::logEvent(
-                $this->id,
-                OnboardingLog::EVENT_STARTED,
-                null,
-                [],
-                null,
-                $userAgent,
-                $ipAddress
+            $progress['current_step'] = $currentStep;
+            $progress['completed_steps'] = array_unique(array_merge(
+                $progress['completed_steps'] ?? [],
+                array_filter($completedSteps, fn ($step) => $step >= 1 && $step <= $totalSteps)
+            ));
+            $progress['step_data'] = array_merge(
+                $progress['step_data'] ?? [],
+                $stepData
             );
-        }
+            $progress['last_activity_at'] = now()->toISOString();
 
-        // ステップ完了ログ記録（重複を避ける）- updateの前に実行
-        $existingCompletedSteps = $this->getOriginal('onboarding_progress')['completed_steps'] ?? [];
-        $newlyCompletedSteps = array_diff($completedSteps, $existingCompletedSteps);
+            // 開始時刻が未設定の場合は設定
+            if (! isset($progress['started_at'])) {
+                $progress['started_at'] = now()->toISOString();
 
-        $this->update(['onboarding_progress' => $progress]);
+                // 開始ログ記録
+                OnboardingLog::logEvent(
+                    $this->id,
+                    OnboardingLog::EVENT_STARTED,
+                    null,
+                    [],
+                    null,
+                    $userAgent,
+                    $ipAddress
+                );
+            }
 
-        foreach ($newlyCompletedSteps as $step) {
-            OnboardingLog::logEvent(
-                $this->id,
-                OnboardingLog::EVENT_STEP_COMPLETED,
-                $step,
-                ['timestamp' => now()->toISOString()],
-                null,
-                $userAgent,
-                $ipAddress
-            );
-        }
+            // トランザクション内で元データを取得し、重複を避ける
+            $existingCompletedSteps = $this->onboarding_progress['completed_steps'] ?? [];
+            $newlyCompletedSteps = array_diff($completedSteps, $existingCompletedSteps);
+
+            $this->update(['onboarding_progress' => $progress]);
+
+            // 同一トランザクション内でログ記録
+            foreach ($newlyCompletedSteps as $step) {
+                OnboardingLog::logEvent(
+                    $this->id,
+                    OnboardingLog::EVENT_STEP_COMPLETED,
+                    $step,
+                    ['timestamp' => now()->toISOString()],
+                    null,
+                    $userAgent,
+                    $ipAddress
+                );
+            }
+        });
     }
 
     /**
