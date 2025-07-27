@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\MasterDataController;
+use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\Api\PomodoroController;
 use App\Http\Controllers\Api\StudyAnalyticsController;
 use App\Http\Controllers\Api\StudyGoalController;
@@ -81,6 +82,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{goal}', [StudyGoalController::class, 'show']);
         Route::put('/{goal}', [StudyGoalController::class, 'update']);
         Route::delete('/{goal}', [StudyGoalController::class, 'destroy']);
+    });
+
+    // Onboarding API（オンボーディング機能）
+    Route::prefix('onboarding')->group(function () {
+        Route::get('/status', [OnboardingController::class, 'status']);
+        Route::post('/progress', [OnboardingController::class, 'updateProgress']);
+        Route::post('/complete', [OnboardingController::class, 'complete']);
+        Route::post('/skip', [OnboardingController::class, 'skip']);
+
+        // 管理者用統計API（必要に応じて権限チェック追加）
+        Route::get('/analytics', [OnboardingController::class, 'analytics']);
     });
 });
 

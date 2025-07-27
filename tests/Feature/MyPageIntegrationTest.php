@@ -18,7 +18,7 @@ class MyPageIntegrationTest extends TestCase
     public function mypage_route_is_accessible_with_authentication()
     {
         $user = User::factory()->create();
-        
+
         // ログイン状態をシミュレート
         $response = $this->actingAs($user)
             ->get('/mypage');
@@ -35,13 +35,13 @@ class MyPageIntegrationTest extends TestCase
 
         // SPAアプリケーションが正常に読み込まれることを確認
         $response->assertStatus(200);
-        
+
         // Vueアプリのコンテナが存在することを確認（Vue Routerで認証処理される）
         $response->assertSee('id="app"', false);
-        
+
         // アプリケーションタイトルが正しく設定されていることを確認
         $response->assertSee('<title>Study Log - すたログ</title>', false);
-        
+
         // Vue.jsアプリケーションの基本構造が含まれていることを確認
         $response->assertSee('resources/js/app.js', false);
     }
@@ -54,7 +54,7 @@ class MyPageIntegrationTest extends TestCase
             'email' => 'original@example.com',
             'password' => Hash::make('originalpassword'),
         ]);
-        
+
         Sanctum::actingAs($user);
 
         // 1. ユーザー情報を取得
@@ -107,7 +107,7 @@ class MyPageIntegrationTest extends TestCase
         $user = User::factory()->create([
             'password' => Hash::make('password123'),
         ]);
-        
+
         Sanctum::actingAs($user);
 
         // 1. 削除前にユーザーが存在することを確認
@@ -141,14 +141,14 @@ class MyPageIntegrationTest extends TestCase
             'password' => null,
             'google_id' => 'google_12345',
         ];
-        
+
         // avatar_urlカラムが存在する場合のみ設定
         if (Schema::hasColumn('users', 'avatar_url')) {
             $data['avatar_url'] = 'https://lh3.googleusercontent.com/avatar';
         }
-        
+
         $googleUser = User::factory()->create($data);
-        
+
         Sanctum::actingAs($googleUser);
 
         // 1. Googleユーザーの情報を取得
@@ -161,7 +161,7 @@ class MyPageIntegrationTest extends TestCase
                     'is_google_user' => true,
                 ],
             ]);
-            
+
         // avatar_urlカラムが存在する場合のみテスト
         if (Schema::hasColumn('users', 'avatar_url')) {
             $userResponse->assertJson([
@@ -200,7 +200,7 @@ class MyPageIntegrationTest extends TestCase
             'password' => null,
             'google_id' => 'google_12345',
         ]);
-        
+
         Sanctum::actingAs($googleUser);
 
         // Googleユーザーはパスワード不要で削除可能
@@ -222,7 +222,7 @@ class MyPageIntegrationTest extends TestCase
     {
         $user1 = User::factory()->create(['email' => 'user1@example.com']);
         $user2 = User::factory()->create(['email' => 'user2@example.com']);
-        
+
         Sanctum::actingAs($user1);
 
         // 1. 重複メールアドレスでの更新試行
@@ -256,7 +256,7 @@ class MyPageIntegrationTest extends TestCase
         $user = User::factory()->create([
             'password' => Hash::make('correctpassword'),
         ]);
-        
+
         Sanctum::actingAs($user);
 
         // 1. 間違ったパスワードで削除試行
@@ -287,11 +287,11 @@ class MyPageIntegrationTest extends TestCase
         $user = User::factory()->create([
             'password' => Hash::make('password123'),
         ]);
-        
+
         // 複数のトークンを作成
         $token1 = $user->createToken('device1');
         $token2 = $user->createToken('device2');
-        
+
         Sanctum::actingAs($user);
 
         // 1. プロフィール更新は既存トークンに影響しない
@@ -334,13 +334,13 @@ class MyPageIntegrationTest extends TestCase
             'email' => 'initial@example.com',
             'password' => Hash::make('password123'),
         ]);
-        
+
         Sanctum::actingAs($user);
 
         // 1. 初期データの確認
         $response = $this->getJson('/api/user');
         $initialData = $response->json('user');
-        
+
         $this->assertEquals('初期ニックネーム', $initialData['nickname']);
         $this->assertEquals('initial@example.com', $initialData['email']);
 

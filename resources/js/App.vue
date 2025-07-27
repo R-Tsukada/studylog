@@ -131,6 +131,9 @@
 
       <!-- スペーサー（ボトムナビのため） -->
       <div class="h-20"></div>
+      
+      <!-- オンボーディングモーダル -->
+      <OnboardingModal ref="onboardingModalRef" />
     </div>
 
     <!-- 認証前の画面 -->
@@ -143,9 +146,13 @@
 <script>
 import axios from 'axios'
 import { reactive } from 'vue'
+import OnboardingModal from './components/onboarding/OnboardingModal.vue'
 
 export default {
   name: 'App',
+  components: {
+    OnboardingModal
+  },
   data() {
     return {
       // 認証関連
@@ -173,7 +180,10 @@ export default {
         elapsedMinutes: 0,
         startTime: 0,
         timer: null
-      })
+      }),
+      
+      // オンボーディング関連
+      onboardingModalRef: null
     }
   },
   async mounted() {
@@ -224,6 +234,9 @@ export default {
         if (response.data.success) {
           this.user = response.data.user
           localStorage.setItem('user', JSON.stringify(response.data.user))
+          
+          // 認証確認完了後、オンボーディングをチェック
+          await this.checkAndShowOnboarding()
         } else {
           console.warn('認証状態確認失敗:', response.data)
           this.handleLogout()
@@ -670,6 +683,36 @@ export default {
     handleImageError(event) {
       // 画像読み込みエラー時は非表示にする
       event.target.style.display = 'none'
+    },
+    
+    // オンボーディング関連メソッド
+    async checkAndShowOnboarding() {
+      try {
+        // 少し遅延してから実行（UIが安定してから）
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // オンボーディングモーダルコンポーネントが利用可能かチェック
+        if (this.$refs.onboardingModalRef && this.$refs.onboardingModalRef.showOnboarding) {
+          await this.$refs.onboardingModalRef.showOnboarding()
+        } else {
+          console.warn('オンボーディングモーダルが利用できません')
+        }
+      } catch (error) {
+        console.error('オンボーディングチェックエラー:', error)
+        // エラーが発生してもアプリの動作は継続
+      }
+    },
+    
+    // 手動でオンボーディングを表示（設定画面から呼び出し用）
+    async showOnboardingManually() {
+      try {
+        if (this.$refs.onboardingModalRef && this.$refs.onboardingModalRef.showOnboarding) {
+          await this.$refs.onboardingModalRef.showOnboarding()
+        }
+      } catch (error) {
+        console.error('手動オンボーディング表示エラー:', error)
+        this.showError('オンボーディング表示中にエラーが発生しました')
+      }
     }
   },
   

@@ -22,12 +22,12 @@ class MyPageTest extends TestCase
             'password' => $isGoogleUser ? null : Hash::make('password123'),
             'google_id' => $isGoogleUser ? 'google_123' : null,
         ];
-        
+
         // avatar_urlカラムが存在する場合のみ設定
         if (Schema::hasColumn('users', 'avatar_url')) {
             $data['avatar_url'] = $isGoogleUser ? 'https://example.com/avatar.jpg' : null;
         }
-        
+
         return User::factory()->create($data);
     }
 
@@ -45,8 +45,8 @@ class MyPageTest extends TestCase
             ])
             ->assertJsonStructure([
                 'user' => [
-                    'id', 'nickname', 'email', 'avatar_url', 'is_google_user', 'created_at'
-                ]
+                    'id', 'nickname', 'email', 'avatar_url', 'is_google_user', 'created_at',
+                ],
             ]);
 
         $this->assertEquals('テストユーザー', $response->json('user.nickname'));
@@ -64,7 +64,7 @@ class MyPageTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertTrue($response->json('user.is_google_user'));
-        
+
         // avatar_urlカラムが存在する場合のみテスト
         if (Schema::hasColumn('users', 'avatar_url')) {
             $this->assertEquals('https://example.com/avatar.jpg', $response->json('user.avatar_url'));
@@ -175,7 +175,7 @@ class MyPageTest extends TestCase
     {
         $user1 = $this->createTestUser();
         $user2 = User::factory()->create(['email' => 'existing@example.com']);
-        
+
         Sanctum::actingAs($user1);
 
         $response = $this->putJson('/api/auth/profile', [
@@ -287,11 +287,11 @@ class MyPageTest extends TestCase
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
         $user = $this->createTestUser();
-        
+
         // 複数のトークンを作成
         $token1 = $user->createToken('token1');
         $token2 = $user->createToken('token2');
-        
+
         Sanctum::actingAs($user);
 
         // トークンが作成されていることを確認
@@ -360,12 +360,12 @@ class MyPageTest extends TestCase
         $response->assertStatus(200);
 
         $user->refresh();
-        
+
         // 変更されるべきフィールド
         $this->assertEquals('新しいニックネーム', $user->nickname);
         $this->assertEquals('new@example.com', $user->email);
         $this->assertTrue(Hash::check('newpassword123', $user->password));
-        
+
         // 変更されないフィールド
         $this->assertEquals($originalId, $user->id);
         $this->assertEquals($originalCreatedAt, $user->created_at);
