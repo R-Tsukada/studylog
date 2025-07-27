@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\OnboardingLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class OnboardingControllerExtendedTest extends TestCase
@@ -312,15 +313,27 @@ class OnboardingControllerExtendedTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function it_includes_proper_error_logging(): void
     {
-        // 無効なデータでAPIエラーを誘発
+        // Laravelのログファサードをモック化してエラーログ記録を検証
+        Log::shouldReceive('error')
+            ->once()
+            ->with(
+                'Onboarding API Error',
+                \Mockery::on(function ($context) {
+                    return is_array($context) &&
+                           isset($context['user_id']) &&
+                           isset($context['endpoint']) &&
+                           isset($context['method']) &&
+                           $context['endpoint'] === '/api/onboarding/progress';
+                })
+            );
+
+        // 無効なデータでAPIエラーを誘発（バリデーションエラーではなく、システムエラーを狙う）
         $response = $this->actingAs($this->user)
             ->postJson('/api/onboarding/progress', [
-                'current_step' => 'invalid',
+                'current_step' => 999, // 存在しないステップ番号
+                'completed_steps' => [1, 2, 3],
             ]);
 
         $response->assertStatus(422);
-
-        // ログが記録されることを確認（実際のログ確認は環境に依存）
-        $this->assertTrue(true); // ログ確認の具体的なアサーションはテスト環境次第
     }
 }
