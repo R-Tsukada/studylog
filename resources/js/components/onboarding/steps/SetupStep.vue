@@ -266,8 +266,9 @@ export default {
         const selectedDate = new Date(form.examDate)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
+        selectedDate.setHours(0, 0, 0, 0)
         
-        if (selectedDate <= today) {
+        if (selectedDate < today) {
           errors.examDate = '試験日は今日以降の日付を選択してください'
         }
       }
