@@ -226,6 +226,7 @@ class OnboardingServiceTest extends TestCase
     public function it_updates_user_progress_safely_with_transaction(): void
     {
         $initialProgress = $this->user->onboarding_progress;
+        $this->assertNull($initialProgress, 'Initial onboarding progress should be null');
 
         // 正常なケース
         $result = $this->service->updateUserProgressSafely(
@@ -240,6 +241,8 @@ class OnboardingServiceTest extends TestCase
         $this->user->refresh();
         $progress = $this->user->onboarding_progress;
 
+        // 初期状態から適切に更新されたことを確認
+        $this->assertNotEquals($initialProgress, $progress, 'Progress should be different from initial state');
         $this->assertEquals(2, $progress['current_step']);
         $this->assertEquals([1], $progress['completed_steps']);
         $this->assertEquals(['exam_type' => 'JSTQB'], $progress['step_data']);
