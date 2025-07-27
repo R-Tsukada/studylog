@@ -20,12 +20,12 @@
         <!-- モーダル本体 -->
         <div 
           ref="modalRef"
-          class="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden
+          class="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col
                  transform transition-all duration-300 ease-out"
           :class="{ 'scale-95 opacity-0': state.isLoading }"
         >
           <!-- ヘッダー -->
-          <header class="flex justify-between items-center p-4 border-b border-gray-200">
+          <header class="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200">
             <div class="flex items-center gap-3">
               <span class="text-2xl" aria-hidden="true">📚</span>
               <div>
@@ -54,7 +54,7 @@
           </header>
           
           <!-- プログレスバー -->
-          <div class="border-b border-gray-200">
+          <div class="flex-shrink-0 border-b border-gray-200">
             <div 
               class="h-2 bg-blue-600 transition-all duration-300 ease-out"
               :style="{ width: progress + '%' }"
@@ -69,7 +69,7 @@
           <!-- メインコンテンツ -->
           <main 
             id="onboarding-content"
-            class="p-6 overflow-y-auto"
+            class="flex-1 p-6 overflow-y-auto min-h-0"
             tabindex="-1"
           >
             <Transition name="step-slide" mode="out-in">
@@ -84,7 +84,7 @@
           
           <!-- フッター -->
           <footer 
-            class="flex justify-between items-center p-4 border-t border-gray-200 bg-gray-50"
+            class="flex-shrink-0 flex justify-between items-center p-4 border-t border-gray-200 bg-gray-50"
             role="navigation"
             aria-label="オンボーディングナビゲーション"
           >
