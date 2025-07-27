@@ -41,8 +41,8 @@ class OnboardingStorage {
 
             const stateData = JSON.parse(stored);
             
-            // セッション有効性チェック
-            if (!this.isValidSession(stateData.timestamp)) {
+            // セッション有効性チェック（無限再帰を避けるため直接チェック）
+            if (!stateData.timestamp || (Date.now() - stateData.timestamp) >= this.SESSION_TIMEOUT) {
                 this.clearState();
                 return null;
             }
