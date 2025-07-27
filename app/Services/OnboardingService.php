@@ -252,6 +252,11 @@ class OnboardingService
      */
     public function clearAnalyticsCache(): void
     {
-        Cache::tags(['onboarding'])->flush();
+        $store = Cache::getStore();
+        if ($store instanceof \Illuminate\Cache\TaggableStore) {
+            Cache::tags(['onboarding'])->flush();
+        }
+        // Note: タグがサポートされていないドライバーの場合は、
+        // 個別のキャッシュキークリアや全体フラッシュが必要に応じて実装可能
     }
 }
