@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('user_agent', 500)->nullable()->comment('ユーザーエージェント');
             $table->ipAddress('ip_address')->nullable()->comment('IPアドレス');
             $table->timestamp('created_at')->useCurrent()->comment('作成日時');
-            
+
             // インデックス
             $table->index(['user_id', 'event_type'], 'idx_onboarding_logs_user_event');
             $table->index('created_at', 'idx_onboarding_logs_created_at');

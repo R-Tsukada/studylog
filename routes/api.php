@@ -90,7 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/progress', [OnboardingController::class, 'updateProgress']);
         Route::post('/complete', [OnboardingController::class, 'complete']);
         Route::post('/skip', [OnboardingController::class, 'skip']);
-        
+
         // 管理者用統計API（必要に応じて権限チェック追加）
         Route::get('/analytics', [OnboardingController::class, 'analytics']);
     });

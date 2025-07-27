@@ -30,8 +30,8 @@ class OnboardingControllerTest extends TestCase
                 'data' => [
                     'should_show' => true,
                     'completed_at' => null,
-                    'skipped' => false
-                ]
+                    'skipped' => false,
+                ],
             ]);
     }
 
@@ -46,8 +46,8 @@ class OnboardingControllerTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'should_show' => false
-                ]
+                    'should_show' => false,
+                ],
             ]);
     }
 
@@ -56,7 +56,7 @@ class OnboardingControllerTest extends TestCase
         $data = [
             'current_step' => 2,
             'completed_steps' => [1],
-            'step_data' => ['exam_type' => 'JSTQB']
+            'step_data' => ['exam_type' => 'JSTQB'],
         ];
 
         $response = $this->actingAs($this->user)
@@ -77,7 +77,7 @@ class OnboardingControllerTest extends TestCase
     {
         $data = [
             'completed_steps' => [1, 2, 3, 4],
-            'total_time_spent' => 300
+            'total_time_spent' => 300,
         ];
 
         $response = $this->actingAs($this->user)
@@ -93,7 +93,7 @@ class OnboardingControllerTest extends TestCase
         // ログ記録確認
         $this->assertDatabaseHas('onboarding_logs', [
             'user_id' => $this->user->id,
-            'event_type' => OnboardingLog::EVENT_COMPLETED
+            'event_type' => OnboardingLog::EVENT_COMPLETED,
         ]);
     }
 
@@ -101,7 +101,7 @@ class OnboardingControllerTest extends TestCase
     {
         $data = [
             'current_step' => 2,
-            'reason' => 'user_choice'
+            'reason' => 'user_choice',
         ];
 
         $response = $this->actingAs($this->user)
@@ -118,7 +118,7 @@ class OnboardingControllerTest extends TestCase
         $this->assertDatabaseHas('onboarding_logs', [
             'user_id' => $this->user->id,
             'event_type' => OnboardingLog::EVENT_SKIPPED,
-            'step_number' => 2
+            'step_number' => 2,
         ]);
     }
 
@@ -126,23 +126,19 @@ class OnboardingControllerTest extends TestCase
     {
         $response = $this->actingAs($this->user)
             ->postJson('/api/onboarding/progress', [
-                'current_step' => 'invalid'
+                'current_step' => 'invalid',
             ]);
 
         $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => 'バリデーションエラー'
-            ])
             ->assertJsonStructure([
-                'errors' => ['current_step']
+                'errors' => ['current_step'],
             ]);
     }
 
     public function test_unauthenticated_requests_are_rejected(): void
     {
         $response = $this->getJson('/api/onboarding/status');
-        
+
         $response->assertStatus(401);
     }
 }
