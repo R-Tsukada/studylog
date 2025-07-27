@@ -243,7 +243,7 @@ class OnboardingControllerExtendedTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_prevents_completing_onboarding_twice(): void
+    public function it_allows_completing_onboarding_multiple_times(): void
     {
         // 一度完了
         $this->actingAs($this->user)
@@ -260,14 +260,15 @@ class OnboardingControllerExtendedTest extends TestCase
                 'completed_steps' => [1, 2, 3, 4],
             ]);
 
-        // 成功するが、2回目の完了ログは作成されない
+        // 成功し、2回目の完了ログも作成される
         $response->assertStatus(200);
 
         $completionLogs = OnboardingLog::where('user_id', $this->user->id)
             ->where('event_type', OnboardingLog::EVENT_COMPLETED)
             ->count();
 
-        $this->assertEquals(2, $completionLogs); // 実際には重複して記録される（ビジネスロジック次第）
+        // 現在の実装では重複完了が許可されており、2つのログが記録される
+        $this->assertEquals(2, $completionLogs);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
