@@ -304,11 +304,27 @@ class OnboardingServiceTest extends TestCase
         $cacheKey = 'onboarding:analytics:'.md5(serialize([$startDate, $endDate, null, null]));
         $this->assertTrue(Cache::has($cacheKey));
 
-        // キャッシュクリア
+        // キャッシュクリア実行
         $this->service->clearAnalyticsCache();
 
-        // キャッシュが削除されることを確認（tagsを使用している場合）
-        // 実際の実装では、Cache::tags(['onboarding'])->flush() が呼ばれる
-        $this->assertTrue(true); // 実装に応じて適切なアサーションに変更
+        // キャッシュストアがタグをサポートするかどうかをチェック
+        $store = Cache::getStore();
+        $supportsTagging = $store instanceof \Illuminate\Cache\TaggableStore;
+
+        if ($supportsTagging) {
+            // タグサポート環境では、タグベースのクリアが実行される
+            // キャッシュがクリアされていることを確認（一旦存在しないはず）
+            $this->assertFalse(Cache::has($cacheKey), 'Cache should be cleared by tag-based flush');
+            
+            // 新しいデータを取得して、キャッシュが再生成されることを確認
+            $newResult = $this->service->getAnalytics($startDate, $endDate);
+            
+            // 新しいキャッシュエントリが作成されることを確認
+            $this->assertTrue(Cache::has($cacheKey), 'Cache should be recreated after tag-based clear');
+            $this->assertIsArray($newResult, 'Analytics result should be valid array');
+        } else {
+            // タグサポートなし環境では、何もしない（キャッシュは残る）
+            $this->assertTrue(Cache::has($cacheKey), 'Cache should remain for non-taggable stores');
+        }
     }
 }
