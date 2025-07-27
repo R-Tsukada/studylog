@@ -198,21 +198,51 @@ class OnboardingService
     ): bool
     {
         return DB::transaction(function () use ($user, $currentStep, $completedSteps, $stepData, $userAgent, $ipAddress) {
-            // 楽観的ロック（updated_atをチェック）
-            $currentTimestamp = $user->updated_at;
-
-            $user->updateOnboardingProgress($currentStep, $completedSteps, $stepData, $userAgent, $ipAddress);
-
-            // 他のプロセスで更新されていないかチェック
-            $user->refresh();
-            if ($user->updated_at->ne($currentTimestamp)) {
-                // 楽観的ロック違反時の処理は、実際のプロジェクトに応じて調整
-                logger()->warning('Onboarding concurrent update detected', [
+            // Store the current version for optimistic locking
+            $currentVersion = $user->updated_at;
+            
+            // Prepare the progress data
+            $progress = $user->onboarding_progress ?? [];
+            $progress['current_step'] = $currentStep;
+            $progress['completed_steps'] = $completedSteps;
+            $progress['step_data'] = $stepData;
+            $progress['updated_at'] = now()->toISOString();
+            
+            // Attempt to update with optimistic lock
+            $updated = User::where('id', $user->id)
+                ->where('updated_at', $currentVersion)
+                ->update([
+                    'onboarding_progress' => $progress,
+                    'updated_at' => now(),
+                ]);
+                
+            if (!$updated) {
+                logger()->warning('Onboarding concurrent update prevented', [
                     'user_id' => $user->id,
                     'current_step' => $currentStep,
                 ]);
+                throw new \RuntimeException('Concurrent update detected. Please try again.');
             }
-
+            
+            // Log the progress update for each newly completed step
+            $previousCompletedSteps = $user->onboarding_progress['completed_steps'] ?? [];
+            $newlyCompletedSteps = array_diff($completedSteps, $previousCompletedSteps);
+            
+            foreach ($newlyCompletedSteps as $stepNumber) {
+                OnboardingLog::logEvent(
+                    $user->id,
+                    OnboardingLog::EVENT_STEP_COMPLETED,
+                    $stepNumber,
+                    array_merge(['completed_steps' => $completedSteps], $stepData),
+                    null,
+                    $userAgent,
+                    $ipAddress
+                );
+            }
+            
+            // Refresh the user model to get the latest data
+            $user->refresh();
+            
             return true;
         });
     }
