@@ -160,8 +160,14 @@ class OnboardingStorage {
      */
     isValidSession(timestamp = null) {
         if (!timestamp) {
-            const state = this.getState();
-            timestamp = state?.timestamp;
+            try {
+                const stored = localStorage.getItem(this.STORAGE_KEYS.STATE);
+                if (!stored) return false;
+                const stateData = JSON.parse(stored);
+                timestamp = stateData.timestamp;
+            } catch (error) {
+                return false;
+            }
         }
 
         if (!timestamp) return false;
