@@ -726,8 +726,7 @@ export default {
       stopGlobalPomodoroTimer: this.stopGlobalPomodoroTimer,
       globalStudyTimer: this.globalStudyTimer,
       startGlobalStudyTimer: this.startGlobalStudyTimer,
-      stopGlobalStudyTimer: this.stopGlobalStudyTimer,
-      showOnboardingManually: this.showOnboardingManually
+      stopGlobalStudyTimer: this.stopGlobalStudyTimer
     }
   }
 }
