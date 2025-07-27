@@ -22,6 +22,17 @@ class OnboardingCompleteRequest extends FormRequest
             'step_times' => 'nullable|array',
             'step_times.*' => 'integer|min:0|max:3600', // 各ステップ最大1時間
             'feedback' => "nullable|string|max:{$maxFeedbackLength}",
+            
+            // step_data のバリデーション追加
+            'step_data' => 'nullable|array',
+            'step_data.setup_step' => 'nullable|array',
+            'step_data.setup_step.exam_type' => 'nullable|string|max:255',
+            'step_data.setup_step.exam_date' => 'nullable|date|after:today',
+            'step_data.setup_step.daily_goal_minutes' => 'nullable|integer|min:1|max:1440',
+            'step_data.setup_step.custom_exam_name' => 'nullable|string|max:255',
+            'step_data.setup_step.custom_exam_description' => 'nullable|string|max:1000',
+            'step_data.setup_step.custom_exam_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'step_data.setup_step.custom_exam_notes' => 'nullable|string|max:2000',
         ];
     }
 
