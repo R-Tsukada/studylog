@@ -131,9 +131,10 @@ class OnboardingControllerExtendedTest extends TestCase
             ->where('step_number', 1)
             ->count();
 
-        // デバッグ: 全てのログを確認
+        // ログが作成されていることを確認
         $allLogs = OnboardingLog::where('user_id', $this->user->id)->get();
-        $this->assertGreaterThan(0, $allLogs->count(), 'ログが1つも作成されていません');
+        $this->assertGreaterThan(0, $allLogs->count(), 
+            'OnboardingLogが作成されていません。updateOnboardingProgressメソッドのログ記録処理を確認してください。');
 
         $this->assertEquals(1, $step1Logs);
 
