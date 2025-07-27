@@ -56,7 +56,9 @@ class OnboardingLog extends Model
         string $eventType,
         ?int $stepNumber = null,
         array $data = [],
-        ?string $sessionId = null
+        ?string $sessionId = null,
+        ?string $userAgent = null,
+        ?string $ipAddress = null
     ): self {
         return self::create([
             'user_id' => $userId,
@@ -64,8 +66,8 @@ class OnboardingLog extends Model
             'step_number' => $stepNumber,
             'data' => $data,
             'session_id' => $sessionId ?? session()->getId(),
-            'user_agent' => request()->userAgent(),
-            'ip_address' => request()->ip(),
+            'user_agent' => $userAgent,
+            'ip_address' => $ipAddress,
         ]);
     }
 

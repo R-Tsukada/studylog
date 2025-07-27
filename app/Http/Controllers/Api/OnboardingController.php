@@ -61,7 +61,9 @@ class OnboardingController extends Controller
                 $user,
                 $validated['current_step'],
                 $validated['completed_steps'] ?? [],
-                $validated['step_data'] ?? []
+                $validated['step_data'] ?? [],
+                $request->userAgent(),
+                $request->ip()
             );
 
             return $this->successResponse([
@@ -84,12 +86,16 @@ class OnboardingController extends Controller
             $user = $request->user();
 
             // 完了処理
-            $user->completeOnboarding([
-                'total_time_spent' => $validated['total_time_spent'] ?? 0,
-                'step_times' => $validated['step_times'] ?? [],
-                'feedback' => $validated['feedback'] ?? null,
-                'completion_source' => 'web_app',
-            ]);
+            $user->completeOnboarding(
+                [
+                    'total_time_spent' => $validated['total_time_spent'] ?? 0,
+                    'step_times' => $validated['step_times'] ?? [],
+                    'feedback' => $validated['feedback'] ?? null,
+                    'completion_source' => 'web_app',
+                ],
+                $request->userAgent(),
+                $request->ip()
+            );
 
             $user->refresh();
 
@@ -115,7 +121,9 @@ class OnboardingController extends Controller
             // スキップ処理
             $user->skipOnboarding(
                 $validated['current_step'] ?? null,
-                $validated['reason'] ?? 'user_choice'
+                $validated['reason'] ?? 'user_choice',
+                $request->userAgent(),
+                $request->ip()
             );
 
             $user->refresh();

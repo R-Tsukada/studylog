@@ -148,7 +148,9 @@ class User extends Authenticatable
     public function updateOnboardingProgress(
         int $currentStep,
         array $completedSteps = [],
-        array $stepData = []
+        array $stepData = [],
+        ?string $userAgent = null,
+        ?string $ipAddress = null
     ): void {
         $totalSteps = config('onboarding.total_steps', 4);
 
@@ -175,7 +177,15 @@ class User extends Authenticatable
             $progress['started_at'] = now()->toISOString();
 
             // 開始ログ記録
-            OnboardingLog::logEvent($this->id, OnboardingLog::EVENT_STARTED);
+            OnboardingLog::logEvent(
+                $this->id,
+                OnboardingLog::EVENT_STARTED,
+                null,
+                [],
+                null,
+                $userAgent,
+                $ipAddress
+            );
         }
 
         // ステップ完了ログ記録（重複を避ける）- updateの前に実行
@@ -189,7 +199,10 @@ class User extends Authenticatable
                 $this->id,
                 OnboardingLog::EVENT_STEP_COMPLETED,
                 $step,
-                ['timestamp' => now()->toISOString()]
+                ['timestamp' => now()->toISOString()],
+                null,
+                $userAgent,
+                $ipAddress
             );
         }
     }
@@ -197,7 +210,11 @@ class User extends Authenticatable
     /**
      * オンボーディング完了処理
      */
-    public function completeOnboarding(array $completionData = []): void
+    public function completeOnboarding(
+        array $completionData = [],
+        ?string $userAgent = null,
+        ?string $ipAddress = null
+    ): void
     {
         $totalSteps = config('onboarding.total_steps', 4);
 
@@ -217,14 +234,22 @@ class User extends Authenticatable
             $this->id,
             OnboardingLog::EVENT_COMPLETED,
             null,
-            array_merge(['completion_method' => 'normal'], $completionData)
+            array_merge(['completion_method' => 'normal'], $completionData),
+            null,
+            $userAgent,
+            $ipAddress
         );
     }
 
     /**
      * オンボーディングスキップ処理
      */
-    public function skipOnboarding(?int $currentStep = null, string $reason = 'user_choice'): void
+    public function skipOnboarding(
+        ?int $currentStep = null,
+        string $reason = 'user_choice',
+        ?string $userAgent = null,
+        ?string $ipAddress = null
+    ): void
     {
         $this->update([
             'onboarding_completed_at' => now(),
@@ -239,7 +264,10 @@ class User extends Authenticatable
             [
                 'skip_method' => $reason,
                 'completed_steps' => $this->onboarding_progress['completed_steps'] ?? [],
-            ]
+            ],
+            null,
+            $userAgent,
+            $ipAddress
         );
     }
 

@@ -179,13 +179,20 @@ class OnboardingService
     /**
      * ユーザーのオンボーディング状態を安全に更新
      */
-    public function updateUserProgressSafely(User $user, int $currentStep, array $completedSteps = [], array $stepData = []): bool
+    public function updateUserProgressSafely(
+        User $user,
+        int $currentStep,
+        array $completedSteps = [],
+        array $stepData = [],
+        ?string $userAgent = null,
+        ?string $ipAddress = null
+    ): bool
     {
-        return DB::transaction(function () use ($user, $currentStep, $completedSteps, $stepData) {
+        return DB::transaction(function () use ($user, $currentStep, $completedSteps, $stepData, $userAgent, $ipAddress) {
             // 楽観的ロック（updated_atをチェック）
             $currentTimestamp = $user->updated_at;
 
-            $user->updateOnboardingProgress($currentStep, $completedSteps, $stepData);
+            $user->updateOnboardingProgress($currentStep, $completedSteps, $stepData, $userAgent, $ipAddress);
 
             // 他のプロセスで更新されていないかチェック
             $user->refresh();
