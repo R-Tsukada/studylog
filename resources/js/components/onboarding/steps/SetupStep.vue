@@ -236,6 +236,11 @@ export default {
 
     // メソッド
     const formatMinutes = (minutes) => {
+      if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
+        console.warn('Invalid minutes value:', minutes);
+        return '0分';
+      }
+      
       const hours = Math.floor(minutes / 60)
       const mins = minutes % 60
       if (hours === 0) {

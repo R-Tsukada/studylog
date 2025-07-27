@@ -145,7 +145,15 @@ export default {
     // メソッド
 
     const formatDate = (dateString) => {
+      if (!dateString) return '未設定';
+      
       const date = new Date(dateString)
+      
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date string:', dateString);
+        return '日付形式エラー';
+      }
+      
       return date.toLocaleDateString('ja-JP', {
         year: 'numeric',
         month: 'long',
@@ -154,6 +162,11 @@ export default {
     }
 
     const formatMinutes = (minutes) => {
+      if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
+        console.warn('Invalid minutes value:', minutes);
+        return '0分';
+      }
+      
       const hours = Math.floor(minutes / 60)
       const mins = minutes % 60
       if (hours === 0) {
