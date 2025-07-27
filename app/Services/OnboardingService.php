@@ -121,24 +121,46 @@ class OnboardingService
      */
     private function getDailyStats(string $startDate, string $endDate, ?string $groupBy): Collection
     {
-        $dateFormat = match ($groupBy) {
-            'week' => 'YEARWEEK(created_at)',
-            'month' => 'DATE_FORMAT(created_at, "%Y-%m")',
-            default => 'DATE(created_at)',
-        };
+        $query = DB::table('onboarding_logs')
+            ->whereBetween('created_at', [$startDate, $endDate]);
 
-        return DB::table('onboarding_logs')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw("
-                {$dateFormat} as date,
-                event_type,
-                COUNT(*) as count,
-                COUNT(DISTINCT user_id) as unique_users
-            ")
-            ->groupBy(DB::raw($dateFormat), 'event_type')
-            ->orderBy(DB::raw($dateFormat))
-            ->get()
-            ->groupBy('date');
+        // セキュリティ強化：事前定義された安全なSQL式のみ使用
+        switch ($groupBy) {
+            case 'week':
+                $query->selectRaw('
+                    YEARWEEK(created_at) as date,
+                    event_type,
+                    COUNT(*) as count,
+                    COUNT(DISTINCT user_id) as unique_users
+                ')
+                ->groupBy(DB::raw('YEARWEEK(created_at)'), 'event_type')
+                ->orderBy(DB::raw('YEARWEEK(created_at)'));
+                break;
+
+            case 'month':
+                $query->selectRaw('
+                    DATE_FORMAT(created_at, "%Y-%m") as date,
+                    event_type,
+                    COUNT(*) as count,
+                    COUNT(DISTINCT user_id) as unique_users
+                ')
+                ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'event_type')
+                ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'));
+                break;
+
+            default: // 'day' or null
+                $query->selectRaw('
+                    DATE(created_at) as date,
+                    event_type,
+                    COUNT(*) as count,
+                    COUNT(DISTINCT user_id) as unique_users
+                ')
+                ->groupBy(DB::raw('DATE(created_at)'), 'event_type')
+                ->orderBy(DB::raw('DATE(created_at)'));
+                break;
+        }
+
+        return $query->get()->groupBy('date');
     }
 
     /**
