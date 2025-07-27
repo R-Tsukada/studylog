@@ -31,6 +31,7 @@
         placeholder="例: 情報セキュリティマネジメント試験"
         required
         aria-describedby="custom-exam-name-error"
+        @keydown.enter.prevent
       />
       <p 
         v-if="errors.name" 
@@ -56,6 +57,7 @@
         :class="{ 'border-red-500': errors.description }"
         placeholder="例: セキュリティ関連の資格試験"
         aria-describedby="custom-exam-description-help custom-exam-description-error"
+        @keydown.enter.prevent
       />
       <p id="custom-exam-description-help" class="mt-1 text-sm text-gray-500">
         {{ form.description.length }}/1000文字
@@ -92,6 +94,7 @@
             :class="{ 'border-red-500': errors.color }"
             placeholder="#3B82F6"
             aria-describedby="custom-exam-color-error"
+            @keydown.enter.prevent
           />
         </div>
       </div>
@@ -122,6 +125,7 @@
         :class="{ 'border-red-500': errors.notes }"
         placeholder="例: スコア目標: 700点以上、受験料: 7,500円"
         aria-describedby="custom-exam-notes-help custom-exam-notes-error"
+        @keydown.enter.prevent
       />
       <p id="custom-exam-notes-help" class="mt-1 text-sm text-gray-500">
         目標スコアや受験料などの覚書に使用できます（{{ form.notes.length }}/2000文字）
