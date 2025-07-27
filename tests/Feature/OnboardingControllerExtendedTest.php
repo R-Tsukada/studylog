@@ -149,9 +149,9 @@ class OnboardingControllerExtendedTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function it_handles_concurrent_progress_updates_safely(): void
+    public function it_handles_sequential_progress_updates_safely(): void
     {
-        // 楽観的ロックのテスト（簡易版）
+        // シーケンシャル更新の正常動作検証（トランザクション保護）
         $initialProgress = [
             'current_step' => 1,
             'completed_steps' => [],
@@ -159,7 +159,7 @@ class OnboardingControllerExtendedTest extends TestCase
 
         $this->user->update(['onboarding_progress' => $initialProgress]);
 
-        // 同時に2つの更新を試行
+        // 順次2つの更新を実行
         $response1 = $this->actingAs($this->user)
             ->postJson('/api/onboarding/progress', [
                 'current_step' => 2,
