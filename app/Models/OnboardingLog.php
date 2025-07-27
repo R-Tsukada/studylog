@@ -92,15 +92,14 @@ class OnboardingLog extends Model
      */
     public static function getCompletionRate(string $startDate, string $endDate): float
     {
-        $started = self::ofType(self::EVENT_STARTED)
-            ->inPeriod($startDate, $endDate)
-            ->distinct('user_id')
-            ->count();
+        $stats = self::inPeriod($startDate, $endDate)
+            ->whereIn('event_type', [self::EVENT_STARTED, self::EVENT_COMPLETED])
+            ->selectRaw('event_type, COUNT(DISTINCT user_id) as user_count')
+            ->groupBy('event_type')
+            ->pluck('user_count', 'event_type');
 
-        $completed = self::ofType(self::EVENT_COMPLETED)
-            ->inPeriod($startDate, $endDate)
-            ->distinct('user_id')
-            ->count();
+        $started = $stats[self::EVENT_STARTED] ?? 0;
+        $completed = $stats[self::EVENT_COMPLETED] ?? 0;
 
         return $started > 0 ? round(($completed / $started) * 100, 2) : 0;
     }
