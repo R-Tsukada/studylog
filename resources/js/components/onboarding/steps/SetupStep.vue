@@ -201,6 +201,7 @@
 
 <script>
 import { reactive, computed, watch, onMounted } from 'vue'
+import { examTypes, subjectsByExam } from '../../../utils/examConfig'
 
 export default {
   name: 'SetupStep',
@@ -218,57 +219,6 @@ export default {
 
     // エラー状態
     const errors = reactive({})
-
-    // マスターデータ
-    const examTypes = [
-      { value: 'jstqb_fl', label: 'JSTQB Foundation Level' },
-      { value: 'jstqb_al', label: 'JSTQB Advanced Level' },
-      { value: 'aws_clf', label: 'AWS Cloud Practitioner' },
-      { value: 'aws_saa', label: 'AWS Solutions Architect Associate' },
-      { value: 'aws_sap', label: 'AWS Solutions Architect Professional' },
-      { value: 'aws_dva', label: 'AWS Developer Associate' },
-      { value: 'oracle_bronze', label: 'Oracle Database Bronze' },
-      { value: 'oracle_silver', label: 'Oracle Database Silver' },
-      { value: 'oracle_gold', label: 'Oracle Database Gold' },
-      { value: 'ccna', label: 'Cisco CCNA' },
-      { value: 'lpic1', label: 'LPIC Level 1' },
-      { value: 'lpic2', label: 'LPIC Level 2' },
-      { value: 'ipa_fe', label: '基本情報技術者試験' },
-      { value: 'ipa_ap', label: '応用情報技術者試験' },
-      { value: 'other', label: 'その他' }
-    ]
-
-    // 学習分野のマスターデータ
-    const subjectsByExam = {
-      jstqb_fl: [
-        { value: 'testing_fundamentals', label: 'テストの基礎' },
-        { value: 'test_design_techniques', label: 'テスト設計技法' },
-        { value: 'test_management', label: 'テスト管理' },
-        { value: 'tool_support', label: 'ツールサポート' }
-      ],
-      aws_clf: [
-        { value: 'cloud_concepts', label: 'クラウドの概念' },
-        { value: 'security_compliance', label: 'セキュリティとコンプライアンス' },
-        { value: 'technology', label: 'テクノロジー' },
-        { value: 'billing_pricing', label: '請求と料金' }
-      ],
-      aws_saa: [
-        { value: 'design_resilient_architectures', label: '復元力のあるアーキテクチャの設計' },
-        { value: 'design_high_performing_architectures', label: '高性能アーキテクチャの設計' },
-        { value: 'design_secure_applications', label: 'セキュアなアプリケーションの設計' },
-        { value: 'design_cost_optimized_architectures', label: 'コスト最適化アーキテクチャの設計' }
-      ],
-      ipa_fe: [
-        { value: 'technology', label: 'テクノロジ系' },
-        { value: 'management', label: 'マネジメント系' },
-        { value: 'strategy', label: 'ストラテジ系' }
-      ],
-      ipa_ap: [
-        { value: 'technology', label: 'テクノロジ系' },
-        { value: 'management', label: 'マネジメント系' },
-        { value: 'strategy', label: 'ストラテジ系' }
-      ]
-    }
 
     // 計算プロパティ
     const availableSubjects = computed(() => {

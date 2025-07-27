@@ -130,6 +130,7 @@
 
 <script>
 import { computed } from 'vue'
+import { examTypeNames, subjectNames, getExamTypeName, getSubjectName } from '../../../utils/examConfig'
 
 export default {
   name: 'CompletionStep',
@@ -140,57 +141,8 @@ export default {
     }
   },
   setup(props) {
-    // マスターデータ（SetupStepと同じデータを使用）
-    const examTypeNames = {
-      'jstqb_fl': 'JSTQB Foundation Level',
-      'jstqb_al': 'JSTQB Advanced Level',
-      'aws_clf': 'AWS Cloud Practitioner',
-      'aws_saa': 'AWS Solutions Architect Associate',
-      'aws_sap': 'AWS Solutions Architect Professional',
-      'aws_dva': 'AWS Developer Associate',
-      'oracle_bronze': 'Oracle Database Bronze',
-      'oracle_silver': 'Oracle Database Silver',
-      'oracle_gold': 'Oracle Database Gold',
-      'ccna': 'Cisco CCNA',
-      'lpic1': 'LPIC Level 1',
-      'lpic2': 'LPIC Level 2',
-      'ipa_fe': '基本情報技術者試験',
-      'ipa_ap': '応用情報技術者試験',
-      'other': 'その他'
-    }
-
-    const subjectNames = {
-      // JSTQB Foundation Level
-      'testing_fundamentals': 'テストの基礎',
-      'test_design_techniques': 'テスト設計技法',
-      'test_management': 'テスト管理',
-      'tool_support': 'ツールサポート',
-      
-      // AWS Cloud Practitioner
-      'cloud_concepts': 'クラウドの概念',
-      'security_compliance': 'セキュリティとコンプライアンス',
-      'technology': 'テクノロジー',
-      'billing_pricing': '請求と料金',
-      
-      // AWS Solutions Architect Associate
-      'design_resilient_architectures': '復元力のあるアーキテクチャの設計',
-      'design_high_performing_architectures': '高性能アーキテクチャの設計',
-      'design_secure_applications': 'セキュアなアプリケーションの設計',
-      'design_cost_optimized_architectures': 'コスト最適化アーキテクチャの設計',
-      
-      // 情報処理技術者試験
-      'management': 'マネジメント系',
-      'strategy': 'ストラテジ系'
-    }
 
     // メソッド
-    const getExamTypeName = (examType) => {
-      return examTypeNames[examType] || examType
-    }
-
-    const getSubjectName = (subject) => {
-      return subjectNames[subject] || subject
-    }
 
     const formatDate = (dateString) => {
       const date = new Date(dateString)
