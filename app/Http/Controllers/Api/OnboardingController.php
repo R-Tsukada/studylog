@@ -7,9 +7,13 @@ use App\Http\Requests\OnboardingAnalyticsRequest;
 use App\Http\Requests\OnboardingCompleteRequest;
 use App\Http\Requests\OnboardingProgressRequest;
 use App\Http\Requests\OnboardingSkipRequest;
+use App\Models\ExamType;
+use App\Models\StudyGoal;
+use App\Models\User;
 use App\Services\OnboardingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OnboardingController extends Controller
 {
@@ -85,6 +89,17 @@ class OnboardingController extends Controller
             $validated = $request->validated();
             $user = $request->user();
 
+            DB::beginTransaction();
+
+            // step_dataの処理
+            $setupComplete = false;
+            if (!empty($validated['step_data']['setup_step'])) {
+                $setupData = $this->extractSetupStepData($validated['step_data']['setup_step']);
+                $examType = $this->processExamType($user, $setupData);
+                $this->createStudyGoal($user, $examType, $setupData);
+                $setupComplete = true;
+            }
+
             // 完了処理
             $user->completeOnboarding(
                 [
@@ -97,14 +112,22 @@ class OnboardingController extends Controller
                 $request->ip()
             );
 
+            DB::commit();
             $user->refresh();
 
-            return $this->successResponse([
+            $responseData = [
                 'completed_at' => $user->onboarding_completed_at->toISOString(),
                 'stats' => $user->getOnboardingStats(),
-            ], $request, 'オンボーディングが完了しました');
+            ];
+
+            if ($setupComplete) {
+                $responseData['setup_complete'] = true;
+            }
+
+            return $this->successResponse($responseData, $request, 'オンボーディングが完了しました');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->errorResponse('完了処理中にエラーが発生しました', $e, $request);
         }
     }
@@ -206,5 +229,112 @@ class OnboardingController extends Controller
                 'version' => config('onboarding.version', '1.0'),
             ],
         ], $statusCode);
+    }
+
+    /**
+     * セットアップステップデータの抽出
+     */
+    private function extractSetupStepData(array $setupData): array
+    {
+        return [
+            'exam_type' => $setupData['exam_type'] ?? null,
+            'exam_date' => $setupData['exam_date'] ?? null,
+            'daily_goal_minutes' => $setupData['daily_goal_minutes'] ?? null,
+            'custom_exam_name' => $setupData['custom_exam_name'] ?? null,
+            'custom_exam_description' => $setupData['custom_exam_description'] ?? null,
+            'custom_exam_color' => $setupData['custom_exam_color'] ?? null,
+            'custom_exam_notes' => $setupData['custom_exam_notes'] ?? null,
+        ];
+    }
+
+    /**
+     * 試験タイプの処理（作成・取得）
+     */
+    private function processExamType(User $user, array $setupData): ExamType
+    {
+        if ($setupData['exam_type'] === 'custom') {
+            return $this->createCustomExamType($user, $setupData);
+        } else {
+            return $this->createSystemExamType($user, $setupData);
+        }
+    }
+
+    /**
+     * カスタム試験タイプの作成
+     */
+    private function createCustomExamType(User $user, array $setupData): ExamType
+    {
+        $examCode = $this->generateExamCode($user->id, $setupData['custom_exam_name']);
+
+        return ExamType::create([
+            'user_id' => $user->id,
+            'code' => $examCode,
+            'name' => $setupData['custom_exam_name'],
+            'description' => $setupData['custom_exam_description'],
+            'exam_date' => $setupData['exam_date'],
+            'color' => $setupData['custom_exam_color'] ?? '#9333EA',
+            'exam_notes' => $setupData['custom_exam_notes'],
+            'is_system' => false,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * システム試験タイプのユーザー固有インスタンス作成
+     */
+    private function createSystemExamType(User $user, array $setupData): ExamType
+    {
+        $systemExams = [
+            'aws_clf' => ['name' => 'AWS Cloud Practitioner', 'description' => 'AWSクラウドプラクティショナー認定'],
+            'jstqb_fl' => ['name' => 'JSTQB Foundation Level', 'description' => 'ソフトウェアテスト技術者資格試験'],
+            'ipa_ap' => ['name' => '応用情報技術者試験', 'description' => 'IPA応用情報技術者試験'],
+            'ccna' => ['name' => 'CCNA', 'description' => 'Cisco Certified Network Associate'],
+        ];
+
+        $examInfo = $systemExams[$setupData['exam_type']] ?? ['name' => $setupData['exam_type'], 'description' => ''];
+
+        return ExamType::create([
+            'user_id' => $user->id,
+            'code' => $setupData['exam_type'],
+            'name' => $examInfo['name'],
+            'description' => $examInfo['description'],
+            'exam_date' => $setupData['exam_date'],
+            'color' => '#3B82F6',
+            'is_system' => false,
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * 学習目標の作成
+     */
+    private function createStudyGoal(User $user, ExamType $examType, array $setupData): void
+    {
+        StudyGoal::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->update(['is_active' => false]);
+
+        StudyGoal::create([
+            'user_id' => $user->id,
+            'exam_type_id' => $examType->id,
+            'daily_minutes_goal' => $setupData['daily_goal_minutes'],
+            'exam_date' => $setupData['exam_date'],
+            'is_active' => true,
+        ]);
+    }
+
+    /**
+     * 試験コードの生成
+     */
+    private function generateExamCode(int $userId, string $examName): string
+    {
+        $baseCode = strtolower(str_replace([' ', '　', '-', '_'], '', $examName));
+        $baseCode = preg_replace('/[^a-z0-9]/', '', $baseCode);
+        $baseCode = substr($baseCode, 0, 10);
+        
+        $timestamp = time();
+        $randomSuffix = mt_rand(1000, 9999);
+        
+        return $baseCode . '_u' . $userId . '_' . $timestamp . '_' . $randomSuffix;
     }
 }
