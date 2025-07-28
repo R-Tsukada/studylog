@@ -69,7 +69,7 @@ class OnboardingProgressApiTest extends TestCase
             
         // エラーメッセージも確認
         $errors = $response->json('errors');
-        $this->assertContains('現在のステップは必須です', $errors['current_step']);
+        $this->assertStringContainsString('現在のステップは必須です', $errors['current_step'][0]);
     }
 
     /**

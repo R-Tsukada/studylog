@@ -36,6 +36,12 @@ return [
             'category' => 'finance',
             'color' => '#9C27B0',
         ],
+        'aws_clf' => [
+            'name' => 'AWS Cloud Practitioner',
+            'description' => 'AWSクラウドプラクティショナー認定',
+            'category' => 'cloud',
+            'color' => '#FF5722',
+        ],
         'aws_foundational' => [
             'name' => 'AWS Foundational',
             'description' => 'AWS認定基礎レベル',
@@ -84,6 +90,12 @@ return [
             'tax_planning' => 'タックスプランニング',
             'real_estate' => '不動産',
             'inheritance' => '相続・事業承継',
+        ],
+        'aws_clf' => [
+            'cloud_concepts' => 'クラウドの概念',
+            'security_compliance' => 'セキュリティとコンプライアンス',
+            'technology' => 'テクノロジー',
+            'billing_pricing' => '請求と料金',
         ],
         'aws_foundational' => [
             'cloud_concepts' => 'クラウドの概念',

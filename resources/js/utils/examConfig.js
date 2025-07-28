@@ -7,6 +7,7 @@ export const examTypeNames = {
   'ipa_fe': '基本情報技術者試験',
   'toeic': 'TOEIC',
   'fp': 'ファイナンシャルプランナー',
+  'aws_clf': 'AWS Cloud Practitioner',
   'aws_foundational': 'AWS Foundational',
   'aws_associate': 'AWS Associate'
 }
@@ -56,6 +57,7 @@ export const examTypes = [
   { value: 'ipa_fe', label: examTypeNames.ipa_fe },
   { value: 'toeic', label: examTypeNames.toeic },
   { value: 'fp', label: examTypeNames.fp },
+  { value: 'aws_clf', label: examTypeNames.aws_clf },
   { value: 'aws_foundational', label: examTypeNames.aws_foundational },
   { value: 'aws_associate', label: examTypeNames.aws_associate }
 ]
@@ -86,6 +88,12 @@ export const subjectsByExam = {
     { value: 'tax_planning', label: subjectNames.tax_planning },
     { value: 'real_estate', label: subjectNames.real_estate },
     { value: 'inheritance', label: subjectNames.inheritance }
+  ],
+  aws_clf: [
+    { value: 'cloud_concepts', label: subjectNames.cloud_concepts },
+    { value: 'security_compliance', label: subjectNames.security_compliance },
+    { value: 'technology', label: subjectNames.technology },
+    { value: 'billing_pricing', label: subjectNames.billing_pricing }
   ],
   aws_foundational: [
     { value: 'cloud_concepts', label: subjectNames.cloud_concepts },

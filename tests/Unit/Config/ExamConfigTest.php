@@ -80,7 +80,7 @@ class ExamConfigTest extends TestCase
         
         // 全ての試験タイプに対応する学習分野設定があることを確認
         foreach ($examTypes as $examType) {
-            $this->assertContains($examType, $subjectConfigs, 
+            $this->assertArrayHasKey($examType, config('exams.subjects'),
                 "試験タイプ '{$examType}' に対応する学習分野設定が見つかりません");
         }
     }
@@ -97,12 +97,13 @@ class ExamConfigTest extends TestCase
             'ipa_fe', 
             'toeic',
             'fp',
+            'aws_clf',
             'aws_foundational',
             'aws_associate'
         ];
         
         foreach ($requiredTypes as $requiredType) {
-            $this->assertContains($requiredType, $examTypes, 
+            $this->assertArrayHasKey($requiredType, config('exams.types'),
                 "必須試験タイプ '{$requiredType}' が設定に含まれていません");
         }
     }

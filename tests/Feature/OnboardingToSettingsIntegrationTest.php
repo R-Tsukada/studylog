@@ -207,45 +207,31 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             ]
         ];
 
-        echo "\n=== オンボーディングAPIテスト開始 ===\n";
-        echo "Request Data: " . json_encode($onboardingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
-
+        // オンボーディング完了API実行
         $response = $this->actingAs($this->user)
             ->postJson('/api/onboarding/complete', $onboardingData);
 
-        echo "Response Status: " . $response->getStatusCode() . "\n";
-        echo "Response Body: " . $response->getContent() . "\n";
-
-        if ($response->getStatusCode() !== 200) {
-            echo "=== エラー詳細 ===\n";
-            $this->fail('オンボーディング完了APIが失敗しました');
-        }
+        $response->assertStatus(200);
 
         // データベース確認
         $examTypes = ExamType::where('user_id', $this->user->id)->get();
-        echo "作成されたExamType数: " . $examTypes->count() . "\n";
+        $this->assertGreaterThan(0, $examTypes->count(), 'ExamTypeが作成されていません');
         
-        if ($examTypes->count() > 0) {
-            echo "ExamType詳細: " . json_encode($examTypes->first()->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
-        }
-
         $studyGoals = StudyGoal::where('user_id', $this->user->id)->get();
-        echo "作成されたStudyGoal数: " . $studyGoals->count() . "\n";
-
-        if ($studyGoals->count() > 0) {
-            echo "StudyGoal詳細: " . json_encode($studyGoals->first()->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n";
-        }
+        $this->assertGreaterThan(0, $studyGoals->count(), 'StudyGoalが作成されていません');
 
         // 設定画面API確認
-        echo "\n=== 設定画面APIテスト ===\n";
         $settingsResponse = $this->actingAs($this->user)
             ->getJson('/api/user/exam-types');
 
-        echo "Settings API Status: " . $settingsResponse->getStatusCode() . "\n";
-        echo "Settings API Response: " . $settingsResponse->getContent() . "\n";
-
-        echo "=== テスト完了 ===\n";
-
-        $this->assertTrue(true); // テスト成功
+        $settingsResponse->assertStatus(200);
+        $settingsData = $settingsResponse->json();
+        
+        $this->assertTrue($settingsData['success']);
+        $this->assertNotEmpty($settingsData['exam_types']);
+        
+        // 作成されたカスタム試験が設定画面に表示されることを確認
+        $examNames = collect($settingsData['exam_types'])->pluck('name')->toArray();
+        $this->assertContains('情報セキュリティマネジメント試験', $examNames);
     }
 }
