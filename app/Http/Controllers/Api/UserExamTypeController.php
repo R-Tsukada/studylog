@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ExamType;
+use App\Models\StudyGoal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -164,6 +165,9 @@ class UserExamTypeController extends Controller
                 ], 422);
             }
 
+            // 試験日の変更を検出するため、更新前の値を保存
+            $oldExamDate = $examType->exam_date;
+
             $examType->update([
                 'name' => $validated['name'],
                 'description' => $validated['description'] ?? $examType->description,
@@ -171,6 +175,24 @@ class UserExamTypeController extends Controller
                 'exam_notes' => $validated['exam_notes'],
                 'color' => $validated['color'] ?? $examType->color,
             ]);
+
+            // 試験日が変更された場合、関連するStudyGoalの試験日も同期更新
+            $newExamDate = $validated['exam_date'];
+            if ($oldExamDate !== $newExamDate) {
+                $updatedGoalsCount = StudyGoal::where('user_id', $userId)
+                    ->where('exam_type_id', $examType->id)
+                    ->where('is_active', true)
+                    ->update(['exam_date' => $newExamDate]);
+
+                if ($updatedGoalsCount > 0) {
+                    \Log::info("ExamType {$examType->id} の試験日変更に伴い、{$updatedGoalsCount}件のStudyGoalの試験日を同期更新しました", [
+                        'exam_type_id' => $examType->id,
+                        'old_date' => $oldExamDate,
+                        'new_date' => $newExamDate,
+                        'updated_goals' => $updatedGoalsCount,
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,

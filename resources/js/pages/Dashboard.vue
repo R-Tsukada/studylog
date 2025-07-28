@@ -291,7 +291,7 @@ import StudyGrassChart from '../components/StudyGrassChart.vue'
 
 export default {
   name: 'Dashboard',
-  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
+  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer', 'subscribeToDataUpdate', 'unsubscribeFromDataUpdate'],
   components: {
     PomodoroTimer,
     StudyGrassChart,
@@ -349,9 +349,34 @@ export default {
   
   async mounted() {
     await this.loadInitialData()
+    
+    // イベントハンドラーを作成して参照を保持
+    this.studyGoalUpdatedHandler = () => {
+      this.loadDashboardData()
+    }
+    
+    // 学習目標更新イベントを購読
+    this.subscribeToDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    
+    // ページの visibility change イベントを監視（タブ切り替えやアプリ切り替え時の対応）
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   },
+  
+  async activated() {
+    // ページがアクティブになったときにデータを再取得（設定画面からの戻りなどで即座に反映）
+    await this.loadDashboardData()
+  },
+  
   beforeUnmount() {
     this.clearTimers()
+    
+    // イベント購読を解除
+    if (this.studyGoalUpdatedHandler) {
+      this.unsubscribeFromDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    }
+    
+    // visibilitychange イベントの監視を解除
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
   },
   methods: {
     async loadInitialData() {
@@ -496,6 +521,7 @@ export default {
         })
         if (response.data.success) {
           const data = response.data.data
+          
           this.continuousDays = data.continuous_days
           this.todayStudyTime = data.today_study_time
           this.todaySessionCount = data.today_session_count
@@ -636,6 +662,14 @@ export default {
       console.error('草表示でエラーが発生しました:', error)
       // エラーメッセージの表示は StudyGrassChart コンポーネント内で処理されるため、
       // こちらでは特別な処理は不要
+    },
+
+    // ページの visibility change ハンドラー（タブ切り替えやアプリ切り替え時の対応）
+    async handleVisibilityChange() {
+      if (!document.hidden) {
+        // ページが見えるようになった時にデータを再取得
+        await this.loadDashboardData()
+      }
     },
 
   }

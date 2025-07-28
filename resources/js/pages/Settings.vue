@@ -506,6 +506,7 @@ import axios from 'axios'
 
 export default {
   name: 'Settings',
+  inject: ['showError', 'showSuccess', 'notifyDataUpdate'],
   data() {
     return {
       // データ
@@ -614,6 +615,7 @@ export default {
 
     async saveExam() {
       this.loading = true
+      
       try {
         let response
         if (this.editingExam) {
@@ -626,6 +628,9 @@ export default {
           this.showSuccess(this.editingExam ? '試験情報を更新しました' : '新しい試験を追加しました')
           await this.loadUserExamTypes()
           this.cancelExamEdit()
+          
+          // ダッシュボードにデータ更新を通知（試験日変更の可能性があるため）
+          this.notifyDataUpdate('studyGoalUpdated')
         } else {
           this.showError(response.data.message || '保存に失敗しました')
         }
@@ -832,6 +837,9 @@ export default {
           this.showSuccess(response.data.message)
           this.activeGoal = response.data.goal
           this.editGoalMode = false
+          
+          // ダッシュボードにデータ更新を通知
+          this.notifyDataUpdate('studyGoalUpdated')
         } else {
           this.showError(response.data.message || '目標の保存に失敗しました')
         }

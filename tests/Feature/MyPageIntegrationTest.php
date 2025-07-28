@@ -44,7 +44,7 @@ class MyPageIntegrationTest extends TestCase
 
         // Vue.jsアプリケーションのマウントポイントが含まれていることを確認
         $response->assertSee('<div id="app"></div>', false);
-        
+
         // 何らかのJavaScriptアセットが読み込まれていることを確認（Viteの場合パスが動的に変わる）
         $content = $response->getContent();
         $this->assertTrue(
