@@ -1,5 +1,26 @@
 <template>
   <div>
+    <!-- 試験日カウントダウン -->
+    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
+              <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
+                {{ exam.days_until_exam }}
+              </div>
+              <div class="text-sm text-gray-600">日</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- GitHub風草表示 -->
     <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
       <StudyGrassChart
@@ -36,27 +57,6 @@
           >
             ⏹️ 学習終了
           </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 試験日カウントダウン -->
-    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
-      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
-              <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
-            </div>
-            <div class="text-right">
-              <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
-                {{ exam.days_until_exam }}
-              </div>
-              <div class="text-sm text-gray-600">日</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
