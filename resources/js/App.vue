@@ -164,6 +164,9 @@ export default {
       errorMessage: '',
       successMessage: '',
       
+      // コンポーネント間通信用のイベントバス
+      eventBus: new Map(),
+      
       // グローバルポモドーロタイマー（reactiveで明示的にリアクティブ化）
       globalPomodoroTimer: reactive({
         isActive: false,
@@ -297,6 +300,35 @@ export default {
       setTimeout(() => {
         this.successMessage = ''
       }, 5000)
+    },
+    
+    // イベントバス：データ更新通知
+    notifyDataUpdate(eventType) {
+      const listeners = this.eventBus.get(eventType) || []
+      listeners.forEach(callback => {
+        if (typeof callback === 'function') {
+          callback()
+        }
+      })
+    },
+    
+    // イベント購読
+    subscribeToDataUpdate(eventType, callback) {
+      if (!this.eventBus.has(eventType)) {
+        this.eventBus.set(eventType, [])
+      }
+      this.eventBus.get(eventType).push(callback)
+    },
+    
+    // イベント購読解除
+    unsubscribeFromDataUpdate(eventType, callback) {
+      if (this.eventBus.has(eventType)) {
+        const listeners = this.eventBus.get(eventType)
+        const index = listeners.indexOf(callback)
+        if (index > -1) {
+          listeners.splice(index, 1)
+        }
+      }
     },
     
     // グローバルポモドーロタイマー管理
@@ -726,7 +758,10 @@ export default {
       stopGlobalPomodoroTimer: this.stopGlobalPomodoroTimer,
       globalStudyTimer: this.globalStudyTimer,
       startGlobalStudyTimer: this.startGlobalStudyTimer,
-      stopGlobalStudyTimer: this.stopGlobalStudyTimer
+      stopGlobalStudyTimer: this.stopGlobalStudyTimer,
+      notifyDataUpdate: this.notifyDataUpdate,
+      subscribeToDataUpdate: this.subscribeToDataUpdate,
+      unsubscribeFromDataUpdate: this.unsubscribeFromDataUpdate
     }
   }
 }

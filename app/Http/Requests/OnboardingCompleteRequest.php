@@ -10,7 +10,7 @@ class OnboardingCompleteRequest extends FormRequest
     {
         $totalSteps = config('onboarding.total_steps', 4);
         $maxFeedbackLength = config('onboarding.max_feedback_length', 1000);
-        
+
         // 試験関連のバリデーション設定を取得
         $examNameMaxLength = config('exams.validation.exam_name_max_length', 255);
         $examDescriptionMaxLength = config('exams.validation.exam_description_max_length', 1000);
@@ -29,7 +29,7 @@ class OnboardingCompleteRequest extends FormRequest
             'step_times' => 'nullable|array',
             'step_times.*' => 'integer|min:0|max:3600', // 各ステップ最大1時間
             'feedback' => "nullable|string|max:{$maxFeedbackLength}",
-            
+
             // step_data のバリデーション追加
             'step_data' => 'nullable|array',
             'step_data.setup_step' => 'nullable|array',

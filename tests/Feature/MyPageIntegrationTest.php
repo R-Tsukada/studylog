@@ -42,8 +42,15 @@ class MyPageIntegrationTest extends TestCase
         // アプリケーションタイトルが正しく設定されていることを確認
         $response->assertSee('<title>Study Log - すたログ</title>', false);
 
-        // Vue.jsアプリケーションの基本構造が含まれていることを確認
-        $response->assertSee('resources/js/app.js', false);
+        // Vue.jsアプリケーションのマウントポイントが含まれていることを確認
+        $response->assertSee('<div id="app"></div>', false);
+
+        // 何らかのJavaScriptアセットが読み込まれていることを確認（Viteの場合パスが動的に変わる）
+        $content = $response->getContent();
+        $this->assertTrue(
+            str_contains($content, '<script') || str_contains($content, '.js'),
+            'Expected to find JavaScript assets in the response'
+        );
     }
 
     /** @test */

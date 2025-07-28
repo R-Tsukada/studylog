@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Requests;
 
-use Tests\TestCase;
 use App\Http\Requests\OnboardingCompleteRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use Tests\TestCase;
 
 class OnboardingCompleteRequestTest extends TestCase
 {
@@ -16,7 +16,7 @@ class OnboardingCompleteRequestTest extends TestCase
      */
     public function 基本的なバリデーションルールが正しく設定されている()
     {
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $rules = $request->rules();
 
         // 基本フィールドの確認
@@ -24,7 +24,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('total_time_spent', $rules);
         $this->assertArrayHasKey('step_times', $rules);
         $this->assertArrayHasKey('feedback', $rules);
-        
+
         // step_data の確認
         $this->assertArrayHasKey('step_data', $rules);
         $this->assertArrayHasKey('step_data.setup_step', $rules);
@@ -35,14 +35,14 @@ class OnboardingCompleteRequestTest extends TestCase
      */
     public function step_data_setup_stepのバリデーションルールが正しく設定されている()
     {
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $rules = $request->rules();
 
         // setup_step の詳細フィールド
         $this->assertArrayHasKey('step_data.setup_step.exam_type', $rules);
         $this->assertArrayHasKey('step_data.setup_step.exam_date', $rules);
         $this->assertArrayHasKey('step_data.setup_step.daily_goal_minutes', $rules);
-        
+
         // カスタム試験フィールド
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_name', $rules);
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_description', $rules);
@@ -63,11 +63,11 @@ class OnboardingCompleteRequestTest extends TestCase
                     'exam_type' => 'aws_clf',
                     'exam_date' => '2025-08-15',
                     'daily_goal_minutes' => 60,
-                ]
-            ]
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -89,12 +89,12 @@ class OnboardingCompleteRequestTest extends TestCase
                     'custom_exam_name' => '情報セキュリティマネジメント試験',
                     'custom_exam_description' => 'セキュリティ関連の資格試験',
                     'custom_exam_color' => '#FF5722',
-                    'custom_exam_notes' => 'スコア目標: 700点以上'
-                ]
-            ]
+                    'custom_exam_notes' => 'スコア目標: 700点以上',
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -109,11 +109,11 @@ class OnboardingCompleteRequestTest extends TestCase
             'step_data' => [
                 'setup_step' => [
                     'exam_date' => '2020-01-01', // 過去の日付
-                ]
-            ]
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -129,11 +129,11 @@ class OnboardingCompleteRequestTest extends TestCase
             'step_data' => [
                 'setup_step' => [
                     'daily_goal_minutes' => 1500, // 24時間超過
-                ]
-            ]
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -149,11 +149,11 @@ class OnboardingCompleteRequestTest extends TestCase
             'step_data' => [
                 'setup_step' => [
                     'custom_exam_name' => str_repeat('a', 256), // 255文字超過
-                ]
-            ]
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -169,11 +169,11 @@ class OnboardingCompleteRequestTest extends TestCase
             'step_data' => [
                 'setup_step' => [
                     'custom_exam_color' => 'invalid-color', // 無効なカラーコード
-                ]
-            ]
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -190,7 +190,7 @@ class OnboardingCompleteRequestTest extends TestCase
             'total_time_spent' => 300,
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());

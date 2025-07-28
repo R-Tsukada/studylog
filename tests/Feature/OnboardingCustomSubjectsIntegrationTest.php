@@ -18,7 +18,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create([
             'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
@@ -45,9 +45,9 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
                         'custom_subjects' => [
                             ['name' => 'データベース'],
                             ['name' => 'ネットワーク基礎'],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
         $response->assertStatus(200);
@@ -63,7 +63,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $subjectAreas = SubjectArea::where('user_id', $this->user->id)
             ->where('exam_type_id', $examType->id)
             ->get();
-        
+
         $this->assertCount(2, $subjectAreas);
         $this->assertEquals('データベース', $subjectAreas[0]->name);
         $this->assertEquals('ネットワーク基礎', $subjectAreas[1]->name);
@@ -89,9 +89,9 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
                         'custom_exam_subjects' => [
                             ['name' => '分野A'],
                             ['name' => '分野B'],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
         $response->assertStatus(200);
@@ -106,7 +106,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $subjectAreas = SubjectArea::where('user_id', $this->user->id)
             ->where('exam_type_id', $examType->id)
             ->get();
-        
+
         $this->assertCount(2, $subjectAreas);
         $this->assertEquals('分野A', $subjectAreas[0]->name);
         $this->assertEquals('分野B', $subjectAreas[1]->name);
@@ -128,9 +128,9 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
                             ['name' => 'データベース'],
                             ['name' => ''],
                             ['name' => 'ネットワーク'],
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ]);
 
         $response->assertStatus(422);

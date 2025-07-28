@@ -253,7 +253,7 @@ class OnboardingServiceTest extends TestCase
     {
         // まず初期データを設定
         $this->user->update(['onboarding_progress' => null]);
-        
+
         try {
             DB::transaction(function () {
                 // 正常にデータを更新
@@ -263,7 +263,7 @@ class OnboardingServiceTest extends TestCase
                     [1],
                     ['test' => 'data']
                 );
-                
+
                 // 意図的に例外を投げてロールバックを発生させる
                 throw new \Exception('Forced rollback for testing');
             });
@@ -319,7 +319,7 @@ class OnboardingServiceTest extends TestCase
         // そのためキャッシュクリアメソッドが呼ばれても実際にはクリアされない
         // これは正常な動作なので、メソッドが例外なく実行されることのみ確認
         $this->assertTrue(true, 'clearAnalyticsCache method executed without exceptions');
-        
+
         // キャッシュストアの種類に関係なく、メソッドが正常に動作することを確認
         $store = Cache::getStore();
         $this->assertNotNull($store, 'Cache store should be available');

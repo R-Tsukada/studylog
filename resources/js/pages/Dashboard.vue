@@ -1,5 +1,26 @@
 <template>
   <div>
+    <!-- 試験日カウントダウン -->
+    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
+              <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
+                {{ exam.days_until_exam }}
+              </div>
+              <div class="text-sm text-gray-600">日</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- GitHub風草表示 -->
     <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
       <StudyGrassChart
@@ -39,7 +60,6 @@
         </div>
       </div>
     </section>
-
 
     <!-- 今日の学習状況 -->
     <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
@@ -271,7 +291,7 @@ import StudyGrassChart from '../components/StudyGrassChart.vue'
 
 export default {
   name: 'Dashboard',
-  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer'],
+  inject: ['globalStudyTimer', 'startGlobalStudyTimer', 'stopGlobalStudyTimer', 'subscribeToDataUpdate', 'unsubscribeFromDataUpdate'],
   components: {
     PomodoroTimer,
     StudyGrassChart,
@@ -283,6 +303,7 @@ export default {
       todayStudyTime: '0分',
       todaySessionCount: 0,
       achievementRate: 0,
+      activeGoals: [],
       
       // API連携用のデータ
       examTypes: [],
@@ -316,6 +337,11 @@ export default {
       return this.globalStudyTimer.currentSession
     },
     
+    // 試験日が設定されているアクティブな目標を取得
+    upcomingExams() {
+      return this.activeGoals.filter(goal => goal.days_until_exam !== null && goal.days_until_exam >= 0)
+    },
+    
     isActive() {
       return this.globalStudyTimer.isActive
     }
@@ -323,9 +349,34 @@ export default {
   
   async mounted() {
     await this.loadInitialData()
+    
+    // イベントハンドラーを作成して参照を保持
+    this.studyGoalUpdatedHandler = () => {
+      this.loadDashboardData()
+    }
+    
+    // 学習目標更新イベントを購読
+    this.subscribeToDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    
+    // ページの visibility change イベントを監視（タブ切り替えやアプリ切り替え時の対応）
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   },
+  
+  async activated() {
+    // ページがアクティブになったときにデータを再取得（設定画面からの戻りなどで即座に反映）
+    await this.loadDashboardData()
+  },
+  
   beforeUnmount() {
     this.clearTimers()
+    
+    // イベント購読を解除
+    if (this.studyGoalUpdatedHandler) {
+      this.unsubscribeFromDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    }
+    
+    // visibilitychange イベントの監視を解除
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
   },
   methods: {
     async loadInitialData() {
@@ -470,10 +521,12 @@ export default {
         })
         if (response.data.success) {
           const data = response.data.data
+          
           this.continuousDays = data.continuous_days
           this.todayStudyTime = data.today_study_time
           this.todaySessionCount = data.today_session_count
           this.achievementRate = Math.round(data.achievement_rate)
+          this.activeGoals = data.active_goals || []
           
           // 最近の学習履歴もダッシュボードAPIから取得するように変更
           this.recentSessions = data.recent_subjects || []
@@ -504,6 +557,27 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString)
       return `${date.getMonth() + 1}/${date.getDate()}`
+    },
+    
+    // 試験日フォーマット（年/月/日）
+    formatExamDate(dateString) {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      const year = date.getFullYear()
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      return `${year}年${month}月${day}日`
+    },
+    
+    // カウントダウンの色を決める
+    getCountdownColor(daysUntilExam) {
+      if (daysUntilExam <= 7) {
+        return 'var(--color-muted-pink-dark)' // 1週間以内は赤
+      } else if (daysUntilExam <= 30) {
+        return 'var(--color-muted-yellow-dark)' // 1ヶ月以内は黄
+      } else {
+        return 'var(--color-muted-green-dark)' // それ以外は緑
+      }
     },
     
     // メモ編集モーダル関連
@@ -588,6 +662,14 @@ export default {
       console.error('草表示でエラーが発生しました:', error)
       // エラーメッセージの表示は StudyGrassChart コンポーネント内で処理されるため、
       // こちらでは特別な処理は不要
+    },
+
+    // ページの visibility change ハンドラー（タブ切り替えやアプリ切り替え時の対応）
+    async handleVisibilityChange() {
+      if (!document.hidden) {
+        // ページが見えるようになった時にデータを再取得
+        await this.loadDashboardData()
+      }
     },
 
   }

@@ -218,8 +218,7 @@ class User extends Authenticatable
         array $completionData = [],
         ?string $userAgent = null,
         ?string $ipAddress = null
-    ): void
-    {
+    ): void {
         $totalSteps = config('onboarding.total_steps', 4);
 
         $progress = $this->onboarding_progress ?? [];
@@ -253,8 +252,7 @@ class User extends Authenticatable
         string $reason = 'user_choice',
         ?string $userAgent = null,
         ?string $ipAddress = null
-    ): void
-    {
+    ): void {
         $this->update([
             'onboarding_completed_at' => now(),
             'onboarding_skipped' => true,
