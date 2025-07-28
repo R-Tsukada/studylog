@@ -353,11 +353,35 @@ export default {
         state.completedSteps = [1, 2, 3, 4]
 
         // サーバーに完了を記録（step_dataを含める）
-        await OnboardingAPI.complete({
-          completed_steps: state.completedSteps,
-          total_time_spent: calculateTotalTime(),
-          step_data: OnboardingStorage.getAllStepData()
-        })
+        let completionData
+        try {
+          const allStepData = OnboardingStorage.getAllStepData()
+          const setupStepData = allStepData[2] // SetupStepは2番目のステップ
+          
+          completionData = {
+            completed_steps: state.completedSteps,
+            total_time_spent: calculateTotalTime(),
+            step_data: setupStepData?.step_data || {}
+          }
+          
+          // デバッグログ追加
+          console.log('🔍 OnboardingModal completeOnboarding:', {
+            completionData,
+            allStepData,
+            setupStepData,
+            extractedStepData: setupStepData?.step_data
+          })
+        } catch (dataError) {
+          console.error('step_data抽出エラー:', dataError)
+          // フォールバック：step_dataなしで完了
+          completionData = {
+            completed_steps: state.completedSteps,
+            total_time_spent: calculateTotalTime(),
+            step_data: {}
+          }
+        }
+        
+        await OnboardingAPI.complete(completionData)
 
         // 状態リセット
         resetState()

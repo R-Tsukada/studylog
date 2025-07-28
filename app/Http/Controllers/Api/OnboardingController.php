@@ -9,6 +9,7 @@ use App\Http\Requests\OnboardingProgressRequest;
 use App\Http\Requests\OnboardingSkipRequest;
 use App\Models\ExamType;
 use App\Models\StudyGoal;
+use App\Models\SubjectArea;
 use App\Models\User;
 use App\Services\OnboardingService;
 use Illuminate\Http\JsonResponse;
@@ -97,6 +98,7 @@ class OnboardingController extends Controller
                 $setupData = $this->extractSetupStepData($validated['step_data']['setup_step']);
                 $examType = $this->processExamType($user, $setupData);
                 $this->createStudyGoal($user, $examType, $setupData);
+                $this->createSubjectAreas($user, $examType, $setupData);
                 $setupComplete = true;
             }
 
@@ -244,6 +246,8 @@ class OnboardingController extends Controller
             'custom_exam_description' => $setupData['custom_exam_description'] ?? null,
             'custom_exam_color' => $setupData['custom_exam_color'] ?? null,
             'custom_exam_notes' => $setupData['custom_exam_notes'] ?? null,
+            'custom_exam_subjects' => $setupData['custom_exam_subjects'] ?? [],
+            'custom_subjects' => $setupData['custom_subjects'] ?? [],
         ];
     }
 
@@ -285,10 +289,12 @@ class OnboardingController extends Controller
     private function createSystemExamType(User $user, array $setupData): ExamType
     {
         $systemExams = [
-            'aws_clf' => ['name' => 'AWS Cloud Practitioner', 'description' => 'AWSクラウドプラクティショナー認定'],
             'jstqb_fl' => ['name' => 'JSTQB Foundation Level', 'description' => 'ソフトウェアテスト技術者資格試験'],
-            'ipa_ap' => ['name' => '応用情報技術者試験', 'description' => 'IPA応用情報技術者試験'],
-            'ccna' => ['name' => 'CCNA', 'description' => 'Cisco Certified Network Associate'],
+            'ipa_fe' => ['name' => '基本情報技術者試験', 'description' => 'IPA基本情報技術者試験'],
+            'toeic' => ['name' => 'TOEIC', 'description' => 'TOEIC Listening & Reading Test'],
+            'fp' => ['name' => 'ファイナンシャルプランナー', 'description' => 'ファイナンシャル・プランニング技能検定'],
+            'aws_foundational' => ['name' => 'AWS Foundational', 'description' => 'AWS認定基礎レベル'],
+            'aws_associate' => ['name' => 'AWS Associate', 'description' => 'AWS認定アソシエイトレベル'],
         ];
 
         $examInfo = $systemExams[$setupData['exam_type']] ?? ['name' => $setupData['exam_type'], 'description' => ''];
@@ -321,6 +327,63 @@ class OnboardingController extends Controller
             'exam_date' => $setupData['exam_date'],
             'is_active' => true,
         ]);
+    }
+
+    /**
+     * 学習分野の作成
+     */
+    private function createSubjectAreas(User $user, ExamType $examType, array $setupData): void
+    {
+        $subjectsToCreate = [];
+
+        // カスタム試験の場合
+        if ($setupData['exam_type'] === 'custom' && !empty($setupData['custom_exam_subjects'])) {
+            $subjectsToCreate = $setupData['custom_exam_subjects'];
+        }
+        // 既定試験でカスタム学習分野がある場合
+        elseif ($setupData['exam_type'] !== 'custom' && !empty($setupData['custom_subjects'])) {
+            $subjectsToCreate = $setupData['custom_subjects'];
+        }
+
+        // 学習分野を作成
+        foreach ($subjectsToCreate as $subject) {
+            if (!empty($subject['name'])) {
+                $subjectCode = $this->generateSubjectCode($subject['name'], $user->id);
+                
+                SubjectArea::create([
+                    'user_id' => $user->id,
+                    'exam_type_id' => $examType->id,
+                    'code' => $subjectCode,
+                    'name' => $subject['name'],
+                    'is_system' => false,
+                    'is_active' => true,
+                    'sort_order' => 0,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * 学習分野コードの生成
+     */
+    private function generateSubjectCode(string $name, int $userId): string
+    {
+        $baseCode = preg_replace('/[^a-zA-Z0-9]/', '', $name);
+        if (empty($baseCode)) {
+            $baseCode = 'subject';
+        }
+
+        $baseCode = strtolower(substr($baseCode, 0, 10));
+        $uniqueCode = $baseCode.'_'.$userId.'_'.time();
+
+        $counter = 1;
+        $finalCode = $uniqueCode;
+        while (SubjectArea::where('code', $finalCode)->exists()) {
+            $finalCode = $uniqueCode.'_'.$counter;
+            $counter++;
+        }
+
+        return $finalCode;
     }
 
     /**

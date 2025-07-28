@@ -78,34 +78,97 @@
       </div>
 
       <!-- 学習分野（資格選択後に表示） -->
-      <div v-if="form.examType && availableSubjects.length > 0">
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          重点的に学習したい分野
-        </label>
-        <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
-          <div
-            v-for="subject in availableSubjects"
-            :key="subject.value"
-            class="flex items-center"
-          >
-            <input
-              :id="`subject-${subject.value}`"
-              v-model="form.subjects"
-              :value="subject.value"
-              type="checkbox"
-              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label
-              :for="`subject-${subject.value}`"
-              class="ml-2 text-sm text-gray-700 cursor-pointer"
+      <div v-if="form.examType && form.examType !== 'custom'">
+        <!-- 既定の学習分野（システム提供） -->
+        <div v-if="availableSubjects.length > 0" class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            重点的に学習したい分野（推奨分野）
+          </label>
+          <div class="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+            <div
+              v-for="subject in availableSubjects"
+              :key="subject.value"
+              class="flex items-center"
             >
-              {{ subject.label }}
-            </label>
+              <input
+                :id="`subject-${subject.value}`"
+                v-model="form.subjects"
+                :value="subject.value"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                :for="`subject-${subject.value}`"
+                class="ml-2 text-sm text-gray-700 cursor-pointer"
+              >
+                {{ subject.label }}
+              </label>
+            </div>
+          </div>
+          <p class="mt-1 text-sm text-gray-500">
+            複数選択可能です（後から変更できます）
+          </p>
+        </div>
+
+        <!-- カスタム学習分野追加セクション -->
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <span class="text-blue-400" aria-hidden="true">✏️</span>
+            </div>
+            <div class="ml-3 flex-1">
+              <h4 class="text-sm font-medium text-blue-800 mb-2">
+                独自の学習分野を追加
+              </h4>
+              <p class="text-sm text-blue-700 mb-3">
+                あなた独自の学習項目を設定できます
+              </p>
+              
+              <!-- カスタム学習分野リスト -->
+              <div class="space-y-3">
+                <div v-if="form.customSubjects.length > 0" class="space-y-2">
+                  <div
+                    v-for="(subject, index) in form.customSubjects"
+                    :key="index"
+                    class="flex items-center justify-between p-2 bg-white border border-blue-200 rounded"
+                  >
+                    <div class="flex-1">
+                      <input
+                        v-model="subject.name"
+                        type="text"
+                        maxlength="255"
+                        class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="例: データ構造とアルゴリズム"
+                        @keydown.enter.prevent
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      @click="removeCustomSubject(index)"
+                      class="ml-2 text-red-600 hover:text-red-800 transition-colors"
+                      title="削除"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- 学習分野追加ボタン -->
+                <button
+                  type="button"
+                  @click="addCustomSubject"
+                  class="w-full px-3 py-2 border-2 border-dashed border-blue-300 rounded text-blue-600 hover:border-blue-400 hover:text-blue-700 transition-colors"
+                >
+                  + 学習分野を追加
+                </button>
+                
+                <p class="text-xs text-blue-600">
+                  学習進捗を詳細に追跡するための分野を設定できます（最大10個）
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <p class="mt-1 text-sm text-gray-500">
-          複数選択可能です（後から変更できます）
-        </p>
       </div>
 
       <!-- 1日の目標学習時間 -->
@@ -220,19 +283,28 @@ export default {
   },
   emits: ['step-data', 'validation-change'],
   setup(_, { emit }) {
-    // フォームデータ
+    // フォームデータ（防御的初期化）
     const form = reactive({
       examType: '',
       examDate: '',
       subjects: [],
-      dailyGoalMinutes: 60,
+      customSubjects: [], // 既定試験でのカスタム学習分野
+      dailyGoalMinutes: 60, // 確実に数値
       displayName: '',
       occupation: '',
       customExam: {
         name: '',
         description: '',
         color: '#9333EA',
-        notes: ''
+        notes: '',
+        subjects: []
+      }
+    })
+    
+    // dailyGoalMinutesが常に有効な数値であることを保証
+    watch(() => form.dailyGoalMinutes, (newValue) => {
+      if (typeof newValue !== 'number' || isNaN(newValue)) {
+        form.dailyGoalMinutes = 60
       }
     })
 
@@ -268,13 +340,14 @@ export default {
 
     // メソッド
     const formatMinutes = (minutes) => {
-      if (typeof minutes !== 'number' || isNaN(minutes) || minutes < 0) {
-        console.warn('Invalid minutes value:', minutes);
+      // 防御的プログラミング：どんな値が来ても安全に処理
+      const safeMinutes = Number(minutes) || 0;
+      if (safeMinutes < 0) {
         return '0分';
       }
       
-      const hours = Math.floor(minutes / 60)
-      const mins = minutes % 60
+      const hours = Math.floor(safeMinutes / 60)
+      const mins = safeMinutes % 60
       if (hours === 0) {
         return `${mins}分`
       } else if (mins === 0) {
@@ -316,6 +389,7 @@ export default {
     const handleExamTypeChange = () => {
       // 資格変更時に学習分野をクリア
       form.subjects = []
+      form.customSubjects = []
       
       // カスタム試験でない場合はカスタム試験データをクリア
       if (form.examType !== 'custom') {
@@ -323,7 +397,8 @@ export default {
           name: '',
           description: '',
           color: '#9333EA',
-          notes: ''
+          notes: '',
+          subjects: []
         }
         customExamValidation.isValid = false
         customExamValidation.errors = {}
@@ -335,6 +410,17 @@ export default {
     const handleCustomExamValidation = (validation) => {
       customExamValidation.isValid = validation.isValid
       customExamValidation.errors = validation.errors
+    }
+
+    // カスタム学習分野管理メソッド
+    const addCustomSubject = () => {
+      if (form.customSubjects.length < 10) {
+        form.customSubjects.push({ name: '' })
+      }
+    }
+
+    const removeCustomSubject = (index) => {
+      form.customSubjects.splice(index, 1)
     }
 
     const handleSubmit = () => {
@@ -357,6 +443,12 @@ export default {
         stepData.custom_exam_description = form.customExam.description || null
         stepData.custom_exam_color = form.customExam.color
         stepData.custom_exam_notes = form.customExam.notes || null
+        stepData.custom_exam_subjects = form.customExam.subjects || []
+      }
+
+      // 既定試験でのカスタム学習分野を含める
+      if (form.examType !== 'custom' && form.customSubjects.length > 0) {
+        stepData.custom_subjects = form.customSubjects.filter(subject => subject.name.trim() !== '')
       }
 
       const data = {
@@ -373,6 +465,14 @@ export default {
           setup_step: stepData
         }
       }
+      
+      // デバッグログ追加
+      console.log('🔍 SetupStep emitStepData:', {
+        examType: form.examType,
+        customExam: form.customExam,
+        stepData,
+        fullData: data
+      })
       
       emit('step-data', data)
     }
@@ -412,7 +512,9 @@ export default {
       formatMinutes,
       handleExamTypeChange,
       handleCustomExamValidation,
-      handleSubmit
+      handleSubmit,
+      addCustomSubject,
+      removeCustomSubject
     }
   }
 }

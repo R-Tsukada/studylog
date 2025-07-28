@@ -33,6 +33,10 @@ class OnboardingCompleteRequest extends FormRequest
             'step_data.setup_step.custom_exam_description' => 'nullable|string|max:1000',
             'step_data.setup_step.custom_exam_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'step_data.setup_step.custom_exam_notes' => 'nullable|string|max:2000',
+            'step_data.setup_step.custom_exam_subjects' => 'nullable|array|max:10',
+            'step_data.setup_step.custom_exam_subjects.*.name' => 'required|string|max:255',
+            'step_data.setup_step.custom_subjects' => 'nullable|array|max:10',
+            'step_data.setup_step.custom_subjects.*.name' => 'required|string|max:255',
         ];
     }
 

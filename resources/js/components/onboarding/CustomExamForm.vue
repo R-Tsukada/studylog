@@ -111,6 +111,62 @@
       </p>
     </div>
 
+    <!-- 学習分野 -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        学習分野（任意）
+      </label>
+      <div class="space-y-3">
+        <!-- 既存の学習分野リスト -->
+        <div v-if="form.subjects.length > 0" class="space-y-2">
+          <div
+            v-for="(subject, index) in form.subjects"
+            :key="index"
+            class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-md"
+          >
+            <div class="flex-1">
+              <input
+                v-model="subject.name"
+                type="text"
+                maxlength="255"
+                class="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="例: データ構造とアルゴリズム"
+                @keydown.enter.prevent
+              />
+            </div>
+            <button
+              type="button"
+              @click="removeSubject(index)"
+              class="ml-3 text-red-600 hover:text-red-800 transition-colors"
+              title="削除"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+        
+        <!-- 学習分野追加ボタン -->
+        <button
+          type="button"
+          @click="addSubject"
+          class="w-full px-3 py-2 border-2 border-dashed border-gray-300 rounded-md text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors"
+        >
+          + 学習分野を追加
+        </button>
+        
+        <p class="text-sm text-gray-500">
+          学習進捗を詳細に追跡するための分野を設定できます（最大10個）
+        </p>
+      </div>
+      <p 
+        v-if="errors.subjects" 
+        class="mt-1 text-sm text-red-600"
+        role="alert"
+      >
+        {{ errors.subjects }}
+      </p>
+    </div>
+
     <!-- メモ・ノート -->
     <div>
       <label for="custom-exam-notes" class="block text-sm font-medium text-gray-700 mb-2">
@@ -160,7 +216,8 @@ export default {
       name: props.modelValue.name || '',
       description: props.modelValue.description || '',
       color: props.modelValue.color || '#9333EA',
-      notes: props.modelValue.notes || ''
+      notes: props.modelValue.notes || '',
+      subjects: props.modelValue.subjects || []
     })
 
     // エラー状態
@@ -199,6 +256,23 @@ export default {
         errors.notes = 'メモは2000文字以内で入力してください'
       }
 
+      // 学習分野チェック
+      if (form.subjects.length > 10) {
+        errors.subjects = '学習分野は10個まで登録できます'
+      }
+
+      // 各学習分野の名前チェック
+      for (let i = 0; i < form.subjects.length; i++) {
+        if (!form.subjects[i].name || form.subjects[i].name.trim() === '') {
+          errors.subjects = '学習分野名を入力してください'
+          break
+        }
+        if (form.subjects[i].name.length > 255) {
+          errors.subjects = '学習分野名は255文字以内で入力してください'
+          break
+        }
+      }
+
       return Object.keys(errors).length === 0
     }
 
@@ -208,7 +282,8 @@ export default {
         name: form.name,
         description: form.description || null,
         color: form.color,
-        notes: form.notes || null
+        notes: form.notes || null,
+        subjects: form.subjects.filter(subject => subject.name.trim() !== '')
       }
       emit('update:modelValue', data)
     }
@@ -228,6 +303,17 @@ export default {
       emitValidation()
     }, { deep: true })
 
+    // 学習分野管理メソッド
+    const addSubject = () => {
+      if (form.subjects.length < 10) {
+        form.subjects.push({ name: '' })
+      }
+    }
+
+    const removeSubject = (index) => {
+      form.subjects.splice(index, 1)
+    }
+
     // 初期バリデーション
     validateForm()
     emitValidation()
@@ -236,7 +322,9 @@ export default {
       form,
       errors,
       isValid,
-      validateForm
+      validateForm,
+      addSubject,
+      removeSubject
     }
   }
 }

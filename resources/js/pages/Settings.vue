@@ -693,9 +693,13 @@ export default {
     async loadUserExamTypes() {
       this.loadingExams = true
       try {
+        console.log('🔍 Settings.vue loadUserExamTypes 開始')
         const response = await axios.get('/api/user/exam-types')
+        console.log('🔍 Settings.vue loadUserExamTypes レスポンス:', response.data)
+        
         if (response.data.success) {
           this.userExamTypes = response.data.exam_types
+          console.log('🔍 Settings.vue userExamTypes更新:', this.userExamTypes)
         }
       } catch (error) {
         console.error('試験タイプ取得エラー:', error)
