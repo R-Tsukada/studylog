@@ -364,13 +364,6 @@ export default {
             step_data: setupStepData?.step_data || {}
           }
           
-          // デバッグログ追加
-          console.log('🔍 OnboardingModal completeOnboarding:', {
-            completionData,
-            allStepData,
-            setupStepData,
-            extractedStepData: setupStepData?.step_data
-          })
         } catch (dataError) {
           console.error('step_data抽出エラー:', dataError)
           // フォールバック：step_dataなしで完了

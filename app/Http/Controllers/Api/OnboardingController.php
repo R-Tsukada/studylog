@@ -288,16 +288,12 @@ class OnboardingController extends Controller
      */
     private function createSystemExamType(User $user, array $setupData): ExamType
     {
-        $systemExams = [
-            'jstqb_fl' => ['name' => 'JSTQB Foundation Level', 'description' => 'ソフトウェアテスト技術者資格試験'],
-            'ipa_fe' => ['name' => '基本情報技術者試験', 'description' => 'IPA基本情報技術者試験'],
-            'toeic' => ['name' => 'TOEIC', 'description' => 'TOEIC Listening & Reading Test'],
-            'fp' => ['name' => 'ファイナンシャルプランナー', 'description' => 'ファイナンシャル・プランニング技能検定'],
-            'aws_foundational' => ['name' => 'AWS Foundational', 'description' => 'AWS認定基礎レベル'],
-            'aws_associate' => ['name' => 'AWS Associate', 'description' => 'AWS認定アソシエイトレベル'],
+        $examTypes = config('exams.types', []);
+        $examInfo = $examTypes[$setupData['exam_type']] ?? [
+            'name' => $setupData['exam_type'], 
+            'description' => '',
+            'color' => '#3B82F6'
         ];
-
-        $examInfo = $systemExams[$setupData['exam_type']] ?? ['name' => $setupData['exam_type'], 'description' => ''];
 
         return ExamType::create([
             'user_id' => $user->id,
@@ -305,7 +301,7 @@ class OnboardingController extends Controller
             'name' => $examInfo['name'],
             'description' => $examInfo['description'],
             'exam_date' => $setupData['exam_date'],
-            'color' => '#3B82F6',
+            'color' => $examInfo['color'],
             'is_system' => false,
             'is_active' => true,
         ]);
@@ -368,19 +364,30 @@ class OnboardingController extends Controller
      */
     private function generateSubjectCode(string $name, int $userId): string
     {
+        $maxLength = config('exams.validation.exam_code_base_length', 10);
+        
+        // ベースコードの生成
         $baseCode = preg_replace('/[^a-zA-Z0-9]/', '', $name);
+        $baseCode = strtolower(substr($baseCode, 0, $maxLength));
+        
+        // 空の場合のフォールバック
         if (empty($baseCode)) {
             $baseCode = 'subject';
         }
 
-        $baseCode = strtolower(substr($baseCode, 0, 10));
         $uniqueCode = $baseCode.'_'.$userId.'_'.time();
 
+        // 重複チェックと生成（最大10回試行）
         $counter = 1;
         $finalCode = $uniqueCode;
-        while (SubjectArea::where('code', $finalCode)->exists()) {
+        while (SubjectArea::where('code', $finalCode)->exists() && $counter <= 10) {
             $finalCode = $uniqueCode.'_'.$counter;
             $counter++;
+        }
+
+        // 10回試行しても重複する場合は例外をスロー
+        if (SubjectArea::where('code', $finalCode)->exists()) {
+            throw new \RuntimeException('学習分野コードの生成に失敗しました。しばらく時間をおいて再試行してください。');
         }
 
         return $finalCode;
@@ -391,13 +398,35 @@ class OnboardingController extends Controller
      */
     private function generateExamCode(int $userId, string $examName): string
     {
+        $maxLength = config('exams.validation.exam_code_base_length', 10);
+        
+        // ベースコードの生成
         $baseCode = strtolower(str_replace([' ', '　', '-', '_'], '', $examName));
         $baseCode = preg_replace('/[^a-z0-9]/', '', $baseCode);
-        $baseCode = substr($baseCode, 0, 10);
+        $baseCode = substr($baseCode, 0, $maxLength);
+        
+        // 空の場合のフォールバック
+        if (empty($baseCode)) {
+            $baseCode = 'custom';
+        }
         
         $timestamp = time();
         $randomSuffix = mt_rand(1000, 9999);
+        $candidateCode = $baseCode . '_u' . $userId . '_' . $timestamp . '_' . $randomSuffix;
         
-        return $baseCode . '_u' . $userId . '_' . $timestamp . '_' . $randomSuffix;
+        // 重複チェックと生成（最大10回試行）
+        $counter = 1;
+        $finalCode = $candidateCode;
+        while (ExamType::where('code', $finalCode)->exists() && $counter <= 10) {
+            $finalCode = $candidateCode . '_' . $counter;
+            $counter++;
+        }
+        
+        // 10回試行しても重複する場合は例外をスロー
+        if (ExamType::where('code', $finalCode)->exists()) {
+            throw new \RuntimeException('試験コードの生成に失敗しました。しばらく時間をおいて再試行してください。');
+        }
+        
+        return $finalCode;
     }
 }

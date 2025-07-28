@@ -1,5 +1,6 @@
 // 試験・資格マスターデータ設定ファイル
 // 試験タイプ、科目データの一元管理
+// Note: この設定は config/exams.php と同期する必要があります
 
 export const examTypeNames = {
   'jstqb_fl': 'JSTQB Foundation Level',

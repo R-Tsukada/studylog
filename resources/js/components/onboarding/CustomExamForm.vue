@@ -256,9 +256,10 @@ export default {
         errors.notes = 'メモは2000文字以内で入力してください'
       }
 
-      // 学習分野チェック
-      if (form.subjects.length > 10) {
-        errors.subjects = '学習分野は10個まで登録できます'
+      // 学習分野チェック（設定値から取得）
+      const maxCustomSubjects = 10 // TODO: config/exams.phpの設定値を使用したい
+      if (form.subjects.length > maxCustomSubjects) {
+        errors.subjects = `学習分野は${maxCustomSubjects}個まで登録できます`
       }
 
       // 各学習分野の名前チェック
@@ -305,7 +306,8 @@ export default {
 
     // 学習分野管理メソッド
     const addSubject = () => {
-      if (form.subjects.length < 10) {
+      const maxCustomSubjects = 10 // TODO: config/exams.phpの設定値を使用したい
+      if (form.subjects.length < maxCustomSubjects) {
         form.subjects.push({ name: '' })
       }
     }

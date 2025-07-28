@@ -466,13 +466,6 @@ export default {
         }
       }
       
-      // デバッグログ追加
-      console.log('🔍 SetupStep emitStepData:', {
-        examType: form.examType,
-        customExam: form.customExam,
-        stepData,
-        fullData: data
-      })
       
       emit('step-data', data)
     }
