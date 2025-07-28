@@ -68,16 +68,28 @@ class OnboardingControllerCodeGenerationTest extends TestCase
      */
     public function 試験コード生成_重複チェック機能()
     {
+        $timestamp = time();
+        $existingCode = 'testexam_u1_' . $timestamp . '_1000';
+        
         // 既存のコードを作成
         ExamType::factory()->create([
-            'code' => 'testexam_u1_' . time() . '_1000',
+            'code' => $existingCode,
             'user_id' => $this->user->id,
         ]);
 
         $examCode = $this->invokePrivateMethod('generateExamCode', [1, 'Test Exam']);
         
-        $this->assertNotEquals('testexam_u1_' . time() . '_1000', $examCode);
+        $this->assertNotEquals($existingCode, $examCode);
         $this->assertStringContainsString('testexam', $examCode);
+        $this->assertMatchesRegularExpression('/testexam_u1_\d+_\d+/', $examCode);
+        
+        // データベースレベルでのユニーク性確認
+        $this->assertFalse(
+            ExamType::where('code', $examCode)
+                ->where('user_id', $this->user->id)
+                ->exists(),
+            '生成されたコードが既にデータベースに存在しています'
+        );
     }
 
     /**
@@ -107,16 +119,28 @@ class OnboardingControllerCodeGenerationTest extends TestCase
      */
     public function 学習分野コード生成_重複チェック機能()
     {
+        $timestamp = time();
+        $existingCode = 'testsubjec_1_' . $timestamp;
+        
         // 既存のコードを作成
         SubjectArea::factory()->create([
-            'code' => 'testsubject_1_' . time(),
+            'code' => $existingCode,
             'user_id' => $this->user->id,
         ]);
 
         $subjectCode = $this->invokePrivateMethod('generateSubjectCode', ['Test Subject', 1]);
         
-        $this->assertNotEquals('testsubject_1_' . time(), $subjectCode);
+        $this->assertNotEquals($existingCode, $subjectCode);
         $this->assertStringContainsString('testsubjec', $subjectCode); // 10文字制限で切り詰められる
+        $this->assertMatchesRegularExpression('/testsubjec_1_\d+/', $subjectCode);
+        
+        // データベースレベルでのユニーク性確認
+        $this->assertFalse(
+            SubjectArea::where('code', $subjectCode)
+                ->where('user_id', $this->user->id)
+                ->exists(),
+            '生成されたコードが既にデータベースに存在しています'
+        );
     }
 
     /**
