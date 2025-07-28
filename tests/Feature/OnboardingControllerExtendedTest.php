@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\OnboardingLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class OnboardingControllerExtendedTest extends TestCase
@@ -134,7 +133,7 @@ class OnboardingControllerExtendedTest extends TestCase
 
         // ログが作成されていることを確認
         $allLogs = OnboardingLog::where('user_id', $this->user->id)->get();
-        $this->assertGreaterThan(0, $allLogs->count(), 
+        $this->assertGreaterThan(0, $allLogs->count(),
             'OnboardingLogが作成されていません。updateOnboardingProgressメソッドのログ記録処理を確認してください。');
 
         $this->assertEquals(1, $step1Logs);
@@ -316,7 +315,7 @@ class OnboardingControllerExtendedTest extends TestCase
         // この テストは実際のアプリケーションでバリデーションエラーが発生することを確認
         // step 999 はバリデーションで弾かれるため、システムエラーログは出力されない
         // これは正常な動作である
-        
+
         $response = $this->actingAs($this->user)
             ->postJson('/api/onboarding/progress', [
                 'current_step' => 999, // バリデーションで無効とされるステップ番号
@@ -325,7 +324,7 @@ class OnboardingControllerExtendedTest extends TestCase
 
         // バリデーションエラーが返されることを確認
         $response->assertStatus(422);
-        
+
         // バリデーションエラーメッセージが含まれることを確認
         $response->assertJsonStructure(['errors']);
     }

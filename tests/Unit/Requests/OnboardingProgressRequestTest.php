@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Requests;
 
-use Tests\TestCase;
 use App\Http\Requests\OnboardingProgressRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use Tests\TestCase;
 
 class OnboardingProgressRequestTest extends TestCase
 {
@@ -19,10 +19,10 @@ class OnboardingProgressRequestTest extends TestCase
         $invalidData = [
             'completed_steps' => [1, 2],
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -38,10 +38,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 'invalid',
             'completed_steps' => [1, 2],
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -57,10 +57,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 0, // 1未満
             'completed_steps' => [1, 2],
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -82,10 +82,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 2,
             'completed_steps' => [1],
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37.123Z' // ミリ秒付き
+            'timestamp' => '2025-07-27T14:34:37.123Z', // ミリ秒付き
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -101,10 +101,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 2,
             'completed_steps' => [1],
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37Z' // ミリ秒なし
+            'timestamp' => '2025-07-27T14:34:37Z', // ミリ秒なし
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -119,10 +119,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 2,
             'completed_steps' => [1],
             'step_data' => ['test' => 'data'],
-            'timestamp' => null
+            'timestamp' => null,
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -141,12 +141,12 @@ class OnboardingProgressRequestTest extends TestCase
                     'exam_type' => 'aws_clf',
                     'exam_date' => '2025-08-15',
                     'daily_goal_minutes' => 60,
-                ]
+                ],
             ],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -161,10 +161,10 @@ class OnboardingProgressRequestTest extends TestCase
             'current_step' => 2,
             'completed_steps' => [0, 5], // 範囲外の値
             'step_data' => ['test' => 'data'],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -179,17 +179,17 @@ class OnboardingProgressRequestTest extends TestCase
     {
         // 大きなデータを作成（10KB超過）
         $largeData = str_repeat('x', 11000);
-        
+
         $invalidData = [
             'current_step' => 2,
             'completed_steps' => [1],
             'step_data' => [
-                'large_field' => $largeData
+                'large_field' => $largeData,
             ],
-            'timestamp' => '2025-07-27T14:34:37Z'
+            'timestamp' => '2025-07-27T14:34:37Z',
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -199,7 +199,7 @@ class OnboardingProgressRequestTest extends TestCase
     /**
      * @test
      */
-    public function JavaScriptからのAPIコール形式をテスト()
+    public function java_scriptからの_ap_iコール形式をテスト()
     {
         // 実際のJavaScriptから送信される可能性のあるデータ形式
         $jsStyleData = [
@@ -213,13 +213,13 @@ class OnboardingProgressRequestTest extends TestCase
                     'custom_exam_name' => '情報セキュリティマネジメント試験',
                     'custom_exam_description' => 'セキュリティ関連の資格試験',
                     'custom_exam_color' => '#FF5722',
-                    'custom_exam_notes' => 'スコア目標: 700点以上'
-                ]
+                    'custom_exam_notes' => 'スコア目標: 700点以上',
+                ],
             ],
-            'timestamp' => '2025-07-27T14:34:37Z' // ミリ秒除去済み
+            'timestamp' => '2025-07-27T14:34:37Z', // ミリ秒除去済み
         ];
 
-        $request = new OnboardingProgressRequest();
+        $request = new OnboardingProgressRequest;
         $validator = Validator::make($jsStyleData, $request->rules());
 
         $this->assertTrue($validator->passes());

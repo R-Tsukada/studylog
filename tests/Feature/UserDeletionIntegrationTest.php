@@ -17,7 +17,6 @@ use Tests\TestCase;
 class UserDeletionIntegrationTest extends TestCase
 {
     use RefreshDatabase;
-    
 
     /** @test */
     public function complete_user_deletion_workflow()

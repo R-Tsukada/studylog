@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\ExamType;
 use App\Models\StudyGoal;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,9 +37,9 @@ class OnboardingToSettingsIntegrationTest extends TestCase
                     'custom_exam_name' => '情報セキュリティマネジメント試験',
                     'custom_exam_description' => 'セキュリティ関連の資格試験',
                     'custom_exam_color' => '#FF5722',
-                    'custom_exam_notes' => 'スコア目標: 700点以上'
-                ]
-            ]
+                    'custom_exam_notes' => 'スコア目標: 700点以上',
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -50,8 +50,8 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'setup_complete' => true
-                ]
+                    'setup_complete' => true,
+                ],
             ]);
 
         // 2. データベースにExamTypeが作成されているか確認
@@ -62,7 +62,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             'color' => '#FF5722',
             'exam_notes' => 'スコア目標: 700点以上',
             'is_system' => 0,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
 
         $examType = ExamType::where('user_id', $this->user->id)->first();
@@ -74,7 +74,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             'user_id' => $this->user->id,
             'exam_type_id' => $examType->id,
             'daily_minutes_goal' => 90,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
 
         $studyGoal = StudyGoal::where('user_id', $this->user->id)->first();
@@ -95,9 +95,9 @@ class OnboardingToSettingsIntegrationTest extends TestCase
                         'color' => '#FF5722',
                         'exam_notes' => 'スコア目標: 700点以上',
                         'is_system' => false,
-                        'is_active' => true
-                    ]
-                ]
+                        'is_active' => true,
+                    ],
+                ],
             ]);
 
         // 5. オンボーディング完了状態の確認
@@ -106,7 +106,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
     }
 
     /**
-     * @test  
+     * @test
      */
     public function オンボーディング完了後に設定画面で既存試験が表示される()
     {
@@ -119,8 +119,8 @@ class OnboardingToSettingsIntegrationTest extends TestCase
                     'exam_type' => 'aws_clf',
                     'exam_date' => '2025-08-15',
                     'daily_goal_minutes' => 60,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -134,7 +134,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             'code' => 'aws_clf',
             'name' => 'AWS Cloud Practitioner',
             'is_system' => 0,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
 
         // 設定画面のAPIで取得確認
@@ -142,7 +142,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             ->getJson('/api/user/exam-types');
 
         $settingsResponse->assertStatus(200);
-        
+
         $examTypes = $settingsResponse->json('exam_types');
         $this->assertCount(1, $examTypes);
         $this->assertEquals('AWS Cloud Practitioner', $examTypes[0]['name']);
@@ -171,7 +171,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
 
         // ExamTypeやStudyGoalは作成されない
         $this->assertDatabaseMissing('exam_types', [
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
 
         // 設定画面では空の配列が返る
@@ -181,7 +181,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         $settingsResponse->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'exam_types' => []
+                'exam_types' => [],
             ]);
     }
 
@@ -202,9 +202,9 @@ class OnboardingToSettingsIntegrationTest extends TestCase
                     'custom_exam_name' => '情報セキュリティマネジメント試験',
                     'custom_exam_description' => 'セキュリティ関連の資格試験',
                     'custom_exam_color' => '#FF5722',
-                    'custom_exam_notes' => 'スコア目標: 700点以上'
-                ]
-            ]
+                    'custom_exam_notes' => 'スコア目標: 700点以上',
+                ],
+            ],
         ];
 
         // オンボーディング完了API実行
@@ -216,7 +216,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         // データベース確認
         $examTypes = ExamType::where('user_id', $this->user->id)->get();
         $this->assertGreaterThan(0, $examTypes->count(), 'ExamTypeが作成されていません');
-        
+
         $studyGoals = StudyGoal::where('user_id', $this->user->id)->get();
         $this->assertGreaterThan(0, $studyGoals->count(), 'StudyGoalが作成されていません');
 
@@ -226,10 +226,10 @@ class OnboardingToSettingsIntegrationTest extends TestCase
 
         $settingsResponse->assertStatus(200);
         $settingsData = $settingsResponse->json();
-        
+
         $this->assertTrue($settingsData['success']);
         $this->assertNotEmpty($settingsData['exam_types']);
-        
+
         // 作成されたカスタム試験が設定画面に表示されることを確認
         $examNames = collect($settingsData['exam_types'])->pluck('name')->toArray();
         $this->assertContains('情報セキュリティマネジメント試験', $examNames);

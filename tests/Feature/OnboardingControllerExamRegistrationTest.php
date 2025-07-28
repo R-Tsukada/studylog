@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\ExamType;
 use App\Models\StudyGoal;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -36,9 +36,9 @@ class OnboardingControllerExamRegistrationTest extends TestCase
                     'custom_exam_name' => '情報セキュリティマネジメント試験',
                     'custom_exam_description' => 'セキュリティ関連の資格試験',
                     'custom_exam_color' => '#FF5722',
-                    'custom_exam_notes' => 'スコア目標: 700点以上'
-                ]
-            ]
+                    'custom_exam_notes' => 'スコア目標: 700点以上',
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -48,8 +48,8 @@ class OnboardingControllerExamRegistrationTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'data' => [
-                    'setup_complete' => true
-                ]
+                    'setup_complete' => true,
+                ],
             ]);
 
         // ExamTypeが作成されているか確認
@@ -60,9 +60,9 @@ class OnboardingControllerExamRegistrationTest extends TestCase
             'color' => '#FF5722',
             'exam_notes' => 'スコア目標: 700点以上',
             'is_system' => 0,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
-        
+
         $examType = ExamType::where('user_id', $this->user->id)->first();
         $this->assertEquals('2025-09-01', $examType->exam_date->format('Y-m-d'));
 
@@ -71,9 +71,9 @@ class OnboardingControllerExamRegistrationTest extends TestCase
             'user_id' => $this->user->id,
             'exam_type_id' => $examType->id,
             'daily_minutes_goal' => 90,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
-        
+
         $studyGoal = StudyGoal::where('user_id', $this->user->id)->first();
         $this->assertEquals('2025-09-01', $studyGoal->exam_date->format('Y-m-d'));
 
@@ -95,8 +95,8 @@ class OnboardingControllerExamRegistrationTest extends TestCase
                     'exam_type' => 'aws_clf',
                     'exam_date' => '2025-08-15',
                     'daily_goal_minutes' => 60,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -110,9 +110,9 @@ class OnboardingControllerExamRegistrationTest extends TestCase
             'code' => 'aws_clf',
             'name' => 'AWS Cloud Practitioner',
             'is_system' => 0,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
-        
+
         $examType = ExamType::where('user_id', $this->user->id)->first();
         $this->assertEquals('2025-08-15', $examType->exam_date->format('Y-m-d'));
 
@@ -121,9 +121,9 @@ class OnboardingControllerExamRegistrationTest extends TestCase
             'user_id' => $this->user->id,
             'exam_type_id' => $examType->id,
             'daily_minutes_goal' => 60,
-            'is_active' => 1
+            'is_active' => 1,
         ]);
-        
+
         $studyGoal = StudyGoal::where('user_id', $this->user->id)->first();
         $this->assertEquals('2025-08-15', $studyGoal->exam_date->format('Y-m-d'));
     }
@@ -136,7 +136,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         // 既存のアクティブ学習目標を作成
         $existingGoal = StudyGoal::factory()->create([
             'user_id' => $this->user->id,
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $requestData = [
@@ -146,8 +146,8 @@ class OnboardingControllerExamRegistrationTest extends TestCase
                 'setup_step' => [
                     'exam_type' => 'jstqb_fl',
                     'daily_goal_minutes' => 45,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -188,10 +188,10 @@ class OnboardingControllerExamRegistrationTest extends TestCase
 
         // ExamTypeやStudyGoalは作成されない
         $this->assertDatabaseMissing('exam_types', [
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $this->assertDatabaseMissing('study_goals', [
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
     }
 
@@ -210,8 +210,8 @@ class OnboardingControllerExamRegistrationTest extends TestCase
                     'exam_type' => 'custom',
                     'custom_exam_name' => null, // nullでエラーを発生
                     'daily_goal_minutes' => 60,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -222,12 +222,12 @@ class OnboardingControllerExamRegistrationTest extends TestCase
 
         // ロールバックの確認（どちらの場合でも変更は反映されない）
         $this->user->refresh();
-        
+
         $this->assertDatabaseMissing('exam_types', [
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $this->assertDatabaseMissing('study_goals', [
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
     }
 
@@ -244,8 +244,8 @@ class OnboardingControllerExamRegistrationTest extends TestCase
                     'exam_type' => 'custom',
                     'custom_exam_name' => '基本情報技術者試験 特別版',
                     'daily_goal_minutes' => 120,
-                ]
-            ]
+                ],
+            ],
         ];
 
         $response = $this->actingAs($this->user)
@@ -256,7 +256,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         // 生成されたコードの確認
         $examType = ExamType::where('user_id', $this->user->id)->first();
         $this->assertNotNull($examType);
-        $this->assertStringContainsString((string)$this->user->id, $examType->code);
+        $this->assertStringContainsString((string) $this->user->id, $examType->code);
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $examType->code);
     }
 }

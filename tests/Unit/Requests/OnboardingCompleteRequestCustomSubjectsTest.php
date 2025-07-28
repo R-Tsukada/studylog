@@ -23,12 +23,12 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
                     'custom_subjects' => [
                         ['name' => 'データベース'],
                         ['name' => 'ネットワーク'],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($validData, $request->rules());
 
         $this->assertTrue($validator->passes());
@@ -48,12 +48,12 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
             'step_data' => [
                 'setup_step' => [
                     'exam_type' => 'ipa_fe',
-                    'custom_subjects' => $subjects
-                ]
-            ]
+                    'custom_subjects' => $subjects,
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -71,12 +71,12 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
                     'exam_type' => 'ipa_fe',
                     'custom_subjects' => [
                         ['name' => ''],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());
@@ -94,12 +94,12 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
                     'exam_type' => 'ipa_fe',
                     'custom_subjects' => [
                         ['name' => str_repeat('あ', 256)],
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
 
-        $request = new OnboardingCompleteRequest();
+        $request = new OnboardingCompleteRequest;
         $validator = Validator::make($invalidData, $request->rules());
 
         $this->assertTrue($validator->fails());

@@ -94,7 +94,7 @@ class OnboardingController extends Controller
 
             // step_dataの処理
             $setupComplete = false;
-            if (!empty($validated['step_data']['setup_step'])) {
+            if (! empty($validated['step_data']['setup_step'])) {
                 $setupData = $this->extractSetupStepData($validated['step_data']['setup_step']);
                 $examType = $this->processExamType($user, $setupData);
                 $this->createStudyGoal($user, $examType, $setupData);
@@ -130,6 +130,7 @@ class OnboardingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->errorResponse('完了処理中にエラーが発生しました', $e, $request);
         }
     }
@@ -290,9 +291,9 @@ class OnboardingController extends Controller
     {
         $examTypes = config('exams.types', []);
         $examInfo = $examTypes[$setupData['exam_type']] ?? [
-            'name' => $setupData['exam_type'], 
+            'name' => $setupData['exam_type'],
             'description' => '',
-            'color' => '#3B82F6'
+            'color' => '#3B82F6',
         ];
 
         return ExamType::create([
@@ -333,19 +334,19 @@ class OnboardingController extends Controller
         $subjectsToCreate = [];
 
         // カスタム試験の場合
-        if ($setupData['exam_type'] === 'custom' && !empty($setupData['custom_exam_subjects'])) {
+        if ($setupData['exam_type'] === 'custom' && ! empty($setupData['custom_exam_subjects'])) {
             $subjectsToCreate = $setupData['custom_exam_subjects'];
         }
         // 既定試験でカスタム学習分野がある場合
-        elseif ($setupData['exam_type'] !== 'custom' && !empty($setupData['custom_subjects'])) {
+        elseif ($setupData['exam_type'] !== 'custom' && ! empty($setupData['custom_subjects'])) {
             $subjectsToCreate = $setupData['custom_subjects'];
         }
 
         // 学習分野を作成
         foreach ($subjectsToCreate as $subject) {
-            if (!empty($subject['name'])) {
+            if (! empty($subject['name'])) {
                 $subjectCode = $this->generateSubjectCode($subject['name'], $user->id);
-                
+
                 SubjectArea::create([
                     'user_id' => $user->id,
                     'exam_type_id' => $examType->id,
@@ -365,11 +366,11 @@ class OnboardingController extends Controller
     private function generateSubjectCode(string $name, int $userId): string
     {
         $maxLength = config('exams.validation.exam_code_base_length', 10);
-        
+
         // ベースコードの生成
         $baseCode = preg_replace('/[^a-zA-Z0-9]/', '', $name);
         $baseCode = strtolower(substr($baseCode, 0, $maxLength));
-        
+
         // 空の場合のフォールバック
         if (empty($baseCode)) {
             $baseCode = 'subject';
@@ -399,34 +400,34 @@ class OnboardingController extends Controller
     private function generateExamCode(int $userId, string $examName): string
     {
         $maxLength = config('exams.validation.exam_code_base_length', 10);
-        
+
         // ベースコードの生成
         $baseCode = strtolower(str_replace([' ', '　', '-', '_'], '', $examName));
         $baseCode = preg_replace('/[^a-z0-9]/', '', $baseCode);
         $baseCode = substr($baseCode, 0, $maxLength);
-        
+
         // 空の場合のフォールバック
         if (empty($baseCode)) {
             $baseCode = 'custom';
         }
-        
+
         $timestamp = time();
         $randomSuffix = mt_rand(1000, 9999);
-        $candidateCode = $baseCode . '_u' . $userId . '_' . $timestamp . '_' . $randomSuffix;
-        
+        $candidateCode = $baseCode.'_u'.$userId.'_'.$timestamp.'_'.$randomSuffix;
+
         // 重複チェックと生成（最大10回試行）
         $counter = 1;
         $finalCode = $candidateCode;
         while (ExamType::where('code', $finalCode)->exists() && $counter <= 10) {
-            $finalCode = $candidateCode . '_' . $counter;
+            $finalCode = $candidateCode.'_'.$counter;
             $counter++;
         }
-        
+
         // 10回試行しても重複する場合は例外をスロー
         if (ExamType::where('code', $finalCode)->exists()) {
             throw new \RuntimeException('試験コードの生成に失敗しました。しばらく時間をおいて再試行してください。');
         }
-        
+
         return $finalCode;
     }
 }

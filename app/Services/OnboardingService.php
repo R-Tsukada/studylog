@@ -16,10 +16,10 @@ class OnboardingService
     public function getAnalytics(string $startDate, string $endDate, ?string $groupBy = null, ?int $limit = null): array
     {
         // Validate date formats
-        if (!strtotime($startDate) || !strtotime($endDate)) {
+        if (! strtotime($startDate) || ! strtotime($endDate)) {
             throw new \InvalidArgumentException('Invalid date format provided');
         }
-        
+
         if (strtotime($startDate) > strtotime($endDate)) {
             throw new \InvalidArgumentException('Start date must be before or equal to end date');
         }
@@ -133,8 +133,8 @@ class OnboardingService
                     COUNT(*) as count,
                     COUNT(DISTINCT user_id) as unique_users
                 ')
-                ->groupBy(DB::raw('YEARWEEK(created_at)'), 'event_type')
-                ->orderBy(DB::raw('YEARWEEK(created_at)'));
+                    ->groupBy(DB::raw('YEARWEEK(created_at)'), 'event_type')
+                    ->orderBy(DB::raw('YEARWEEK(created_at)'));
                 break;
 
             case 'month':
@@ -144,8 +144,8 @@ class OnboardingService
                     COUNT(*) as count,
                     COUNT(DISTINCT user_id) as unique_users
                 ')
-                ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'event_type')
-                ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'));
+                    ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'), 'event_type')
+                    ->orderBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'));
                 break;
 
             default: // 'day' or null
@@ -155,8 +155,8 @@ class OnboardingService
                     COUNT(*) as count,
                     COUNT(DISTINCT user_id) as unique_users
                 ')
-                ->groupBy(DB::raw('DATE(created_at)'), 'event_type')
-                ->orderBy(DB::raw('DATE(created_at)'));
+                    ->groupBy(DB::raw('DATE(created_at)'), 'event_type')
+                    ->orderBy(DB::raw('DATE(created_at)'));
                 break;
         }
 
@@ -217,19 +217,18 @@ class OnboardingService
         array $stepData = [],
         ?string $userAgent = null,
         ?string $ipAddress = null
-    ): bool
-    {
+    ): bool {
         return DB::transaction(function () use ($user, $currentStep, $completedSteps, $stepData, $userAgent, $ipAddress) {
             // Store the current version for optimistic locking
             $currentVersion = $user->updated_at;
-            
+
             // Prepare the progress data
             $progress = $user->onboarding_progress ?? [];
             $progress['current_step'] = $currentStep;
             $progress['completed_steps'] = $completedSteps;
             $progress['step_data'] = $stepData;
             $progress['updated_at'] = now()->toISOString();
-            
+
             // Attempt to update with optimistic lock
             $updated = User::where('id', $user->id)
                 ->where('updated_at', $currentVersion)
@@ -237,19 +236,19 @@ class OnboardingService
                     'onboarding_progress' => $progress,
                     'updated_at' => now(),
                 ]);
-                
-            if (!$updated) {
+
+            if (! $updated) {
                 logger()->warning('Onboarding concurrent update prevented', [
                     'user_id' => $user->id,
                     'current_step' => $currentStep,
                 ]);
                 throw new \RuntimeException('Concurrent update detected. Please try again.');
             }
-            
+
             // Log the progress update for each newly completed step
             $previousCompletedSteps = $user->onboarding_progress['completed_steps'] ?? [];
             $newlyCompletedSteps = array_diff($completedSteps, $previousCompletedSteps);
-            
+
             foreach ($newlyCompletedSteps as $stepNumber) {
                 OnboardingLog::logEvent(
                     $user->id,
@@ -261,10 +260,10 @@ class OnboardingService
                     $ipAddress
                 );
             }
-            
+
             // Refresh the user model to get the latest data
             $user->refresh();
-            
+
             return true;
         });
     }
