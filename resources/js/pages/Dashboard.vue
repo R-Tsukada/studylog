@@ -41,8 +41,8 @@
     </section>
 
     <!-- 試験日カウントダウン -->
-    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: var(--color-muted-yellow-light); border: 1px solid var(--color-muted-yellow);">
-      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-yellow-dark);">🎯 試験予定日まで</h2>
+    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
           <div class="flex justify-between items-center">
