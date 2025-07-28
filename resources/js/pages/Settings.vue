@@ -694,6 +694,7 @@ export default {
       this.loadingExams = true
       try {
         const response = await axios.get('/api/user/exam-types')
+        
         if (response.data.success) {
           this.userExamTypes = response.data.exam_types
         }

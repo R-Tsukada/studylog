@@ -352,12 +352,29 @@ export default {
         // 全ステップ完了済みにマーク
         state.completedSteps = [1, 2, 3, 4]
 
-        // サーバーに完了を記録
-        await OnboardingAPI.complete({
-          completedSteps: state.completedSteps,
-          totalTimeSpent: calculateTotalTime(),
-          completion_source: 'web_app'
-        })
+        // サーバーに完了を記録（step_dataを含める）
+        let completionData
+        try {
+          const allStepData = OnboardingStorage.getAllStepData()
+          const setupStepData = allStepData[2] // SetupStepは2番目のステップ
+          
+          completionData = {
+            completed_steps: state.completedSteps,
+            total_time_spent: calculateTotalTime(),
+            step_data: setupStepData?.step_data || {}
+          }
+          
+        } catch (dataError) {
+          console.error('step_data抽出エラー:', dataError)
+          // フォールバック：step_dataなしで完了
+          completionData = {
+            completed_steps: state.completedSteps,
+            total_time_spent: calculateTotalTime(),
+            step_data: {}
+          }
+        }
+        
+        await OnboardingAPI.complete(completionData)
 
         // 状態リセット
         resetState()
@@ -375,10 +392,10 @@ export default {
     const syncProgress = async () => {
       try {
         await OnboardingAPI.updateProgress({
-          currentStep: state.currentStep,
-          completedSteps: state.completedSteps,
-          stepData: OnboardingStorage.getAllStepData(),
-          timestamp: new Date().toISOString()
+          current_step: state.currentStep,
+          completed_steps: state.completedSteps,
+          step_data: OnboardingStorage.getAllStepData(),
+          timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
         })
 
         // ローカルストレージにも保存

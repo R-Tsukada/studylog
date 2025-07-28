@@ -1,22 +1,15 @@
 // 試験・資格マスターデータ設定ファイル
 // 試験タイプ、科目データの一元管理
+// Note: この設定は config/exams.php と同期する必要があります
 
 export const examTypeNames = {
   'jstqb_fl': 'JSTQB Foundation Level',
-  'jstqb_al': 'JSTQB Advanced Level',
-  'aws_clf': 'AWS Cloud Practitioner',
-  'aws_saa': 'AWS Solutions Architect Associate',
-  'aws_sap': 'AWS Solutions Architect Professional',
-  'aws_dva': 'AWS Developer Associate',
-  'oracle_bronze': 'Oracle Database Bronze',
-  'oracle_silver': 'Oracle Database Silver',
-  'oracle_gold': 'Oracle Database Gold',
-  'ccna': 'Cisco CCNA',
-  'lpic1': 'LPIC Level 1',
-  'lpic2': 'LPIC Level 2',
   'ipa_fe': '基本情報技術者試験',
-  'ipa_ap': '応用情報技術者試験',
-  'other': 'その他'
+  'toeic': 'TOEIC',
+  'fp': 'ファイナンシャルプランナー',
+  'aws_clf': 'AWS Cloud Practitioner',
+  'aws_foundational': 'AWS Foundational',
+  'aws_associate': 'AWS Associate'
 }
 
 export const subjectNames = {
@@ -26,40 +19,47 @@ export const subjectNames = {
   'test_management': 'テスト管理',
   'tool_support': 'ツールサポート',
   
-  // AWS Cloud Practitioner
+  // 基本情報技術者試験
+  'technology_fe': 'テクノロジ系',
+  'management_fe': 'マネジメント系',
+  'strategy_fe': 'ストラテジ系',
+  
+  // TOEIC
+  'listening': 'リスニング',
+  'reading': 'リーディング',
+  'grammar': '文法',
+  'vocabulary': '語彙',
+  
+  // ファイナンシャルプランナー
+  'life_planning': 'ライフプランニングと資金計画',
+  'risk_management': 'リスク管理',
+  'financial_planning': '金融資産運用',
+  'tax_planning': 'タックスプランニング',
+  'real_estate': '不動産',
+  'inheritance': '相続・事業承継',
+  
+  // AWS Foundational
   'cloud_concepts': 'クラウドの概念',
   'security_compliance': 'セキュリティとコンプライアンス',
   'technology': 'テクノロジー',
   'billing_pricing': '請求と料金',
   
-  // AWS Solutions Architect Associate
+  // AWS Associate
   'design_resilient_architectures': '復元力のあるアーキテクチャの設計',
   'design_high_performing_architectures': '高性能アーキテクチャの設計',
   'design_secure_applications': 'セキュアなアプリケーションの設計',
-  'design_cost_optimized_architectures': 'コスト最適化アーキテクチャの設計',
-  
-  // 情報処理技術者試験（基本・応用共通）
-  'management': 'マネジメント系',
-  'strategy': 'ストラテジ系'
+  'design_cost_optimized_architectures': 'コスト最適化アーキテクチャの設計'
 }
 
 // 試験タイプ一覧（SetupStepで使用）
 export const examTypes = [
   { value: 'jstqb_fl', label: examTypeNames.jstqb_fl },
-  { value: 'jstqb_al', label: examTypeNames.jstqb_al },
-  { value: 'aws_clf', label: examTypeNames.aws_clf },
-  { value: 'aws_saa', label: examTypeNames.aws_saa },
-  { value: 'aws_sap', label: examTypeNames.aws_sap },
-  { value: 'aws_dva', label: examTypeNames.aws_dva },
-  { value: 'oracle_bronze', label: examTypeNames.oracle_bronze },
-  { value: 'oracle_silver', label: examTypeNames.oracle_silver },
-  { value: 'oracle_gold', label: examTypeNames.oracle_gold },
-  { value: 'ccna', label: examTypeNames.ccna },
-  { value: 'lpic1', label: examTypeNames.lpic1 },
-  { value: 'lpic2', label: examTypeNames.lpic2 },
   { value: 'ipa_fe', label: examTypeNames.ipa_fe },
-  { value: 'ipa_ap', label: examTypeNames.ipa_ap },
-  { value: 'other', label: examTypeNames.other }
+  { value: 'toeic', label: examTypeNames.toeic },
+  { value: 'fp', label: examTypeNames.fp },
+  { value: 'aws_clf', label: examTypeNames.aws_clf },
+  { value: 'aws_foundational', label: examTypeNames.aws_foundational },
+  { value: 'aws_associate', label: examTypeNames.aws_associate }
 ]
 
 // 試験別学習分野マッピング（SetupStepで使用）
@@ -70,27 +70,42 @@ export const subjectsByExam = {
     { value: 'test_management', label: subjectNames.test_management },
     { value: 'tool_support', label: subjectNames.tool_support }
   ],
+  ipa_fe: [
+    { value: 'technology_fe', label: subjectNames.technology_fe },
+    { value: 'management_fe', label: subjectNames.management_fe },
+    { value: 'strategy_fe', label: subjectNames.strategy_fe }
+  ],
+  toeic: [
+    { value: 'listening', label: subjectNames.listening },
+    { value: 'reading', label: subjectNames.reading },
+    { value: 'grammar', label: subjectNames.grammar },
+    { value: 'vocabulary', label: subjectNames.vocabulary }
+  ],
+  fp: [
+    { value: 'life_planning', label: subjectNames.life_planning },
+    { value: 'risk_management', label: subjectNames.risk_management },
+    { value: 'financial_planning', label: subjectNames.financial_planning },
+    { value: 'tax_planning', label: subjectNames.tax_planning },
+    { value: 'real_estate', label: subjectNames.real_estate },
+    { value: 'inheritance', label: subjectNames.inheritance }
+  ],
   aws_clf: [
     { value: 'cloud_concepts', label: subjectNames.cloud_concepts },
     { value: 'security_compliance', label: subjectNames.security_compliance },
     { value: 'technology', label: subjectNames.technology },
     { value: 'billing_pricing', label: subjectNames.billing_pricing }
   ],
-  aws_saa: [
+  aws_foundational: [
+    { value: 'cloud_concepts', label: subjectNames.cloud_concepts },
+    { value: 'security_compliance', label: subjectNames.security_compliance },
+    { value: 'technology', label: subjectNames.technology },
+    { value: 'billing_pricing', label: subjectNames.billing_pricing }
+  ],
+  aws_associate: [
     { value: 'design_resilient_architectures', label: subjectNames.design_resilient_architectures },
     { value: 'design_high_performing_architectures', label: subjectNames.design_high_performing_architectures },
     { value: 'design_secure_applications', label: subjectNames.design_secure_applications },
     { value: 'design_cost_optimized_architectures', label: subjectNames.design_cost_optimized_architectures }
-  ],
-  ipa_fe: [
-    { value: 'technology', label: subjectNames.technology },
-    { value: 'management', label: subjectNames.management },
-    { value: 'strategy', label: subjectNames.strategy }
-  ],
-  ipa_ap: [
-    { value: 'technology', label: subjectNames.technology },
-    { value: 'management', label: subjectNames.management },
-    { value: 'strategy', label: subjectNames.strategy }
   ]
 }
 
