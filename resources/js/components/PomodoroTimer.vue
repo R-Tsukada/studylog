@@ -65,7 +65,7 @@
             :key="area.id"
             :value="area.id"
           >
-            {{ area.exam_type?.name }} - {{ area.name }}
+            {{ area.name }}
           </option>
         </select>
       </div>
