@@ -411,23 +411,20 @@ class OnboardingController extends Controller
             $baseCode = 'custom';
         }
 
-        $timestamp = time();
-        $randomSuffix = mt_rand(1000, 9999);
-        $candidateCode = $baseCode.'_u'.$userId.'_'.$timestamp.'_'.$randomSuffix;
+        // ランダムネス強化によるユニークコード生成（最大5回試行）
+        $maxAttempts = 5;
+        for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+            $timestamp = now()->format('YmdHis');
+            $randomSuffix = mt_rand(10000, 99999);
+            $microtime = (int) (microtime(true) * 1000) % 10000;
+            $candidateCode = $baseCode.'_u'.$userId.'_'.$timestamp.'_'.$microtime.'_'.$randomSuffix;
 
-        // 重複チェックと生成（最大10回試行）
-        $counter = 1;
-        $finalCode = $candidateCode;
-        while (ExamType::where('code', $finalCode)->exists() && $counter <= 10) {
-            $finalCode = $candidateCode.'_'.$counter;
-            $counter++;
+            // データベースでの重複確認
+            if (! ExamType::where('code', $candidateCode)->exists()) {
+                return $candidateCode;
+            }
         }
 
-        // 10回試行しても重複する場合は例外をスロー
-        if (ExamType::where('code', $finalCode)->exists()) {
-            throw new \RuntimeException('試験コードの生成に失敗しました。しばらく時間をおいて再試行してください。');
-        }
-
-        return $finalCode;
+        throw new \RuntimeException('試験コードの生成に失敗しました。しばらく時間をおいて再試行してください。');
     }
 }

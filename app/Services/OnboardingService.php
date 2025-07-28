@@ -15,12 +15,22 @@ class OnboardingService
      */
     public function getAnalytics(string $startDate, string $endDate, ?string $groupBy = null, ?int $limit = null): array
     {
-        // Validate date formats
-        if (! strtotime($startDate) || ! strtotime($endDate)) {
-            throw new \InvalidArgumentException('Invalid date format provided');
+        // Validate date formats using strict DateTime parsing
+        $startDateTime = \DateTime::createFromFormat('Y-m-d', $startDate);
+        $startErrors = \DateTime::getLastErrors();
+
+        if (! $startDateTime || ($startErrors && ($startErrors['warning_count'] > 0 || $startErrors['error_count'] > 0))) {
+            throw new \InvalidArgumentException('Invalid start date format provided. Expected Y-m-d format.');
         }
 
-        if (strtotime($startDate) > strtotime($endDate)) {
+        $endDateTime = \DateTime::createFromFormat('Y-m-d', $endDate);
+        $endErrors = \DateTime::getLastErrors();
+
+        if (! $endDateTime || ($endErrors && ($endErrors['warning_count'] > 0 || $endErrors['error_count'] > 0))) {
+            throw new \InvalidArgumentException('Invalid end date format provided. Expected Y-m-d format.');
+        }
+
+        if ($startDateTime > $endDateTime) {
             throw new \InvalidArgumentException('Start date must be before or equal to end date');
         }
 
@@ -225,8 +235,14 @@ class OnboardingService
             // Prepare the progress data
             $progress = $user->onboarding_progress ?? [];
             $progress['current_step'] = $currentStep;
-            $progress['completed_steps'] = $completedSteps;
-            $progress['step_data'] = $stepData;
+            $progress['completed_steps'] = array_unique(array_merge(
+                $progress['completed_steps'] ?? [],
+                $completedSteps
+            ));
+            $progress['step_data'] = array_merge(
+                $progress['step_data'] ?? [],
+                $stepData
+            );
             $progress['updated_at'] = now()->toISOString();
 
             // Attempt to update with optimistic lock
