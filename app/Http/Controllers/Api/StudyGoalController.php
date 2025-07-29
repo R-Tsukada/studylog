@@ -7,6 +7,7 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudyGoalController extends Controller
 {
@@ -187,13 +188,19 @@ class StudyGoalController extends Controller
                     ->update(['is_active' => false]);
             }
 
-            $goal->update([
-                'exam_type_id' => $validated['exam_type_id'] ?? $goal->exam_type_id,
-                'daily_minutes_goal' => $validated['daily_minutes_goal'],
-                'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? $goal->weekly_minutes_goal,
-                'exam_date' => $validated['exam_date'] ?? $goal->exam_date,
-                'is_active' => $validated['is_active'] ?? $goal->is_active,
-            ]);
+            // トランザクション内でStudyGoal更新と試験日同期を実行
+            DB::transaction(function () use ($goal, $validated) {
+                $goal->update([
+                    'exam_type_id' => $validated['exam_type_id'] ?? $goal->exam_type_id,
+                    'daily_minutes_goal' => $validated['daily_minutes_goal'],
+                    'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? $goal->weekly_minutes_goal,
+                    'exam_date' => $validated['exam_date'] ?? $goal->exam_date,
+                    'is_active' => $validated['is_active'] ?? $goal->is_active,
+                ]);
+
+                // 試験日同期ロジック：StudyGoal → ExamType
+                $this->syncExamDateToExamType($goal, auth()->id());
+            });
 
             $goal->load('examType');
 
@@ -310,5 +317,41 @@ class StudyGoalController extends Controller
         return ExamType::where('id', $examTypeId)
             ->where('user_id', $userId)
             ->exists();
+    }
+
+    /**
+     * StudyGoalの試験日をExamTypeに同期
+     * アクティブなStudyGoalの試験日でExamTypeを更新
+     */
+    private function syncExamDateToExamType(StudyGoal $goal, int $userId): void
+    {
+        // exam_type_idが設定されておらず、アクティブでない場合は同期しない
+        if (!$goal->exam_type_id || !$goal->is_active) {
+            return;
+        }
+
+        $examType = ExamType::where('id', $goal->exam_type_id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (!$examType) {
+            return; // ExamTypeが存在しない、または所有権がない場合は何もしない
+        }
+
+        // 試験日に変更がある場合のみ更新
+        if ($examType->exam_date !== $goal->exam_date) {
+            $oldDate = $examType->exam_date;
+            
+            $examType->update(['exam_date' => $goal->exam_date]);
+
+            // ログ出力
+            \Log::info("StudyGoal {$goal->id} の試験日変更に伴い、ExamType {$examType->id} の試験日を同期更新しました", [
+                'study_goal_id' => $goal->id,
+                'exam_type_id' => $examType->id,
+                'old_date' => $oldDate,
+                'new_date' => $goal->exam_date,
+                'user_id' => $userId,
+            ]);
+        }
     }
 }
