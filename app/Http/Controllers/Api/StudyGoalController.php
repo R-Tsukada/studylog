@@ -72,21 +72,29 @@ class StudyGoalController extends Controller
                 }
             }
 
-            // アクティブな目標が作成される場合、他のアクティブな目標を無効化
-            if ($validated['is_active'] ?? true) {
-                StudyGoal::forUser(auth()->id())
-                    ->active()
-                    ->update(['is_active' => false]);
-            }
+            // トランザクション内でStudyGoal作成と試験日同期を実行
+            $goal = DB::transaction(function () use ($validated) {
+                // アクティブな目標が作成される場合、他のアクティブな目標を無効化
+                if ($validated['is_active'] ?? true) {
+                    StudyGoal::forUser(auth()->id())
+                        ->active()
+                        ->update(['is_active' => false]);
+                }
 
-            $goal = StudyGoal::create([
-                'user_id' => auth()->id(),
-                'exam_type_id' => $validated['exam_type_id'] ?? null,
-                'daily_minutes_goal' => $validated['daily_minutes_goal'],
-                'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? null,
-                'exam_date' => $validated['exam_date'] ?? null,
-                'is_active' => $validated['is_active'] ?? true,
-            ]);
+                $goal = StudyGoal::create([
+                    'user_id' => auth()->id(),
+                    'exam_type_id' => $validated['exam_type_id'] ?? null,
+                    'daily_minutes_goal' => $validated['daily_minutes_goal'],
+                    'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? null,
+                    'exam_date' => $validated['exam_date'] ?? null,
+                    'is_active' => $validated['is_active'] ?? true,
+                ]);
+
+                // 試験日同期ロジック：StudyGoal → ExamType
+                $this->syncExamDateToExamType($goal, auth()->id());
+
+                return $goal;
+            });
 
             $goal->load('examType');
 
