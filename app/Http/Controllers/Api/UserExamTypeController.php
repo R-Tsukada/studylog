@@ -224,11 +224,27 @@ class UserExamTypeController extends Controller
         try {
             $userId = auth()->id();
 
+            if (! $userId) {
+                \Log::error('ExamType削除: 認証されたユーザーが見つかりません', ['id' => $id]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => '認証が必要です',
+                ], 401);
+            }
+
+            \Log::info('ExamType削除開始', ['id' => $id, 'user_id' => $userId]);
+
             $examType = ExamType::where('id', $id)
                 ->where('user_id', $userId)
                 ->first();
 
             if (! $examType) {
+                \Log::warning('ExamType削除: 指定されたIDが見つからない', [
+                    'id' => $id,
+                    'user_id' => $userId,
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => '指定された試験タイプが見つかりません',
@@ -237,6 +253,11 @@ class UserExamTypeController extends Controller
 
             // システム標準データは削除不可
             if ($examType->is_system) {
+                \Log::warning('ExamType削除: システム標準データの削除を試行', [
+                    'id' => $id,
+                    'name' => $examType->name,
+                ]);
+
                 return response()->json([
                     'success' => false,
                     'message' => 'システム標準の試験タイプは削除できません',
@@ -244,30 +265,96 @@ class UserExamTypeController extends Controller
             }
 
             // 関連する学習履歴がある場合は警告
-            $hasStudySessions = $examType->subjectAreas()
-                ->whereHas('studySessions')
-                ->exists();
+            try {
+                $hasStudySessions = $examType->subjectAreas()
+                    ->whereHas('studySessions')
+                    ->exists();
 
-            if ($hasStudySessions) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'この試験タイプには学習履歴が存在します。削除すると関連データも削除されます。',
-                ], 409);
+                if ($hasStudySessions) {
+                    \Log::info('ExamType削除: 学習履歴が存在するため削除拒否', [
+                        'id' => $id,
+                        'name' => $examType->name,
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'この試験タイプには学習履歴が存在します。削除すると関連データも削除されます。',
+                    ], 409);
+                }
+            } catch (\Exception $e) {
+                \Log::error('ExamType削除: 学習履歴チェック中にエラー', [
+                    'id' => $id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                throw $e;
+            }
+
+            // 関連するStudyGoalsの数を確認（ユーザーに通知するため）
+            $studyGoalsCount = $examType->studyGoals()->count();
+            if ($studyGoalsCount > 0) {
+                \Log::info('ExamType削除: 関連StudyGoalsが存在', [
+                    'id' => $id,
+                    'name' => $examType->name,
+                    'study_goals_count' => $studyGoalsCount,
+                ]);
             }
 
             $examTypeName = $examType->name;
-            $examType->delete();
+
+            try {
+                // 関連するStudyGoalsを先に削除（外部キー制約エラーを防ぐため）
+                $deletedGoalsCount = $examType->studyGoals()->delete();
+                if ($deletedGoalsCount > 0) {
+                    \Log::info('ExamType削除: 関連StudyGoalsを削除', [
+                        'exam_type_id' => $id,
+                        'deleted_goals' => $deletedGoalsCount,
+                    ]);
+                }
+
+                // ExamTypeを削除（SubjectAreasはcascade削除される）
+                $examType->delete();
+
+                \Log::info('ExamType削除完了', [
+                    'id' => $id,
+                    'name' => $examTypeName,
+                    'user_id' => $userId,
+                    'deleted_goals' => $deletedGoalsCount,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('ExamType削除: データベース削除中にエラー', [
+                    'id' => $id,
+                    'name' => $examTypeName,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                throw $e;
+            }
+
+            $message = "試験タイプ「{$examTypeName}」を削除しました";
+            if ($deletedGoalsCount > 0) {
+                $message .= "（学習目標{$deletedGoalsCount}件も削除されました）";
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => "試験タイプ「{$examTypeName}」を削除しました",
+                'message' => $message,
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('ExamType削除: 予期しないエラー', [
+                'id' => $id,
+                'user_id' => auth()->id() ?? 'unknown',
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => '試験タイプの削除中にエラーが発生しました',
-                'error' => $e->getMessage(),
+                'error' => config('app.debug') ? $e->getMessage() : '内部エラーが発生しました',
             ], 500);
         }
     }

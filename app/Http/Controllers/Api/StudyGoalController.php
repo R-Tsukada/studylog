@@ -64,7 +64,7 @@ class StudyGoalController extends Controller
 
             // セキュリティチェック：ExamType所有権の検証
             if (isset($validated['exam_type_id'])) {
-                if (!$this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
+                if (! $this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
                     return response()->json([
                         'success' => false,
                         'message' => '指定された試験タイプへのアクセス権限がありません',
@@ -191,7 +191,7 @@ class StudyGoalController extends Controller
 
             // セキュリティチェック：ExamType所有権の検証
             if (isset($validated['exam_type_id'])) {
-                if (!$this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
+                if (! $this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
                     return response()->json([
                         'success' => false,
                         'message' => '指定された試験タイプへのアクセス権限がありません',
@@ -326,11 +326,11 @@ class StudyGoalController extends Controller
 
     /**
      * ExamTypeの所有権を検証
-     * 
+     *
      * セキュリティ強化：他ユーザーのExamTypeへの不正アクセスを防止
-     * 
-     * @param int|null $examTypeId 検証するExamTypeのID（nullの場合は検証スキップ）
-     * @param int $userId 所有権を確認するユーザーID
+     *
+     * @param  int|null  $examTypeId  検証するExamTypeのID（nullの場合は検証スキップ）
+     * @param  int  $userId  所有権を確認するユーザーID
      * @return bool 所有権がある場合true、ない場合false
      */
     private function validateExamTypeOwnership(?int $examTypeId, int $userId): bool
@@ -347,7 +347,7 @@ class StudyGoalController extends Controller
 
     /**
      * StudyGoalの試験日をExamTypeに同期
-     * 
+     *
      * 同期条件：
      * - exam_type_idが設定されている
      * - StudyGoalがアクティブ状態
@@ -356,7 +356,7 @@ class StudyGoalController extends Controller
     private function syncExamDateToExamType(StudyGoal $goal, int $userId): void
     {
         // 同期条件：exam_type_idが設定されており、かつアクティブな目標のみ
-        if (!$goal->exam_type_id || !$goal->is_active) {
+        if (! $goal->exam_type_id || ! $goal->is_active) {
             return;
         }
 
@@ -365,17 +365,17 @@ class StudyGoalController extends Controller
             ->first();
 
         // ExamTypeが存在しない、または所有権がない場合は処理しない
-        if (!$examType) {
+        if (! $examType) {
             return;
         }
 
         // 試験日に変更がある場合のみ更新（値ベースの比較）
         $examDate = $examType->exam_date ? $examType->exam_date->toDateString() : null;
         $goalDate = $goal->exam_date ? $goal->exam_date->toDateString() : null;
-        
+
         if ($examDate !== $goalDate) {
             $oldDate = $examType->exam_date;
-            
+
             $examType->update(['exam_date' => $goal->exam_date]);
 
             // ログ出力
