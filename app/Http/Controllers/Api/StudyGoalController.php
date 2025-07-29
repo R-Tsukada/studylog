@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ExamType;
 use App\Models\StudyGoal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudyGoalController extends Controller
 {
@@ -60,21 +62,39 @@ class StudyGoalController extends Controller
                 'is_active' => 'boolean',
             ]);
 
-            // アクティブな目標が作成される場合、他のアクティブな目標を無効化
-            if ($validated['is_active'] ?? true) {
-                StudyGoal::forUser(auth()->id())
-                    ->active()
-                    ->update(['is_active' => false]);
+            // セキュリティチェック：ExamType所有権の検証
+            if (isset($validated['exam_type_id'])) {
+                if (!$this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '指定された試験タイプへのアクセス権限がありません',
+                    ], 403);
+                }
             }
 
-            $goal = StudyGoal::create([
-                'user_id' => auth()->id(),
-                'exam_type_id' => $validated['exam_type_id'] ?? null,
-                'daily_minutes_goal' => $validated['daily_minutes_goal'],
-                'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? null,
-                'exam_date' => $validated['exam_date'] ?? null,
-                'is_active' => $validated['is_active'] ?? true,
-            ]);
+            // トランザクション内でStudyGoal作成と試験日同期を実行
+            $goal = DB::transaction(function () use ($validated) {
+                // アクティブな目標が作成される場合、他のアクティブな目標を無効化
+                if ($validated['is_active'] ?? true) {
+                    StudyGoal::forUser(auth()->id())
+                        ->active()
+                        ->update(['is_active' => false]);
+                }
+
+                $goal = StudyGoal::create([
+                    'user_id' => auth()->id(),
+                    'exam_type_id' => $validated['exam_type_id'] ?? null,
+                    'daily_minutes_goal' => $validated['daily_minutes_goal'],
+                    'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? null,
+                    'exam_date' => $validated['exam_date'] ?? null,
+                    'is_active' => $validated['is_active'] ?? true,
+                ]);
+
+                // 試験日同期ロジック：StudyGoal → ExamType
+                $this->syncExamDateToExamType($goal, auth()->id());
+
+                return $goal;
+            });
 
             $goal->load('examType');
 
@@ -90,6 +110,7 @@ class StudyGoalController extends Controller
                     'exam_date' => $goal->exam_date?->format('Y-m-d'),
                     'is_active' => $goal->is_active,
                 ],
+                'events' => ['studyGoalUpdated', 'examDataUpdated'], // フロントエンド更新イベント
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -168,6 +189,16 @@ class StudyGoalController extends Controller
                 'is_active' => 'boolean',
             ]);
 
+            // セキュリティチェック：ExamType所有権の検証
+            if (isset($validated['exam_type_id'])) {
+                if (!$this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '指定された試験タイプへのアクセス権限がありません',
+                    ], 403);
+                }
+            }
+
             // アクティブに変更される場合、他のアクティブな目標を無効化
             if (($validated['is_active'] ?? $goal->is_active) && ! $goal->is_active) {
                 StudyGoal::forUser(auth()->id())
@@ -176,13 +207,19 @@ class StudyGoalController extends Controller
                     ->update(['is_active' => false]);
             }
 
-            $goal->update([
-                'exam_type_id' => $validated['exam_type_id'] ?? $goal->exam_type_id,
-                'daily_minutes_goal' => $validated['daily_minutes_goal'],
-                'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? $goal->weekly_minutes_goal,
-                'exam_date' => $validated['exam_date'] ?? $goal->exam_date,
-                'is_active' => $validated['is_active'] ?? $goal->is_active,
-            ]);
+            // トランザクション内でStudyGoal更新と試験日同期を実行
+            DB::transaction(function () use ($goal, $validated) {
+                $goal->update([
+                    'exam_type_id' => $validated['exam_type_id'] ?? $goal->exam_type_id,
+                    'daily_minutes_goal' => $validated['daily_minutes_goal'],
+                    'weekly_minutes_goal' => $validated['weekly_minutes_goal'] ?? $goal->weekly_minutes_goal,
+                    'exam_date' => $validated['exam_date'] ?? $goal->exam_date,
+                    'is_active' => $validated['is_active'] ?? $goal->is_active,
+                ]);
+
+                // 試験日同期ロジック：StudyGoal → ExamType
+                $this->syncExamDateToExamType($goal, auth()->id());
+            });
 
             $goal->load('examType');
 
@@ -198,6 +235,7 @@ class StudyGoalController extends Controller
                     'exam_date' => $goal->exam_date?->format('Y-m-d'),
                     'is_active' => $goal->is_active,
                 ],
+                'events' => ['studyGoalUpdated', 'examDataUpdated'], // フロントエンド更新イベント
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -283,6 +321,71 @@ class StudyGoalController extends Controller
                 'message' => 'アクティブな学習目標の取得中にエラーが発生しました',
                 'error' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * ExamTypeの所有権を検証
+     * 
+     * セキュリティ強化：他ユーザーのExamTypeへの不正アクセスを防止
+     * 
+     * @param int|null $examTypeId 検証するExamTypeのID（nullの場合は検証スキップ）
+     * @param int $userId 所有権を確認するユーザーID
+     * @return bool 所有権がある場合true、ない場合false
+     */
+    private function validateExamTypeOwnership(?int $examTypeId, int $userId): bool
+    {
+        // exam_type_idがnullの場合は検証をスキップ（任意フィールドのため）
+        if ($examTypeId === null) {
+            return true;
+        }
+
+        return ExamType::where('id', $examTypeId)
+            ->where('user_id', $userId)
+            ->exists();
+    }
+
+    /**
+     * StudyGoalの試験日をExamTypeに同期
+     * 
+     * 同期条件：
+     * - exam_type_idが設定されている
+     * - StudyGoalがアクティブ状態
+     * - ExamTypeが存在し、ユーザーが所有している
+     */
+    private function syncExamDateToExamType(StudyGoal $goal, int $userId): void
+    {
+        // 同期条件：exam_type_idが設定されており、かつアクティブな目標のみ
+        if (!$goal->exam_type_id || !$goal->is_active) {
+            return;
+        }
+
+        $examType = ExamType::where('id', $goal->exam_type_id)
+            ->where('user_id', $userId)
+            ->first();
+
+        // ExamTypeが存在しない、または所有権がない場合は処理しない
+        if (!$examType) {
+            return;
+        }
+
+        // 試験日に変更がある場合のみ更新（値ベースの比較）
+        $examDate = $examType->exam_date ? $examType->exam_date->toDateString() : null;
+        $goalDate = $goal->exam_date ? $goal->exam_date->toDateString() : null;
+        
+        if ($examDate !== $goalDate) {
+            $oldDate = $examType->exam_date;
+            
+            $examType->update(['exam_date' => $goal->exam_date]);
+
+            // ログ出力
+            \Log::info("StudyGoal {$goal->id} の試験日変更に伴い、ExamType {$examType->id} の試験日を同期更新しました", [
+                'study_goal_id' => $goal->id,
+                'exam_type_id' => $examType->id,
+                'old_date' => $oldDate,
+                'new_date' => $goal->exam_date,
+                'user_id' => $userId,
+            ]);
         }
     }
 }

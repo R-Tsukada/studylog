@@ -198,6 +198,7 @@ class UserExamTypeController extends Controller
                 'success' => true,
                 'message' => '試験タイプを更新しました',
                 'exam_type' => $examType,
+                'events' => ['examTypeUpdated', 'examDataUpdated'], // フロントエンド更新イベント
             ]);
 
         } catch (ValidationException $e) {
