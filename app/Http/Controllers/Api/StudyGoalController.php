@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ExamType;
 use App\Models\StudyGoal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -284,5 +285,20 @@ class StudyGoalController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * ExamTypeの所有権を検証
+     * セキュリティ強化：他ユーザーのExamTypeへの不正アクセスを防止
+     */
+    private function validateExamTypeOwnership(?int $examTypeId, int $userId): bool
+    {
+        if ($examTypeId === null) {
+            return true; // exam_type_id が null の場合は検証をスキップ
+        }
+
+        return ExamType::where('id', $examTypeId)
+            ->where('user_id', $userId)
+            ->exists();
     }
 }
