@@ -169,6 +169,16 @@ class StudyGoalController extends Controller
                 'is_active' => 'boolean',
             ]);
 
+            // セキュリティチェック：ExamType所有権の検証
+            if (isset($validated['exam_type_id'])) {
+                if (!$this->validateExamTypeOwnership($validated['exam_type_id'], auth()->id())) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => '指定された試験タイプへのアクセス権限がありません',
+                    ], 403);
+                }
+            }
+
             // アクティブに変更される場合、他のアクティブな目標を無効化
             if (($validated['is_active'] ?? $goal->is_active) && ! $goal->is_active) {
                 StudyGoal::forUser(auth()->id())
