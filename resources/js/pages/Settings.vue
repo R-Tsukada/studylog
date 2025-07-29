@@ -629,8 +629,15 @@ export default {
           await this.loadUserExamTypes()
           this.cancelExamEdit()
           
-          // ダッシュボードにデータ更新を通知（試験日変更の可能性があるため）
-          this.notifyDataUpdate('studyGoalUpdated')
+          // API応答のイベント配列に基づいてリアルタイム更新通知
+          if (response.data.events) {
+            response.data.events.forEach(eventType => {
+              this.notifyDataUpdate(eventType)
+            })
+          }
+          
+          // 学習目標データも即座に再読み込み（試験日同期のため）
+          await this.loadActiveGoal()
         } else {
           this.showError(response.data.message || '保存に失敗しました')
         }
@@ -838,8 +845,15 @@ export default {
           this.activeGoal = response.data.goal
           this.editGoalMode = false
           
-          // ダッシュボードにデータ更新を通知
-          this.notifyDataUpdate('studyGoalUpdated')
+          // API応答のイベント配列に基づいてリアルタイム更新通知
+          if (response.data.events) {
+            response.data.events.forEach(eventType => {
+              this.notifyDataUpdate(eventType)
+            })
+          }
+          
+          // 試験データも即座に再読み込み（試験日同期のため）
+          await this.loadUserExamTypes()
         } else {
           this.showError(response.data.message || '目標の保存に失敗しました')
         }

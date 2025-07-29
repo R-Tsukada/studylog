@@ -355,8 +355,14 @@ export default {
       this.loadDashboardData()
     }
     
+    this.examDataUpdatedHandler = () => {
+      this.loadDashboardData()
+    }
+    
     // 学習目標更新イベントを購読
     this.subscribeToDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    // 試験データ更新イベントを購読
+    this.subscribeToDataUpdate('examDataUpdated', this.examDataUpdatedHandler)
     
     // ページの visibility change イベントを監視（タブ切り替えやアプリ切り替え時の対応）
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
@@ -373,6 +379,9 @@ export default {
     // イベント購読を解除
     if (this.studyGoalUpdatedHandler) {
       this.unsubscribeFromDataUpdate('studyGoalUpdated', this.studyGoalUpdatedHandler)
+    }
+    if (this.examDataUpdatedHandler) {
+      this.unsubscribeFromDataUpdate('examDataUpdated', this.examDataUpdatedHandler)
     }
     
     // visibilitychange イベントの監視を解除

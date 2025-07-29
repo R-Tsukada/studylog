@@ -110,6 +110,7 @@ class StudyGoalController extends Controller
                     'exam_date' => $goal->exam_date?->format('Y-m-d'),
                     'is_active' => $goal->is_active,
                 ],
+                'events' => ['studyGoalUpdated', 'examDataUpdated'], // フロントエンド更新イベント
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -234,6 +235,7 @@ class StudyGoalController extends Controller
                     'exam_date' => $goal->exam_date?->format('Y-m-d'),
                     'is_active' => $goal->is_active,
                 ],
+                'events' => ['studyGoalUpdated', 'examDataUpdated'], // フロントエンド更新イベント
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
