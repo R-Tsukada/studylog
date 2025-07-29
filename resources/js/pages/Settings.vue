@@ -637,7 +637,12 @@ export default {
           }
           
           // 学習目標データも即座に再読み込み（試験日同期のため）
-          await this.loadActiveGoal()
+          try {
+            await this.loadActiveGoal()
+          } catch (error) {
+            console.error('学習目標データの再読み込みエラー:', error)
+            // エラーが発生してもメイン処理は継続
+          }
         } else {
           this.showError(response.data.message || '保存に失敗しました')
         }
@@ -853,7 +858,12 @@ export default {
           }
           
           // 試験データも即座に再読み込み（試験日同期のため）
-          await this.loadUserExamTypes()
+          try {
+            await this.loadUserExamTypes()
+          } catch (error) {
+            console.error('試験データの再読み込みエラー:', error)
+            // エラーが発生してもメイン処理は継続
+          }
         } else {
           this.showError(response.data.message || '目標の保存に失敗しました')
         }
