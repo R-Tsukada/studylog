@@ -15,20 +15,30 @@
             <input 
               type="email" 
               v-model="loginForm.email"
+              @blur="validateLoginEmail"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                loginEmailError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
               placeholder="your-email@example.com"
             />
+            <p v-if="loginEmailError" class="mt-1 text-sm text-red-600">{{ loginEmailError }}</p>
           </div>
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">パスワード</label>
             <input 
               type="password" 
               v-model="loginForm.password"
+              @blur="validateLoginPassword"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                loginPasswordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
               placeholder="パスワード"
             />
+            <p v-if="loginPasswordError" class="mt-1 text-sm text-red-600">{{ loginPasswordError }}</p>
           </div>
           <button 
             type="submit" 
@@ -76,40 +86,79 @@
             <input 
               type="text" 
               v-model="registerForm.nickname"
+              @input="validateNickname"
+              @blur="validateNickname"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="ニックネーム"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                nicknameError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
+              placeholder="ニックネーム（2-50文字）"
             />
+            <p v-if="nicknameError" class="mt-1 text-sm text-red-600">{{ nicknameError }}</p>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">メールアドレス</label>
             <input 
               type="email" 
               v-model="registerForm.email"
+              @input="validateRegisterEmail"
+              @blur="validateRegisterEmail"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                registerEmailError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
               placeholder="your-email@example.com"
             />
+            <p v-if="registerEmailError" class="mt-1 text-sm text-red-600">{{ registerEmailError }}</p>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-2">パスワード</label>
             <input 
               type="password" 
               v-model="registerForm.password"
+              @input="validatePassword"
+              @blur="validatePassword"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="8文字以上のパスワード"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                passwordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
+              placeholder="8文字以上、英数字記号を含む"
             />
+            <p v-if="passwordError" class="mt-1 text-sm text-red-600">{{ passwordError }}</p>
+            <div v-if="registerForm.password" class="mt-2">
+              <div class="text-xs text-gray-600 mb-1">パスワード強度:</div>
+              <div class="flex space-x-1">
+                <div v-for="(check, index) in passwordChecks" :key="index" 
+                     :class="['h-2 w-full rounded', check.valid ? 'bg-green-500' : 'bg-gray-300']">
+                </div>
+              </div>
+              <div class="text-xs text-gray-600 mt-1">
+                <div v-for="(check, index) in passwordChecks" :key="index" 
+                     :class="['flex items-center', check.valid ? 'text-green-600' : 'text-gray-500']">
+                  <span class="mr-1">{{ check.valid ? '✓' : '○' }}</span>
+                  {{ check.label }}
+                </div>
+              </div>
+            </div>
           </div>
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">パスワード確認</label>
             <input 
               type="password" 
               v-model="registerForm.password_confirmation"
+              @input="validatePasswordConfirmation"
+              @blur="validatePasswordConfirmation"
               required
-              class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              :class="[
+                'w-full p-3 border rounded-lg focus:ring-2',
+                passwordConfirmationError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+              ]"
               placeholder="パスワードを再入力"
             />
+            <p v-if="passwordConfirmationError" class="mt-1 text-sm text-red-600">{{ passwordConfirmationError }}</p>
           </div>
           <button 
             type="submit" 
@@ -161,16 +210,154 @@ export default {
         email: '',
         password: '',
         password_confirmation: ''
-      }
+      },
+      
+      // バリデーションエラー
+      loginEmailError: '',
+      loginPasswordError: '',
+      nicknameError: '',
+      registerEmailError: '',
+      passwordError: '',
+      passwordConfirmationError: ''
     }
   },
   computed: {
     isRegisterMode() {
       return this.showRegister || this.$route.name === 'Register'
+    },
+    
+    passwordChecks() {
+      const password = this.registerForm.password
+      return [
+        { label: '8文字以上', valid: password.length >= 8 },
+        { label: '英字を含む', valid: /[a-zA-Z]/.test(password) },
+        { label: '数字を含む', valid: /\d/.test(password) },
+        { label: '記号を含む', valid: /[!@#$%^&*(),.?":{}|<>]/.test(password) }
+      ]
     }
   },
   methods: {
+    // バリデーションメソッド
+    validateLoginEmail() {
+      const email = this.loginForm.email
+      if (!email) {
+        this.loginEmailError = 'メールアドレスは必須です'
+        return false
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        this.loginEmailError = '正しいメールアドレス形式で入力してください'
+        return false
+      }
+      this.loginEmailError = ''
+      return true
+    },
+    
+    validateLoginPassword() {
+      const password = this.loginForm.password
+      if (!password) {
+        this.loginPasswordError = 'パスワードは必須です'
+        return false
+      }
+      if (password.length < 8) {
+        this.loginPasswordError = 'パスワードは8文字以上で入力してください'
+        return false
+      }
+      this.loginPasswordError = ''
+      return true
+    },
+    
+    validateNickname() {
+      const nickname = this.registerForm.nickname
+      if (!nickname) {
+        this.nicknameError = 'ニックネームは必須です'
+        return false
+      }
+      if (nickname.length < 2) {
+        this.nicknameError = 'ニックネームは2文字以上で入力してください'
+        return false
+      }
+      if (nickname.length > 50) {
+        this.nicknameError = 'ニックネームは50文字以内で入力してください'
+        return false
+      }
+      if (!/^[a-zA-Z0-9ぁ-んァ-ンー一-龠]+$/u.test(nickname)) {
+        this.nicknameError = 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます'
+        return false
+      }
+      this.nicknameError = ''
+      return true
+    },
+    
+    validateRegisterEmail() {
+      const email = this.registerForm.email
+      if (!email) {
+        this.registerEmailError = 'メールアドレスは必須です'
+        return false
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        this.registerEmailError = '正しいメールアドレス形式で入力してください'
+        return false
+      }
+      const validDomains = ['.com', '.net', '.org', '.jp', '.edu', '.gov']
+      if (!validDomains.some(domain => email.endsWith(domain))) {
+        this.registerEmailError = '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）'
+        return false
+      }
+      this.registerEmailError = ''
+      return true
+    },
+    
+    validatePassword() {
+      const password = this.registerForm.password
+      if (!password) {
+        this.passwordError = 'パスワードは必須です'
+        return false
+      }
+      if (password.length < 8) {
+        this.passwordError = 'パスワードは8文字以上で入力してください'
+        return false
+      }
+      if (!/[a-zA-Z]/.test(password)) {
+        this.passwordError = 'パスワードには英字を含めてください'
+        return false
+      }
+      if (!/\d/.test(password)) {
+        this.passwordError = 'パスワードには数字を含めてください'
+        return false
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        this.passwordError = 'パスワードには記号を含めてください'
+        return false
+      }
+      this.passwordError = ''
+      return true
+    },
+    
+    validatePasswordConfirmation() {
+      const password = this.registerForm.password
+      const confirmation = this.registerForm.password_confirmation
+      if (!confirmation) {
+        this.passwordConfirmationError = 'パスワード確認は必須です'
+        return false
+      }
+      if (password !== confirmation) {
+        this.passwordConfirmationError = 'パスワードが一致しません'
+        return false
+      }
+      this.passwordConfirmationError = ''
+      return true
+    },
+    
+    // 認証メソッド
     async login() {
+      // フロントエンドバリデーション
+      const emailValid = this.validateLoginEmail()
+      const passwordValid = this.validateLoginPassword()
+      
+      if (!emailValid || !passwordValid) {
+        return
+      }
+      
       this.loading = true
       this.errorMessage = ''
       
@@ -195,6 +382,16 @@ export default {
     },
     
     async register() {
+      // フロントエンドバリデーション
+      const nicknameValid = this.validateNickname()
+      const emailValid = this.validateRegisterEmail()
+      const passwordValid = this.validatePassword()
+      const confirmationValid = this.validatePasswordConfirmation()
+      
+      if (!nicknameValid || !emailValid || !passwordValid || !confirmationValid) {
+        return
+      }
+      
       this.loading = true
       this.errorMessage = ''
       

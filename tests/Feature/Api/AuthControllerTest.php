@@ -19,8 +19,8 @@ class AuthControllerTest extends TestCase
         $userData = [
             'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ];
 
         $response = $this->postJson('/api/auth/register', $userData);
@@ -45,7 +45,7 @@ class AuthControllerTest extends TestCase
 
         // パスワードがハッシュ化されていることを確認
         $user = User::where('email', 'test@example.com')->first();
-        $this->assertTrue(Hash::check('password123', $user->password));
+        $this->assertTrue(Hash::check('Password123!', $user->password));
     }
 
     /** @test */
@@ -65,8 +65,8 @@ class AuthControllerTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => 'テストユーザー',
             'email' => 'invalid-email',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -76,7 +76,7 @@ class AuthControllerTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
             'password_confirmation' => 'different_password',
         ]);
 
@@ -106,7 +106,7 @@ class AuthControllerTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => 'テストユーザー',
             'email' => 'existing@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
             'password_confirmation' => 'password123',
         ]);
 
@@ -119,12 +119,12 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $response->assertStatus(200)
@@ -150,7 +150,7 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         // 間違ったパスワード
@@ -168,7 +168,7 @@ class AuthControllerTest extends TestCase
         // 存在しないメールアドレス
         $response = $this->postJson('/api/auth/login', [
             'email' => 'nonexistent@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $response->assertStatus(401)
@@ -194,7 +194,7 @@ class AuthControllerTest extends TestCase
         // 不正なメールアドレス
         $response = $this->postJson('/api/auth/login', [
             'email' => 'invalid-email',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -353,8 +353,8 @@ class AuthControllerTest extends TestCase
         $userData = [
             'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ];
 
         $response = $this->postJson('/api/auth/register', $userData);
@@ -375,17 +375,17 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         $response1 = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $response2 = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $token1 = $response1->json('token');
@@ -403,7 +403,7 @@ class AuthControllerTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => $longNickname,
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
             'password_confirmation' => 'password123',
         ]);
 
@@ -426,8 +426,8 @@ class AuthControllerTest extends TestCase
             $response = $this->postJson('/api/auth/register', [
                 'nickname' => $nickname,
                 'email' => "test{$nickname}@example.com",
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
             ]);
 
             $response->assertStatus(201, "Failed for nickname: {$nickname}");
@@ -446,8 +446,8 @@ class AuthControllerTest extends TestCase
         $userData = [
             'nickname' => 'マイグレーション後ユーザー',
             'email' => 'migration@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ];
 
         $response = $this->postJson('/api/auth/register', $userData);
@@ -472,8 +472,8 @@ class AuthControllerTest extends TestCase
         $userData = [
             'nickname' => '認証フローテスト',
             'email' => 'auth-flow@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ];
 
         $registerResponse = $this->postJson('/api/auth/register', $userData);
@@ -485,7 +485,7 @@ class AuthControllerTest extends TestCase
         // ログイン
         $loginResponse = $this->postJson('/api/auth/login', [
             'email' => 'auth-flow@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $loginResponse->assertStatus(200);
@@ -517,13 +517,13 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'token-test@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         // ログインしてトークンを作成
         $response = $this->postJson('/api/auth/login', [
             'email' => 'token-test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
         ]);
 
         $token = $response->json('token');
@@ -540,26 +540,222 @@ class AuthControllerTest extends TestCase
     }
 
     /** @test */
-    public function it_sanitizes_user_input_for_security()
+    public function it_validates_nickname_character_restrictions()
     {
-        // XSS攻撃を想定したニックネーム
-        $maliciousNickname = '<script>alert("xss")</script>';
+        // 無効な文字を含むニックネーム
+        $invalidNickname = '<script>alert("xss")</script>';
 
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => $maliciousNickname,
+            'nickname' => $invalidNickname,
             'email' => 'security-test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        // 新しいバリデーションルールにより、無効な文字を含むニックネームは拒否される
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['nickname']);
+
+        // データベースにユーザーが作成されていないことを確認
+        $this->assertDatabaseMissing('users', [
+            'email' => 'security-test@example.com',
+        ]);
+    }
+
+    /** @test */
+    public function it_validates_enhanced_email_domain_restrictions()
+    {
+        // 許可されていないドメイン
+        $invalidDomains = [
+            'test@gmail.co',
+            'test@yahoo.co.uk',
+            'test@example.info',
+            'test@test.xyz',
+        ];
+
+        foreach ($invalidDomains as $email) {
+            $response = $this->postJson('/api/auth/register', [
+                'nickname' => 'テストユーザー',
+                'email' => $email,
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+            $response->assertStatus(422);
+            $responseData = $response->json();
+            $this->assertArrayHasKey('errors', $responseData);
+            $this->assertArrayHasKey('email', $responseData['errors'], "Failed for email: {$email}");
+        }
+
+        // 許可されているドメイン
+        $validDomains = [
+            'test@example.com',
+            'test@example.net',
+            'test@example.org',
+            'test@example.jp',
+            'test@university.edu',
+            'test@agency.gov',
+        ];
+
+        foreach ($validDomains as $email) {
+            $response = $this->postJson('/api/auth/register', [
+                'nickname' => 'テストユーザー'.rand(1000, 9999),
+                'email' => $email,
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+            $response->assertStatus(201, "Failed for email: {$email}");
+        }
+    }
+
+    /** @test */
+    public function it_validates_enhanced_password_complexity()
+    {
+        // 英字がないパスワード
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => 'テストユーザー',
+            'email' => 'test1@example.com',
+            'password' => '12345678!',
+            'password_confirmation' => '12345678!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+
+        // 数字がないパスワード
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => 'テストユーザー',
+            'email' => 'test2@example.com',
+            'password' => 'Password!',
+            'password_confirmation' => 'Password!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+
+        // 記号がないパスワード
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => 'テストユーザー',
+            'email' => 'test3@example.com',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+
+        // 全ての条件を満たすパスワード
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => 'テストユーザー',
+            'email' => 'test4@example.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(201);
+    }
 
-        // データベースに保存されたニックネームを確認
-        $user = User::where('email', 'security-test@example.com')->first();
-        $this->assertEquals($maliciousNickname, $user->nickname);
+    /** @test */
+    public function it_validates_enhanced_nickname_rules()
+    {
+        // 短すぎるニックネーム（2文字未満）
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => 'あ',
+            'email' => 'test1@example.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
 
-        // APIレスポンスでエスケープされていることを確認（フロントエンドで処理）
-        $responseData = $response->json();
-        $this->assertEquals($maliciousNickname, $responseData['user']['nickname']);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['nickname']);
+
+        // 長すぎるニックネーム（50文字超過）
+        $longNickname = str_repeat('あ', 51);
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => $longNickname,
+            'email' => 'test2@example.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['nickname']);
+
+        // 無効な文字を含むニックネーム
+        $invalidNicknames = [
+            'test@user' => 'test1@example.com',
+            'test user' => 'test2@example.com',
+            'test#user' => 'test3@example.com',
+            'test-user' => 'test4@example.com',
+        ];
+
+        foreach ($invalidNicknames as $nickname => $email) {
+            $response = $this->postJson('/api/auth/register', [
+                'nickname' => $nickname,
+                'email' => $email,
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+            $response->assertStatus(422);
+            $responseData = $response->json();
+            $this->assertArrayHasKey('errors', $responseData);
+            $this->assertArrayHasKey('nickname', $responseData['errors'], "Failed for nickname: {$nickname}");
+        }
+
+        // 有効なニックネーム
+        $validNicknames = [
+            'あいうえお',
+            'テストユーザー',
+            '山田太郎',
+            'TestUser123',
+            'ユーザー123',
+        ];
+
+        $validEmails = [
+            'test5@example.com',
+            'test6@example.com',
+            'test7@example.com',
+            'test8@example.com',
+            'test9@example.com',
+        ];
+
+        foreach ($validNicknames as $index => $nickname) {
+            $response = $this->postJson('/api/auth/register', [
+                'nickname' => $nickname,
+                'email' => $validEmails[$index],
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+            $response->assertStatus(201, "Failed for nickname: {$nickname}");
+        }
+    }
+
+    /** @test */
+    public function it_validates_enhanced_login_rules()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('Password123!'),
+        ]);
+
+        // 短すぎるパスワードでログイン試行
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'test@example.com',
+            'password' => '1234567',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+
+        // 正しい形式でログイン
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'test@example.com',
+            'password' => 'Password123!',
+        ]);
+
+        $response->assertStatus(200);
     }
 }

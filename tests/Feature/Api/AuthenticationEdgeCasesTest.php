@@ -19,8 +19,8 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '',
             'email' => 'empty-nickname@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -33,8 +33,8 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '   ',
             'email' => 'whitespace@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -47,8 +47,8 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '  トリムテスト  ',
             'email' => 'trim-test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(201);
@@ -58,31 +58,46 @@ class AuthenticationEdgeCasesTest extends TestCase
     }
 
     /** @test */
-    public function it_handles_special_characters_in_nickname()
+    public function it_rejects_special_characters_in_nickname()
     {
-        $specialNicknames = [
+        $invalidNicknames = [
             '特殊文字！@#$%',
             'emoji😀🎉',
-            '数字123混合',
             'ハイフン-アンダー_',
             '日本語・英語Mix',
+            'spaces in name',
         ];
 
-        foreach ($specialNicknames as $index => $nickname) {
+        foreach ($invalidNicknames as $index => $nickname) {
             $response = $this->postJson('/api/auth/register', [
                 'nickname' => $nickname,
                 'email' => "special{$index}@example.com",
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
             ]);
 
-            $response->assertStatus(201, "Failed for nickname: {$nickname}");
+            $response->assertStatus(422, "Should fail for nickname: {$nickname}")
+                ->assertJsonValidationErrors(['nickname']);
 
-            $this->assertDatabaseHas('users', [
-                'nickname' => $nickname,
+            $this->assertDatabaseMissing('users', [
                 'email' => "special{$index}@example.com",
             ]);
         }
+
+        // 有効なニックネームのテスト
+        $validNickname = '数字123混合';
+        $response = $this->postJson('/api/auth/register', [
+            'nickname' => $validNickname,
+            'email' => 'valid@example.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('users', [
+            'nickname' => $validNickname,
+            'email' => 'valid@example.com',
+        ]);
     }
 
     /** @test */
@@ -98,8 +113,8 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '重複テスト',
             'email' => 'test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -109,7 +124,7 @@ class AuthenticationEdgeCasesTest extends TestCase
     /** @test */
     public function it_handles_extremely_long_password()
     {
-        $longPassword = str_repeat('a', 1000);
+        $longPassword = 'Password123!'.str_repeat('a', 986); // 1000文字の複雑なパスワード
 
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '長いパスワードテスト',
@@ -130,7 +145,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         $unicodePassword = 'パスワード123！@#';
 
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'Unicode パスワード',
+            'nickname' => 'Unicodeパスワード',
             'email' => 'unicode-pwd@example.com',
             'password' => $unicodePassword,
             'password_confirmation' => $unicodePassword,
@@ -154,8 +169,8 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response = $this->postJson('/api/auth/register', [
             'nickname' => null,
             'email' => 'null-test@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
         ]);
 
         $response->assertStatus(422)
@@ -176,7 +191,7 @@ class AuthenticationEdgeCasesTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'concurrent@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         // 同時に複数のログイン試行
@@ -184,7 +199,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         for ($i = 0; $i < 5; $i++) {
             $responses[] = $this->postJson('/api/auth/login', [
                 'email' => 'concurrent@example.com',
-                'password' => 'password123',
+                'password' => 'Password123!',
             ]);
         }
 
