@@ -84,7 +84,7 @@ class AuthenticationEdgeCasesTest extends TestCase
             ]);
         }
 
-        // 有効なニックネームのテスト
+        // 有効なニックネムのテスト
         $validNickname = '数字123混合';
         $response = $this->postJson('/api/auth/register', [
             'nickname' => $validNickname,
@@ -124,7 +124,7 @@ class AuthenticationEdgeCasesTest extends TestCase
     /** @test */
     public function it_handles_extremely_long_password()
     {
-        $longPassword = 'Password123!' . str_repeat('a', 986); // 1000文字の複雑なパスワード
+        $longPassword = 'Password123!'.str_repeat('a', 986); // 1000文字の複雑なパスワード
 
         $response = $this->postJson('/api/auth/register', [
             'nickname' => '長いパスワードテスト',
@@ -272,7 +272,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['nickname']);
 
-        // 非常に長いニックネーム
+        // 非常に長いニックネム
         $longNickname = str_repeat('長', 300);
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => $longNickname,

@@ -19,14 +19,14 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u',
+                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龠]+$/u',
                 'email' => 'required|string|email:rfc|max:255|unique:users|ends_with:.com,.net,.org,.jp,.edu,.gov',
                 'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
             ], [
-                'nickname.required' => 'ニックネームは必須です',
-                'nickname.min' => 'ニックネームは2文字以上で入力してください',
-                'nickname.max' => 'ニックネームは50文字以内で入力してください',
-                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
+                'nickname.required' => 'ニックネムは必須です',
+                'nickname.min' => 'ニックネムは2文字以上で入力してください',
+                'nickname.max' => 'ニックネムは50文字以内で入力してください',
+                'nickname.regex' => 'ニックネムは英数字、ひらがな、カタカナ、漢字のみ使用できます',
                 'email.required' => 'メールアドレスは必須です',
                 'email.email' => '正しいメールアドレス形式で入力してください',
                 'email.unique' => 'このメールアドレスは既に登録されています',
@@ -213,13 +213,13 @@ class AuthController extends Controller
             }
 
             $validated = $request->validate([
-                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u',
+                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龠]+$/u',
                 'email' => 'sometimes|string|email:rfc|max:255|unique:users,email,'.$user->id.'|ends_with:.com,.net,.org,.jp,.edu,.gov',
                 'password' => ['sometimes', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
             ], [
-                'nickname.min' => 'ニックネームは2文字以上で入力してください',
-                'nickname.max' => 'ニックネームは50文字以内で入力してください',
-                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
+                'nickname.min' => 'ニックネムは2文字以上で入力してください',
+                'nickname.max' => 'ニックネムは50文字以内で入力してください',
+                'nickname.regex' => 'ニックネムは英数字、ひらがな、カタカナ、漢字のみ使用できます',
                 'email.email' => '正しいメールアドレス形式で入力してください',
                 'email.unique' => 'このメールアドレスは既に登録されています',
                 'email.ends_with' => '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）',

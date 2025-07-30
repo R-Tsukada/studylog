@@ -17,7 +17,7 @@ class MyPageTest extends TestCase
     private function createTestUser($isGoogleUser = false): User
     {
         $data = [
-            'nickname' => 'テストユーザ',
+            'nickname' => 'テストユーザー',
             'email' => 'test@example.com',
             'password' => $isGoogleUser ? null : Hash::make('Password123!'),
             'google_id' => $isGoogleUser ? 'google_123' : null,
@@ -49,7 +49,7 @@ class MyPageTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals('テストユーザ', $response->json('user.nickname'));
+        $this->assertEquals('テストユーザー', $response->json('user.nickname'));
         $this->assertEquals('test@example.com', $response->json('user.email'));
         $this->assertFalse($response->json('user.is_google_user'));
     }
@@ -78,7 +78,7 @@ class MyPageTest extends TestCase
         Sanctum::actingAs($user);
 
         $updateData = [
-            'nickname' => '更新されたニックネーム',
+            'nickname' => '更新されたニックネム',
             'email' => 'updated@example.com',
         ];
 
@@ -90,13 +90,13 @@ class MyPageTest extends TestCase
                 'message' => 'プロフィールを更新しました',
             ]);
 
-        $this->assertEquals('更新されたニックネーム', $response->json('user.nickname'));
+        $this->assertEquals('更新されたニックネム', $response->json('user.nickname'));
         $this->assertEquals('updated@example.com', $response->json('user.email'));
 
         // データベースも更新されていることを確認
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'nickname' => '更新されたニックネーム',
+            'nickname' => '更新されたニックネム',
             'email' => 'updated@example.com',
         ]);
     }
@@ -133,7 +133,7 @@ class MyPageTest extends TestCase
         $user = $this->createTestUser();
         Sanctum::actingAs($user);
 
-        // 空のニックネーム
+        // 空のニックネム
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => '',
             'email' => 'test@example.com',
@@ -194,7 +194,7 @@ class MyPageTest extends TestCase
         Sanctum::actingAs($user);
 
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => '新しいニックネーム',
+            'nickname' => '新しいニックネム',
             'email' => $user->email, // 同じメールアドレス
         ]);
 
@@ -324,7 +324,7 @@ class MyPageTest extends TestCase
         $googleUser = $this->createTestUser(true);
         Sanctum::actingAs($googleUser);
 
-        // Googleユーザーはパスワード変更できないが、ニックネームとメールは変更可能
+        // Googleユーザーはパスワード変更できないが、ニックネムとメールは変更可能
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => '更新されたGoogleユーザー',
             'email' => 'updated-google@example.com',
@@ -351,7 +351,7 @@ class MyPageTest extends TestCase
         $originalId = $user->id;
 
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => '新しいニックネーム',
+            'nickname' => '新しいニックネム',
             'email' => 'new@example.com',
             'password' => 'NewPassword123!',
             'password_confirmation' => 'NewPassword123!',
@@ -362,7 +362,7 @@ class MyPageTest extends TestCase
         $user->refresh();
 
         // 変更されるべきフィールド
-        $this->assertEquals('新しいニックネーム', $user->nickname);
+        $this->assertEquals('新しいニックネム', $user->nickname);
         $this->assertEquals('new@example.com', $user->email);
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
 

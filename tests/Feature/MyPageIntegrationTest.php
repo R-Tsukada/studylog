@@ -57,7 +57,7 @@ class MyPageIntegrationTest extends TestCase
     public function complete_profile_update_workflow()
     {
         $user = User::factory()->create([
-            'nickname' => '元のニックネーム',
+            'nickname' => '元のニックネム',
             'email' => 'original@example.com',
             'password' => Hash::make('originalpassword'),
         ]);
@@ -70,14 +70,14 @@ class MyPageIntegrationTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'user' => [
-                    'nickname' => '元のニックネーム',
+                    'nickname' => '元のニックネム',
                     'email' => 'original@example.com',
                 ],
             ]);
 
         // 2. プロフィールを更新
         $updateResponse = $this->putJson('/api/auth/profile', [
-            'nickname' => '更新されたニックネーム',
+            'nickname' => '更新されたニックネム',
             'email' => 'updated@example.com',
             'password' => 'NewPassword123!',
             'password_confirmation' => 'NewPassword123!',
@@ -88,7 +88,7 @@ class MyPageIntegrationTest extends TestCase
                 'success' => true,
                 'message' => 'プロフィールを更新しました',
                 'user' => [
-                    'nickname' => '更新されたニックネーム',
+                    'nickname' => '更新されたニックネム',
                     'email' => 'updated@example.com',
                 ],
             ]);
@@ -98,7 +98,7 @@ class MyPageIntegrationTest extends TestCase
         $verifyResponse->assertStatus(200)
             ->assertJson([
                 'user' => [
-                    'nickname' => '更新されたニックネーム',
+                    'nickname' => '更新されたニックネム',
                     'email' => 'updated@example.com',
                 ],
             ]);
@@ -234,7 +234,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 1. 重複メールアドレスでの更新試行
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => 'テストユーザ',
+            'nickname' => 'テストユーザー',
             'email' => 'user2@example.com', // 既に存在するメール
         ]);
 
@@ -249,7 +249,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 3. 正しいデータでの更新は成功することを確認
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => '正しいニックネーム',
+            'nickname' => '正しいニックネム',
             'email' => 'correct@example.com',
         ]);
 
@@ -303,7 +303,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 1. プロフィール更新は既存トークンに影響しない
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => '更新されたユーザ',
+            'nickname' => '更新されたユーザー',
             'email' => $user->email,
         ]);
 
@@ -337,7 +337,7 @@ class MyPageIntegrationTest extends TestCase
     public function mypage_data_consistency_across_operations()
     {
         $user = User::factory()->create([
-            'nickname' => '初期ニックネーム',
+            'nickname' => '初期ニックネム',
             'email' => 'initial@example.com',
             'password' => Hash::make('Password123!'),
         ]);
@@ -348,11 +348,11 @@ class MyPageIntegrationTest extends TestCase
         $response = $this->getJson('/api/user');
         $initialData = $response->json('user');
 
-        $this->assertEquals('初期ニックネーム', $initialData['nickname']);
+        $this->assertEquals('初期ニックネム', $initialData['nickname']);
         $this->assertEquals('initial@example.com', $initialData['email']);
 
         // 2. 段階的なプロフィール更新
-        // 2-1. ニックネームのみ更新
+        // 2-1. ニックネムのみ更新
         $this->putJson('/api/auth/profile', [
             'nickname' => '1回目更新',
             'email' => $user->email,

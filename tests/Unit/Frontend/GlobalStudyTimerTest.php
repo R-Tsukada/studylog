@@ -26,7 +26,7 @@ class GlobalStudyTimerTest extends TestCase
     {
         parent::setUp();
 
-        // テストユーザとデータを作成
+        // テストユーザーとデータを作成
         $this->user = User::factory()->create();
         $examType = ExamType::factory()->create(['name' => 'テスト資格']);
         $this->subjectArea = SubjectArea::factory()->create([

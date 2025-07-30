@@ -82,7 +82,7 @@
         <h2 class="text-xl font-semibold mb-4 text-center">新規登録</h2>
         <form @submit.prevent="register">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">ニックネーム</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">ニックネム</label>
             <input 
               type="text" 
               v-model="registerForm.nickname"
@@ -93,7 +93,7 @@
                 'w-full p-3 border rounded-lg focus:ring-2',
                 nicknameError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
               ]"
-              placeholder="ニックネーム（2-50文字）"
+              placeholder="ニックネム（2-50文字）"
             />
             <p v-if="nicknameError" class="mt-1 text-sm text-red-600">{{ nicknameError }}</p>
           </div>
@@ -269,19 +269,19 @@ export default {
     validateNickname() {
       const nickname = this.registerForm.nickname
       if (!nickname) {
-        this.nicknameError = 'ニックネームは必須です'
+        this.nicknameError = 'ニックネムは必須です'
         return false
       }
       if (nickname.length < 2) {
-        this.nicknameError = 'ニックネームは2文字以上で入力してください'
+        this.nicknameError = 'ニックネムは2文字以上で入力してください'
         return false
       }
       if (nickname.length > 50) {
-        this.nicknameError = 'ニックネームは50文字以内で入力してください'
+        this.nicknameError = 'ニックネムは50文字以内で入力してください'
         return false
       }
       if (!/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u.test(nickname)) {
-        this.nicknameError = 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます'
+        this.nicknameError = 'ニックネムは英数字、ひらがな、カタカナ、漢字のみ使用できます'
         return false
       }
       this.nicknameError = ''
