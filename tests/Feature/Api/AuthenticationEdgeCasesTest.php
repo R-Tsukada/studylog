@@ -84,7 +84,7 @@ class AuthenticationEdgeCasesTest extends TestCase
             ]);
         }
 
-        // 有効なニックネムのテスト
+        // 有効なニックネームのテスト
         $validNickname = '数字123混合';
         $response = $this->postJson('/api/auth/register', [
             'nickname' => $validNickname,
@@ -272,7 +272,7 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['nickname']);
 
-        // 非常に長いニックネム
+        // 非常に長いニックネーム
         $longNickname = str_repeat('長', 300);
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => $longNickname,

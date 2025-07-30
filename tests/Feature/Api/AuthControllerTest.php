@@ -397,7 +397,7 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function it_validates_nickname_field_length_in_registration()
     {
-        // 長すぎるニックネム（255文字超過）
+        // 長すぎるニックネーム（255文字超過）
         $longNickname = str_repeat('あ', 256);
 
         $response = $this->postJson('/api/auth/register', [
@@ -497,7 +497,7 @@ class AuthControllerTest extends TestCase
         $profileResponse = $this->withHeaders([
             'Authorization' => 'Bearer '.$token,
         ])->putJson('/api/auth/profile', [
-            'nickname' => '更新後ニックネム',
+            'nickname' => '更新後ニックネーム',
         ]);
 
         $profileResponse->assertStatus(200);
@@ -509,7 +509,7 @@ class AuthControllerTest extends TestCase
 
         $userInfoResponse->assertStatus(200);
         $userInfoData = $userInfoResponse->json();
-        $this->assertEquals('更新後ニックネム', $userInfoData['user']['nickname']);
+        $this->assertEquals('更新後ニックネーム', $userInfoData['user']['nickname']);
     }
 
     /** @test */
@@ -542,7 +542,7 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function it_validates_nickname_character_restrictions()
     {
-        // 無効な文字を含むニックネム
+        // 無効な文字を含むニックネーム
         $invalidNickname = '<script>alert("xss")</script>';
 
         $response = $this->postJson('/api/auth/register', [
@@ -552,7 +552,7 @@ class AuthControllerTest extends TestCase
             'password_confirmation' => 'Password123!',
         ]);
 
-        // 新しいバリデーションルールにより、無効な文字を含むニックネムは拒否される
+        // 新しいバリデーションルールにより、無効な文字を含むニックネームは拒否される
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['nickname']);
 
@@ -659,7 +659,7 @@ class AuthControllerTest extends TestCase
     /** @test */
     public function it_validates_enhanced_nickname_rules()
     {
-        // 短すぎるニックネム（2文字未満）
+        // 短すぎるニックネーム（2文字未満）
         $response = $this->postJson('/api/auth/register', [
             'nickname' => 'あ',
             'email' => 'test1@example.com',
@@ -670,7 +670,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['nickname']);
 
-        // 長すぎるニックネム（50文字超過）
+        // 長すぎるニックネーム（50文字超過）
         $longNickname = str_repeat('あ', 51);
         $response = $this->postJson('/api/auth/register', [
             'nickname' => $longNickname,
@@ -682,7 +682,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['nickname']);
 
-        // 無効な文字を含むニックネム
+        // 無効な文字を含むニックネーム
         $invalidNicknames = [
             'test@user' => 'test1@example.com',
             'test user' => 'test2@example.com',
@@ -704,7 +704,7 @@ class AuthControllerTest extends TestCase
             $this->assertArrayHasKey('nickname', $responseData['errors'], "Failed for nickname: {$nickname}");
         }
 
-        // 有効なニックネム
+        // 有効なニックネーム
         $validNicknames = [
             'あいうえお',
             'テストユーザー',
