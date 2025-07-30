@@ -3,74 +3,51 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\UserProfileUpdateRequest;
+use App\Http\Requests\UserRegistrationRequest;
+use App\Http\Resources\UserResource;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private AuthService $authService
+    ) {}
+
     /**
      * ユーザー登録
      */
-    public function register(Request $request): JsonResponse
+    public function register(UserRegistrationRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龠]+$/u',
-                'email' => 'required|string|email:rfc|max:255|unique:users|ends_with:.com,.net,.org,.jp,.edu,.gov',
-                'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
-            ], [
-                'nickname.required' => 'ニックネームは必須です',
-                'nickname.min' => 'ニックネームは2文字以上で入力してください',
-                'nickname.max' => 'ニックネームは50文字以内で入力してください',
-                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
-                'email.required' => 'メールアドレスは必須です',
-                'email.email' => '正しいメールアドレス形式で入力してください',
-                'email.unique' => 'このメールアドレスは既に登録されています',
-                'email.ends_with' => '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）',
-                'password.required' => 'パスワードは必須です',
-                'password.confirmed' => 'パスワード確認が一致しません',
-            ]);
+            $validated = $request->validated();
 
-            $user = User::create([
-                'nickname' => $validated['nickname'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'email_verified_at' => now(), // 今回は自動で認証済みとする
-            ]);
+            $user = $this->authService->createUser($validated);
+            $token = $this->authService->generateAuthToken($user);
 
-            // APIトークンを生成
-            $token = $user->createToken('auth-token')->plainTextToken;
+            return $this->authService->createAuthResponse(
+                $user,
+                $token,
+                'ユーザー登録が完了しました',
+                201
+            );
 
-            return response()->json([
-                'success' => true,
-                'message' => 'ユーザー登録が完了しました',
-                'user' => [
-                    'id' => $user->id,
-                    'nickname' => $user->nickname,
-                    'email' => $user->email,
-                    'avatar_url' => $user->avatar_url,
-                    'is_google_user' => $user->isGoogleUser(),
-                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
-                ],
-                'token' => $token,
-            ], 201);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'バリデーションエラー',
-                'errors' => $e->errors(),
-            ], 422);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ユーザー登録中にエラーが発生しました',
+            Log::error('User registration failed', [
+                'email' => $request->input('email'),
                 'error' => $e->getMessage(),
-            ], 500);
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'ユーザー登録中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 
@@ -90,54 +67,39 @@ class AuthController extends Controller
                 'password.min' => 'パスワードは8文字以上で入力してください',
             ]);
 
-            $user = User::where('email', $validated['email'])->first();
+            $user = $this->authService->authenticateUser(
+                $validated['email'],
+                $validated['password']
+            );
 
-            if (! $user || ! Hash::check($validated['password'], $user->password)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'メールアドレスまたはパスワードが間違っています',
-                ], 401);
+            if (! $user) {
+                return $this->authService->createErrorResponse(
+                    'メールアドレスまたはパスワードが間違っています',
+                    401
+                );
             }
 
-            // Google認証のみのユーザーの場合はパスワードログイン拒否
-            if ($user->isGoogleUser() && ! $user->password) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'このアカウントはGoogleアカウントでログインしてください',
-                ], 401);
-            }
+            $token = $this->authService->generateAuthToken($user);
 
-            // 既存のトークンを削除
-            $user->tokens()->delete();
-
-            // 新しいトークンを生成
-            $token = $user->createToken('auth-token')->plainTextToken;
-
-            return response()->json([
-                'success' => true,
-                'message' => 'ログインしました',
-                'user' => [
-                    'id' => $user->id,
-                    'nickname' => $user->nickname,
-                    'email' => $user->email,
-                    'avatar_url' => $user->avatar_url,
-                    'is_google_user' => $user->isGoogleUser(),
-                ],
-                'token' => $token,
-            ]);
+            return $this->authService->createAuthResponse(
+                $user,
+                $token,
+                'ログインしました'
+            );
 
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'バリデーションエラー',
-                'errors' => $e->errors(),
-            ], 422);
+            return $this->authService->createValidationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ログイン中にエラーが発生しました',
+            Log::error('User login failed', [
+                'email' => $request->input('email'),
                 'error' => $e->getMessage(),
-            ], 500);
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'ログイン中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 
@@ -155,11 +117,15 @@ class AuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ログアウト中にエラーが発生しました',
+            Log::error('User logout failed', [
+                'user_id' => $request->user()?->id,
                 'error' => $e->getMessage(),
-            ], 500);
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'ログアウト中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 
@@ -173,58 +139,40 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'user' => [
-                    'id' => $user->id,
-                    'nickname' => $user->nickname,
-                    'email' => $user->email,
-                    'avatar_url' => $user->avatar_url,
-                    'is_google_user' => $user->isGoogleUser(),
-                    'email_verified_at' => $user->email_verified_at?->format('Y-m-d H:i:s'),
-                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
-                ],
+                'user' => new UserResource($user),
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'ユーザー情報取得中にエラーが発生しました',
+            Log::error('User info retrieval failed', [
+                'user_id' => $request->user()?->id,
                 'error' => $e->getMessage(),
-            ], 500);
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'ユーザー情報取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 
     /**
      * プロフィール更新
      */
-    public function updateProfile(Request $request): JsonResponse
+    public function updateProfile(UserProfileUpdateRequest $request): JsonResponse
     {
         try {
             $user = $request->user();
 
             // Google認証ユーザーのパスワード変更をブロック
             if ($user->isGoogleUser() && $request->has('password')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Google認証ユーザーはパスワードを変更できません',
-                    'errors' => [
-                        'password' => ['Google認証ユーザーはパスワードを設定できません'],
-                    ],
-                ], 422);
+                return $this->authService->createErrorResponse(
+                    'Google認証ユーザーはパスワードを変更できません',
+                    422,
+                    ['password' => ['Google認証ユーザーはパスワードを設定できません']]
+                );
             }
 
-            $validated = $request->validate([
-                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龠]+$/u',
-                'email' => 'sometimes|string|email:rfc|max:255|unique:users,email,'.$user->id.'|ends_with:.com,.net,.org,.jp,.edu,.gov',
-                'password' => ['sometimes', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
-            ], [
-                'nickname.min' => 'ニックネームは2文字以上で入力してください',
-                'nickname.max' => 'ニックネームは50文字以内で入力してください',
-                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
-                'email.email' => '正しいメールアドレス形式で入力してください',
-                'email.unique' => 'このメールアドレスは既に登録されています',
-                'email.ends_with' => '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）',
-                'password.confirmed' => 'パスワード確認が一致しません',
-            ]);
+            $validated = $request->validated();
 
             // パスワードが含まれている場合はハッシュ化
             if (isset($validated['password'])) {
@@ -236,27 +184,22 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'プロフィールを更新しました',
-                'user' => [
-                    'id' => $user->id,
-                    'nickname' => $user->nickname,
-                    'email' => $user->email,
-                    'avatar_url' => $user->avatar_url,
-                    'is_google_user' => $user->isGoogleUser(),
-                ],
+                'user' => new UserResource($user),
             ]);
 
         } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'バリデーションエラー',
-                'errors' => $e->errors(),
-            ], 422);
+            return $this->authService->createValidationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'プロフィール更新中にエラーが発生しました',
+            Log::error('Profile update failed', [
+                'user_id' => $request->user()?->id,
                 'error' => $e->getMessage(),
-            ], 500);
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'プロフィール更新中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 
@@ -274,16 +217,16 @@ class AuthController extends Controller
                     'password' => 'required|string',
                 ]);
 
-                if (! Hash::check($validated['password'], $user->password)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'パスワードが間違っています',
-                    ], 401);
+                if (! $this->authService->validatePassword($user, $validated['password'])) {
+                    return $this->authService->createErrorResponse(
+                        'パスワードが間違っています',
+                        401
+                    );
                 }
             }
 
             // 確認メッセージの検証
-            $validated = $request->validate([
+            $request->validate([
                 'confirmation' => 'required|string|in:削除します',
             ]);
 
@@ -299,18 +242,19 @@ class AuthController extends Controller
                 'message' => 'アカウントを削除しました',
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'バリデーションエラー',
-                'errors' => $e->errors(),
-            ], 422);
+        } catch (ValidationException $e) {
+            return $this->authService->createValidationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'アカウント削除中にエラーが発生しました',
+            Log::error('Account deletion failed', [
+                'user_id' => $request->user()?->id,
                 'error' => $e->getMessage(),
-            ], 500);
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return $this->authService->createErrorResponse(
+                'アカウント削除中にエラーが発生しました。しばらく時間をおいて再度お試しください。',
+                500
+            );
         }
     }
 }
