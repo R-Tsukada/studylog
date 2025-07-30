@@ -17,9 +17,9 @@ class MyPageTest extends TestCase
     private function createTestUser($isGoogleUser = false): User
     {
         $data = [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
-            'password' => $isGoogleUser ? null : Hash::make('password123'),
+            'password' => $isGoogleUser ? null : Hash::make('Password123!'),
             'google_id' => $isGoogleUser ? 'google_123' : null,
         ];
 
@@ -49,7 +49,7 @@ class MyPageTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals('テストユーザー', $response->json('user.nickname'));
+        $this->assertEquals('テストユーザ', $response->json('user.nickname'));
         $this->assertEquals('test@example.com', $response->json('user.email'));
         $this->assertFalse($response->json('user.is_google_user'));
     }
@@ -110,8 +110,8 @@ class MyPageTest extends TestCase
         $updateData = [
             'nickname' => $user->nickname,
             'email' => $user->email,
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
         ];
 
         $response = $this->putJson('/api/auth/profile', $updateData);
@@ -124,7 +124,7 @@ class MyPageTest extends TestCase
 
         // 新しいパスワードでログインできることを確認
         $user->refresh();
-        $this->assertTrue(Hash::check('newpassword123', $user->password));
+        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
     /** @test */
@@ -153,7 +153,7 @@ class MyPageTest extends TestCase
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => 'テスト',
             'email' => 'test@example.com',
-            'password' => 'password123',
+            'password' => 'Password123!',
             'password_confirmation' => 'different',
         ]);
         $response->assertStatus(422)
@@ -209,7 +209,7 @@ class MyPageTest extends TestCase
         Sanctum::actingAs($user);
 
         $response = $this->deleteJson('/api/auth/account', [
-            'password' => 'password123',
+            'password' => 'Password123!',
             'confirmation' => '削除します',
         ]);
 
@@ -306,7 +306,7 @@ class MyPageTest extends TestCase
 
         // アカウント削除
         $response = $this->deleteJson('/api/auth/account', [
-            'password' => 'password123',
+            'password' => 'Password123!',
             'confirmation' => '削除します',
         ]);
 
@@ -353,8 +353,8 @@ class MyPageTest extends TestCase
         $response = $this->putJson('/api/auth/profile', [
             'nickname' => '新しいニックネーム',
             'email' => 'new@example.com',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
         ]);
 
         $response->assertStatus(200);
@@ -364,7 +364,7 @@ class MyPageTest extends TestCase
         // 変更されるべきフィールド
         $this->assertEquals('新しいニックネーム', $user->nickname);
         $this->assertEquals('new@example.com', $user->email);
-        $this->assertTrue(Hash::check('newpassword123', $user->password));
+        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
 
         // 変更されないフィールド
         $this->assertEquals($originalId, $user->id);

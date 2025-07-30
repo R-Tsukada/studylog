@@ -79,8 +79,8 @@ class MyPageIntegrationTest extends TestCase
         $updateResponse = $this->putJson('/api/auth/profile', [
             'nickname' => '更新されたニックネーム',
             'email' => 'updated@example.com',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
         ]);
 
         $updateResponse->assertStatus(200)
@@ -105,14 +105,14 @@ class MyPageIntegrationTest extends TestCase
 
         // 4. 新しいパスワードでログインできることを確認
         $user->refresh();
-        $this->assertTrue(Hash::check('newpassword123', $user->password));
+        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
     /** @test */
     public function complete_account_deletion_workflow()
     {
         $user = User::factory()->create([
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         Sanctum::actingAs($user);
@@ -122,7 +122,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 2. アカウント削除を実行
         $deleteResponse = $this->deleteJson('/api/auth/account', [
-            'password' => 'password123',
+            'password' => 'Password123!',
             'confirmation' => '削除します',
         ]);
 
@@ -234,7 +234,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 1. 重複メールアドレスでの更新試行
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'user2@example.com', // 既に存在するメール
         ]);
 
@@ -292,7 +292,7 @@ class MyPageIntegrationTest extends TestCase
     public function session_and_token_management_during_profile_operations()
     {
         $user = User::factory()->create([
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         // 複数のトークンを作成
@@ -303,7 +303,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 1. プロフィール更新は既存トークンに影響しない
         $response = $this->putJson('/api/auth/profile', [
-            'nickname' => '更新されたユーザー',
+            'nickname' => '更新されたユーザ',
             'email' => $user->email,
         ]);
 
@@ -321,7 +321,7 @@ class MyPageIntegrationTest extends TestCase
 
         // 2. アカウント削除時はすべてのトークンが削除される
         $response = $this->deleteJson('/api/auth/account', [
-            'password' => 'password123',
+            'password' => 'Password123!',
             'confirmation' => '削除します',
         ]);
 
@@ -339,7 +339,7 @@ class MyPageIntegrationTest extends TestCase
         $user = User::factory()->create([
             'nickname' => '初期ニックネーム',
             'email' => 'initial@example.com',
-            'password' => Hash::make('password123'),
+            'password' => Hash::make('Password123!'),
         ]);
 
         Sanctum::actingAs($user);
@@ -368,8 +368,8 @@ class MyPageIntegrationTest extends TestCase
         $this->putJson('/api/auth/profile', [
             'nickname' => '1回目更新',
             'email' => 'second@example.com',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
+            'password' => 'NewPassword123!',
+            'password_confirmation' => 'NewPassword123!',
         ])->assertStatus(200);
 
         // 3. 最終的なデータの整合性確認
@@ -383,6 +383,6 @@ class MyPageIntegrationTest extends TestCase
 
         // パスワードが更新されていることを確認
         $user->refresh();
-        $this->assertTrue(Hash::check('newpassword123', $user->password));
+        $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 }

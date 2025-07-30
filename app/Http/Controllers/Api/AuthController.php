@@ -19,7 +19,7 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龯]+$/',
+                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u',
                 'email' => 'required|string|email:rfc|max:255|unique:users|ends_with:.com,.net,.org,.jp,.edu,.gov',
                 'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
             ], [
@@ -213,7 +213,7 @@ class AuthController extends Controller
             }
 
             $validated = $request->validate([
-                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龯]+$/',
+                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u',
                 'email' => 'sometimes|string|email:rfc|max:255|unique:users,email,'.$user->id.'|ends_with:.com,.net,.org,.jp,.edu,.gov',
                 'password' => ['sometimes', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
             ], [

@@ -30,7 +30,7 @@ class StudyActivityServiceTest extends TestCase
 
         $this->service = new StudyActivityService;
 
-        // テストユーザーとマスターデータを作成
+        // テストユーザとマスターデータを作成
         $this->user = User::factory()->create();
         $this->examType = ExamType::factory()->create(['name' => 'テスト試験']);
         $this->subjectArea = SubjectArea::factory()->create([

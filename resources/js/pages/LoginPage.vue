@@ -280,7 +280,7 @@ export default {
         this.nicknameError = 'ニックネームは50文字以内で入力してください'
         return false
       }
-      if (!/^[a-zA-Z0-9ぁ-んァ-ンー一-龯]+$/.test(nickname)) {
+      if (!/^[a-zA-Z0-9ぁ-んァ-ン一-龠]+$/u.test(nickname)) {
         this.nicknameError = 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます'
         return false
       }

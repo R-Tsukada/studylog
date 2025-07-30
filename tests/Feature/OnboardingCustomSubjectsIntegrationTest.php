@@ -20,7 +20,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         parent::setUp();
 
         $this->user = User::factory()->create([
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
             'onboarding_completed_at' => null,

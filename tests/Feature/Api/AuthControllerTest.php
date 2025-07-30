@@ -17,7 +17,7 @@ class AuthControllerTest extends TestCase
     public function it_can_register_a_new_user()
     {
         $userData = [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
@@ -38,7 +38,7 @@ class AuthControllerTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('users', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'google_id' => null,
         ]);
@@ -63,7 +63,7 @@ class AuthControllerTest extends TestCase
 
         // 不正なメールアドレス
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'invalid-email',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
@@ -74,7 +74,7 @@ class AuthControllerTest extends TestCase
 
         // パスワード確認が一致しない
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'different_password',
@@ -85,7 +85,7 @@ class AuthControllerTest extends TestCase
 
         // 短すぎるパスワード
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'password' => '12345',
             'password_confirmation' => '12345',
@@ -104,7 +104,7 @@ class AuthControllerTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'existing@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'password123',
@@ -351,7 +351,7 @@ class AuthControllerTest extends TestCase
     public function it_generates_correct_avatar_url()
     {
         $userData = [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
@@ -575,7 +575,7 @@ class AuthControllerTest extends TestCase
 
         foreach ($invalidDomains as $email) {
             $response = $this->postJson('/api/auth/register', [
-                'nickname' => 'テストユーザー',
+                'nickname' => 'テストユーザ',
                 'email' => $email,
                 'password' => 'Password123!',
                 'password_confirmation' => 'Password123!',
@@ -599,7 +599,7 @@ class AuthControllerTest extends TestCase
 
         foreach ($validDomains as $email) {
             $response = $this->postJson('/api/auth/register', [
-                'nickname' => 'テストユーザー'.rand(1000, 9999),
+                'nickname' => 'テストユーザ'.rand(1000, 9999),
                 'email' => $email,
                 'password' => 'Password123!',
                 'password_confirmation' => 'Password123!',
@@ -614,7 +614,7 @@ class AuthControllerTest extends TestCase
     {
         // 英字がないパスワード
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test1@example.com',
             'password' => '12345678!',
             'password_confirmation' => '12345678!',
@@ -625,7 +625,7 @@ class AuthControllerTest extends TestCase
 
         // 数字がないパスワード
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test2@example.com',
             'password' => 'Password!',
             'password_confirmation' => 'Password!',
@@ -636,7 +636,7 @@ class AuthControllerTest extends TestCase
 
         // 記号がないパスワード
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test3@example.com',
             'password' => 'Password123',
             'password_confirmation' => 'Password123',
@@ -647,7 +647,7 @@ class AuthControllerTest extends TestCase
 
         // 全ての条件を満たすパスワード
         $response = $this->postJson('/api/auth/register', [
-            'nickname' => 'テストユーザー',
+            'nickname' => 'テストユーザ',
             'email' => 'test4@example.com',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
@@ -707,7 +707,7 @@ class AuthControllerTest extends TestCase
         // 有効なニックネーム
         $validNicknames = [
             'あいうえお',
-            'テストユーザー',
+            'テストユーザ',
             '山田太郎',
             'TestUser123',
             'ユーザー123',
