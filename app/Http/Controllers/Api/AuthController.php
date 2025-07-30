@@ -19,9 +19,20 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'nickname' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => ['required', 'confirmed', Password::min(8)],
+                'nickname' => 'required|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龯]+$/',
+                'email' => 'required|string|email:rfc|max:255|unique:users|ends_with:.com,.net,.org,.jp,.edu,.gov',
+                'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
+            ], [
+                'nickname.required' => 'ニックネームは必須です',
+                'nickname.min' => 'ニックネームは2文字以上で入力してください',
+                'nickname.max' => 'ニックネームは50文字以内で入力してください',
+                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
+                'email.required' => 'メールアドレスは必須です',
+                'email.email' => '正しいメールアドレス形式で入力してください',
+                'email.unique' => 'このメールアドレスは既に登録されています',
+                'email.ends_with' => '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）',
+                'password.required' => 'パスワードは必須です',
+                'password.confirmed' => 'パスワード確認が一致しません',
             ]);
 
             $user = User::create([
@@ -70,8 +81,13 @@ class AuthController extends Controller
     {
         try {
             $validated = $request->validate([
-                'email' => 'required|email',
-                'password' => 'required',
+                'email' => 'required|string|email:rfc|max:255',
+                'password' => 'required|string|min:8|max:255',
+            ], [
+                'email.required' => 'メールアドレスは必須です',
+                'email.email' => '正しいメールアドレス形式で入力してください',
+                'password.required' => 'パスワードは必須です',
+                'password.min' => 'パスワードは8文字以上で入力してください',
             ]);
 
             $user = User::where('email', $validated['email'])->first();
@@ -197,9 +213,17 @@ class AuthController extends Controller
             }
 
             $validated = $request->validate([
-                'nickname' => 'sometimes|string|max:255',
-                'email' => 'sometimes|string|email|max:255|unique:users,email,'.$user->id,
-                'password' => ['sometimes', 'confirmed', Password::min(8)],
+                'nickname' => 'sometimes|string|min:2|max:50|regex:/^[a-zA-Z0-9ぁ-んァ-ンー一-龯]+$/',
+                'email' => 'sometimes|string|email:rfc|max:255|unique:users,email,'.$user->id.'|ends_with:.com,.net,.org,.jp,.edu,.gov',
+                'password' => ['sometimes', 'confirmed', Password::min(8)->letters()->numbers()->symbols()],
+            ], [
+                'nickname.min' => 'ニックネームは2文字以上で入力してください',
+                'nickname.max' => 'ニックネームは50文字以内で入力してください',
+                'nickname.regex' => 'ニックネームは英数字、ひらがな、カタカナ、漢字のみ使用できます',
+                'email.email' => '正しいメールアドレス形式で入力してください',
+                'email.unique' => 'このメールアドレスは既に登録されています',
+                'email.ends_with' => '有効なドメインのメールアドレスを入力してください（.com, .net, .org, .jp, .edu, .gov）',
+                'password.confirmed' => 'パスワード確認が一致しません',
             ]);
 
             // パスワードが含まれている場合はハッシュ化
