@@ -49,8 +49,11 @@ return new class extends Migration
         
         // PostgreSQL用制約（本番環境用）
         if (config('database.default') === 'pgsql') {
-            DB::statement('ALTER TABLE study_obstacles ADD CONSTRAINT chk_severity_level CHECK (severity_level BETWEEN 1 AND 5)');
-            DB::statement('ALTER TABLE study_obstacles ADD CONSTRAINT chk_effectiveness_rating CHECK (effectiveness_rating IS NULL OR effectiveness_rating BETWEEN 1 AND 5)');
+            $severityMin = config('future_vision.constraints.priority.min'); // 同じ1-5スケール
+            $severityMax = config('future_vision.constraints.priority.max');
+            
+            DB::statement("ALTER TABLE study_obstacles ADD CONSTRAINT chk_severity_level CHECK (severity_level BETWEEN {$severityMin} AND {$severityMax})");
+            DB::statement("ALTER TABLE study_obstacles ADD CONSTRAINT chk_effectiveness_rating CHECK (effectiveness_rating IS NULL OR effectiveness_rating BETWEEN {$severityMin} AND {$severityMax})");
             DB::statement('ALTER TABLE study_obstacles ADD CONSTRAINT chk_resolved_at CHECK ((is_resolved = false AND resolved_at IS NULL) OR (is_resolved = true AND resolved_at IS NOT NULL))');
         }
     }

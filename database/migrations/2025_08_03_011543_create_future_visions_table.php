@@ -41,9 +41,14 @@ return new class extends Migration
         
         // PostgreSQL用制約（本番環境用）
         if (config('database.default') === 'pgsql') {
-            DB::statement('ALTER TABLE future_visions ADD CONSTRAINT chk_priority CHECK (priority BETWEEN 1 AND 5)');
-            DB::statement('ALTER TABLE future_visions ADD CONSTRAINT chk_salary_increase CHECK (salary_increase IS NULL OR (salary_increase >= 0 AND salary_increase <= 50000000))');
-            DB::statement('ALTER TABLE future_visions ADD CONSTRAINT chk_target_score CHECK (target_score IS NULL OR (target_score >= 0 AND target_score <= 1000))');
+            $priorityMin = config('future_vision.constraints.priority.min');
+            $priorityMax = config('future_vision.constraints.priority.max');
+            $salaryMax = config('future_vision.constraints.salary_increase.max');
+            $scoreMax = config('future_vision.constraints.target_score.max');
+            
+            DB::statement("ALTER TABLE future_visions ADD CONSTRAINT chk_priority CHECK (priority BETWEEN {$priorityMin} AND {$priorityMax})");
+            DB::statement("ALTER TABLE future_visions ADD CONSTRAINT chk_salary_increase CHECK (salary_increase IS NULL OR (salary_increase >= 0 AND salary_increase <= {$salaryMax}))");
+            DB::statement("ALTER TABLE future_visions ADD CONSTRAINT chk_target_score CHECK (target_score IS NULL OR (target_score >= 0 AND target_score <= {$scoreMax}))");
         }
     }
 
