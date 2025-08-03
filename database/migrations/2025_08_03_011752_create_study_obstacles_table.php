@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('exam_type_id')->nullable()->constrained()->onDelete('cascade')->comment('特定試験への関連付け（NULL=全般）');
-            $table->unsignedTinyInteger('obstacle_category_id');
+            $table->foreignId('obstacle_category_id')->constrained('obstacle_categories');
             
             // 障害情報
             $table->string('obstacle_title')->comment('障害タイトル');
@@ -38,9 +38,6 @@ return new class extends Migration
             $table->timestamp('resolved_at')->nullable()->comment('解決日時');
             
             $table->timestamps();
-            
-            // 外部キー制約
-            $table->foreign('obstacle_category_id')->references('id')->on('obstacle_categories');
             
             // 最適化されたインデックス
             $table->index(['user_id', 'is_active', 'is_resolved'], 'idx_user_active_resolved');

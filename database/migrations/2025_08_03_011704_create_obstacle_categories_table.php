@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('obstacle_categories', function (Blueprint $table) {
-            $table->tinyIncrements('id');
+            $table->id();
             $table->string('code', 20)->unique();
             $table->string('name', 50);
             $table->string('description', 200)->nullable();

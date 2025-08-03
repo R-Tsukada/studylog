@@ -21,10 +21,8 @@ class ObstacleCategory extends Model
         'sort_order' => 'integer',
     ];
 
-    // タイムスタンプを無効化（created_atのみ使用）
-    public $timestamps = false;
-    
-    protected $dates = ['created_at'];
+    // created_atのみ使用（updated_atは使用しない）
+    const UPDATED_AT = null;
 
     public function studyObstacles(): HasMany
     {
