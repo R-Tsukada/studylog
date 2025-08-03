@@ -77,6 +77,16 @@ class User extends Authenticatable
         return $this->hasMany(OnboardingLog::class);
     }
 
+    public function futureVisions(): HasMany
+    {
+        return $this->hasMany(FutureVision::class);
+    }
+
+    public function studyObstacles(): HasMany
+    {
+        return $this->hasMany(StudyObstacle::class);
+    }
+
     // ヘルパーメソッド
     public function isGoogleUser(): bool
     {
