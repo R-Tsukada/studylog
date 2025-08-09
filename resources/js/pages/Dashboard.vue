@@ -73,7 +73,7 @@
                 ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
               </span>
               <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters">
-                (使用できない文字が含まれています: < >)
+                (HTMLタグ文字（&lt; &gt;）は使用できません)
               </span>
             </div>
             <div class="flex gap-2">
@@ -429,10 +429,34 @@ export default {
              this.hasDisallowedCharacters
     },
 
-    // 不許可文字が含まれているかチェック
+    // 不許可文字が含まれているかチェック（サーバーサイドバリデーションと同一ルール）
     hasDisallowedCharacters() {
-      const disallowedPattern = /[<>]/
-      return disallowedPattern.test(this.futureVision.text)
+      // 入力値が存在しない場合は問題なし
+      if (!this.futureVision.text || typeof this.futureVision.text !== 'string') {
+        return false
+      }
+      
+      // HTMLタグ形成文字をチェック（XSS対策）
+      // サーバーサイドのregex: /^[^<>]*$/と同じロジック
+      const disallowedPatterns = [
+        /[<>]/, // HTMLタグ文字
+      ]
+      
+      // 複数のパターンをチェック
+      return disallowedPatterns.some(pattern => pattern.test(this.futureVision.text))
+    },
+
+    // 不許可文字の詳細情報を取得（デバッグ・エラー表示用）
+    getDisallowedCharacterDetails() {
+      if (!this.hasDisallowedCharacters) {
+        return null
+      }
+      
+      const checks = [
+        { pattern: /[<>]/, message: 'HTMLタグ文字（< >）', found: /[<>]/.test(this.futureVision.text) }
+      ]
+      
+      return checks.filter(check => check.found)
     }
   },
   

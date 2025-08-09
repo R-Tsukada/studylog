@@ -153,10 +153,28 @@ class UserFutureVisionTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['vision_text']);
 
-        // HTML特殊文字チェック
+        // HTML特殊文字チェック - 角括弧
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
                 'vision_text' => 'テスト<script>alert("xss")</script>',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - 開始タグのみ
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => 'テスト<div>で10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - 終了タグのみ
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => 'テスト>で10文字以上にする文字列',
             ]);
 
         $response->assertStatus(422)
@@ -243,10 +261,19 @@ class UserFutureVisionTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['vision_text']);
 
-        // HTML特殊文字チェック
+        // HTML特殊文字チェック - スクリプトタグ
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson('/api/user/future-vision', [
                 'vision_text' => 'テスト<script>alert("xss")</script>',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - 角括弧のみ
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => '更新テスト<>で10文字以上にする',
             ]);
 
         $response->assertStatus(422)
