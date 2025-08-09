@@ -34,16 +34,16 @@
         
         <!-- 表示モード（データがある場合） -->
         <div v-else-if="futureVision.hasData && !futureVision.isEditing" class="space-y-4">
-          <div class="p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-wrap" style="background-color: var(--color-muted-purple-light);">
+          <div class="p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-wrap border" style="border-color: var(--color-muted-gray); background-color: transparent;">
             {{ futureVision.text }}
           </div>
           <div class="flex justify-end gap-2">
             <button 
               @click="startEditVision"
-              class="px-3 py-1 text-sm rounded transition-colors"
-              style="color: var(--color-muted-purple-dark); background-color: var(--color-muted-purple-light);"
-              onmouseover="this.style.backgroundColor='var(--color-muted-purple)'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='var(--color-muted-purple-light)'; this.style.color='var(--color-muted-purple-dark)'"
+              class="px-3 py-1 text-sm text-white rounded transition-colors"
+              style="background-color: var(--color-muted-blue);"
+              onmouseover="this.style.backgroundColor='var(--color-muted-blue-dark)'"
+              onmouseout="this.style.backgroundColor='var(--color-muted-blue)'"
             >
               ✏️ 編集
             </button>
