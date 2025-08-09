@@ -71,6 +71,9 @@
               <span class="ml-2 text-red-500" v-if="futureVision.text.trim().length < 10">
                 ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
               </span>
+              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters()">
+                (使用できない文字が含まれています: < >)
+              </span>
             </div>
             <div class="flex gap-2">
               <button
@@ -419,7 +422,14 @@ export default {
     isVisionSaveDisabled() {
       return this.futureVision.loading || 
              this.futureVision.text.trim().length < 10 || 
-             this.futureVision.text.length > 2000
+             this.futureVision.text.length > 2000 ||
+             this.hasDisallowedCharacters()
+    },
+
+    // 不許可文字が含まれているかチェック
+    hasDisallowedCharacters() {
+      const disallowedPattern = /[<>]/
+      return disallowedPattern.test(this.futureVision.text)
     }
   },
   

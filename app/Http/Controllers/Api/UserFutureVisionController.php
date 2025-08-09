@@ -43,16 +43,28 @@ class UserFutureVisionController extends Controller
             ], 409);
         }
 
-        $vision = UserFutureVision::create([
-            'user_id' => $user->id,
-            'vision_text' => $request->validated()['vision_text'],
-        ]);
+        try {
+            $vision = UserFutureVision::create([
+                'user_id' => $user->id,
+                'vision_text' => $request->validated()['vision_text'],
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => '将来のビジョンを保存しました',
-            'data' => $vision,
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => '将来のビジョンを保存しました',
+                'data' => $vision,
+            ], 201);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // ユニーク制約違反の場合（race condition対応）
+            if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'UNIQUE constraint failed')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。',
+                ], 409);
+            }
+
+            throw $e;
+        }
     }
 
     /**

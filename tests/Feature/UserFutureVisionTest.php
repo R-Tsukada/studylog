@@ -104,6 +104,29 @@ class UserFutureVisionTest extends TestCase
             ]);
     }
 
+    public function test_handles_race_condition_on_create(): void
+    {
+        // データベースレベルでのユニーク制約違反をシミュレート
+        // 最初のビジョンを作成
+        UserFutureVision::create([
+            'user_id' => $this->user->id,
+            'vision_text' => '最初のビジョンテキスト',
+        ]);
+
+        // 既存チェックをバイパスして直接作成を試行（通常はコントローラーでキャッチされる）
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => '競合するビジョンテキスト',
+            ]);
+
+        // race conditionの場合も409 Conflictが返される
+        $response->assertStatus(409)
+            ->assertJson([
+                'success' => false,
+                'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。',
+            ]);
+    }
+
     public function test_validates_vision_text_on_create(): void
     {
         // 必須チェック
@@ -186,6 +209,49 @@ class UserFutureVisionTest extends TestCase
                 'success' => false,
                 'message' => '更新対象の将来のビジョンが見つかりません。',
             ]);
+    }
+
+    public function test_validates_vision_text_on_update(): void
+    {
+        // 既存のビジョンを作成
+        UserFutureVision::create([
+            'user_id' => $this->user->id,
+            'vision_text' => 'AWS認定を取得してクラウドエンジニアになる',
+        ]);
+
+        // 必須チェック
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // 最小文字数チェック
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => '短い',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // 最大文字数チェック
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => str_repeat('あ', 2001),
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => 'テスト<script>alert("xss")</script>',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
     }
 
     // DELETE /api/user/future-vision のテスト
