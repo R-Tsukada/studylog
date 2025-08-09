@@ -1,25 +1,110 @@
 <template>
   <div>
-    <!-- 試験日カウントダウン -->
-    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
-      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
-              <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
-            </div>
-            <div class="text-right">
-              <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
-                {{ exam.days_until_exam }}
+    <!-- 試験日カウントダウン & 将来のビジョン -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- 試験日カウントダウンセクション -->
+      <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
+        <div class="space-y-3">
+          <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4 border" style="border-color: var(--color-muted-gray);">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
+                <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
               </div>
-              <div class="text-sm text-gray-600">日</div>
+              <div class="text-right">
+                <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
+                  {{ exam.days_until_exam }}
+                </div>
+                <div class="text-sm text-gray-600">日</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- 将来のビジョンセクション -->
+      <section class="rounded-lg shadow p-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-purple-dark);">✨ 目標を達成したあとの自分</h2>
+        
+        <!-- ローディング表示 -->
+        <div v-if="futureVision.loading" class="text-center py-8">
+          <div class="text-gray-500">読み込み中...</div>
+        </div>
+        
+        <!-- 表示モード（データがある場合） -->
+        <div v-else-if="futureVision.hasData && !futureVision.isEditing" class="space-y-4">
+          <div class="p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-wrap" style="background-color: var(--color-muted-purple-light);">
+            {{ futureVision.text }}
+          </div>
+          <div class="flex justify-end gap-2">
+            <button 
+              @click="startEditVision"
+              class="px-3 py-1 text-sm rounded transition-colors"
+              style="color: var(--color-muted-purple-dark); background-color: var(--color-muted-purple-light);"
+              onmouseover="this.style.backgroundColor='var(--color-muted-purple)'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='var(--color-muted-purple-light)'; this.style.color='var(--color-muted-purple-dark)'"
+            >
+              ✏️ 編集
+            </button>
+            <button 
+              @click="deleteFutureVision"
+              :disabled="futureVision.loading"
+              class="px-3 py-1 text-sm rounded transition-colors"
+              style="color: var(--color-muted-pink-dark); background-color: var(--color-muted-pink-light);"
+              onmouseover="this.style.backgroundColor='var(--color-muted-pink)'; this.style.color='white'"
+              onmouseout="this.style.backgroundColor='var(--color-muted-pink-light)'; this.style.color='var(--color-muted-pink-dark)'"
+            >
+              🗑️ 削除
+            </button>
+          </div>
+        </div>
+        
+        <!-- 入力/編集モード -->
+        <div v-else class="space-y-4">
+          <textarea
+            v-model="futureVision.text"
+            class="w-full p-4 rounded-lg resize-none"
+            style="border: 1px solid var(--color-muted-gray); background-color: white; min-height: 120px;"
+            onfocus="this.style.borderColor='var(--color-muted-purple)'; this.style.boxShadow='0 0 0 2px var(--color-muted-purple-alpha)'"
+            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
+            :placeholder="futureVision.hasData ? '将来のビジョンを編集してください...' : '資格を取得した後、どんな自分になりたいですか？将来のビジョンを描いてみましょう...'"
+            rows="6"
+          ></textarea>
+          <div class="flex justify-between items-center">
+            <div class="text-xs text-gray-500">
+              {{ futureVision.text.length }}/2000文字
+            </div>
+            <div class="flex gap-2">
+              <button
+                v-if="futureVision.isEditing"
+                @click="cancelEditVision"
+                :disabled="futureVision.loading"
+                class="px-4 py-2 text-sm rounded transition-colors"
+                style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
+                onmouseover="this.style.backgroundColor='var(--color-muted-gray-dark)'; this.style.color='white'"
+                onmouseout="this.style.backgroundColor='var(--color-muted-gray)'; this.style.color='var(--color-muted-gray-dark)'"
+              >
+                キャンセル
+              </button>
+              <button
+                @click="saveFutureVision"
+                :disabled="futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000"
+                class="px-4 py-2 text-sm text-white rounded transition-colors"
+                :style="{
+                  backgroundColor: (futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000) ? 'var(--color-muted-gray)' : 'var(--color-muted-purple)',
+                  cursor: (futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000) ? 'not-allowed' : 'pointer'
+                }"
+                onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple-dark)'"
+                onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple)'"
+              >
+                {{ futureVision.loading ? '保存中...' : '💾 保存' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- GitHub風草表示 -->
     <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
@@ -328,6 +413,15 @@ export default {
         notes: '',
         saving: false
       },
+      
+      // 将来ビジョン関連
+      futureVision: {
+        id: null,
+        text: '',
+        isEditing: false,
+        loading: false,
+        hasData: false
+      },
     }
   },
   
@@ -366,6 +460,9 @@ export default {
     
     // ページの visibility change イベントを監視（タブ切り替えやアプリ切り替え時の対応）
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
+    
+    // 将来ビジョンを読み込み
+    await this.loadFutureVision()
   },
   
   async activated() {
@@ -680,6 +777,137 @@ export default {
         await this.loadDashboardData()
       }
     },
+
+    // ========== 将来ビジョン関連メソッド ==========
+    
+    // 将来ビジョンを読み込み
+    async loadFutureVision() {
+      this.futureVision.loading = true
+      try {
+        const response = await axios.get('/api/user/future-vision', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.status === 200 && response.data.success) {
+          this.futureVision.id = response.data.data.id
+          this.futureVision.text = response.data.data.vision_text
+          this.futureVision.hasData = true
+        } else {
+          // 204 No Content の場合
+          this.futureVision.id = null
+          this.futureVision.text = ''
+          this.futureVision.hasData = false
+        }
+      } catch (error) {
+        console.error('将来ビジョン読み込みエラー:', error)
+        if (error.response?.status !== 204) {
+          this.showError('将来のビジョンの読み込みに失敗しました')
+        }
+        this.futureVision.id = null
+        this.futureVision.text = ''
+        this.futureVision.hasData = false
+      } finally {
+        this.futureVision.loading = false
+      }
+    },
+    
+    // 将来ビジョンの保存
+    async saveFutureVision() {
+      if (this.futureVision.text.trim().length < 10) {
+        this.showError('将来のビジョンは10文字以上で入力してください')
+        return
+      }
+      
+      if (this.futureVision.text.length > 2000) {
+        this.showError('将来のビジョンは2000文字以内で入力してください')
+        return
+      }
+      
+      this.futureVision.loading = true
+      try {
+        const isUpdate = this.futureVision.hasData
+        const method = isUpdate ? 'put' : 'post'
+        
+        const response = await axios[method]('/api/user/future-vision', {
+          vision_text: this.futureVision.text
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          this.futureVision.id = response.data.data.id
+          this.futureVision.hasData = true
+          this.futureVision.isEditing = false
+          this.showSuccess(response.data.message)
+        } else {
+          this.showError(response.data.message || '保存に失敗しました')
+        }
+      } catch (error) {
+        console.error('将来ビジョン保存エラー:', error)
+        if (error.response?.data?.message) {
+          this.showError(error.response.data.message)
+        } else {
+          this.showError('将来のビジョンの保存中にエラーが発生しました')
+        }
+      } finally {
+        this.futureVision.loading = false
+      }
+    },
+    
+    // 編集モード開始
+    startEditVision() {
+      this.futureVision.isEditing = true
+    },
+    
+    // 編集キャンセル
+    cancelEditVision() {
+      this.futureVision.isEditing = false
+      // データがある場合は元のテキストに戻す
+      if (this.futureVision.hasData) {
+        this.loadFutureVision()
+      } else {
+        this.futureVision.text = ''
+      }
+    },
+    
+    // 将来ビジョンの削除
+    async deleteFutureVision() {
+      if (!confirm('将来のビジョンを削除してもよろしいですか？')) {
+        return
+      }
+      
+      this.futureVision.loading = true
+      try {
+        const response = await axios.delete('/api/user/future-vision', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        })
+        
+        if (response.data.success) {
+          this.futureVision.id = null
+          this.futureVision.text = ''
+          this.futureVision.hasData = false
+          this.futureVision.isEditing = false
+          this.showSuccess(response.data.message)
+        } else {
+          this.showError(response.data.message || '削除に失敗しました')
+        }
+      } catch (error) {
+        console.error('将来ビジョン削除エラー:', error)
+        if (error.response?.data?.message) {
+          this.showError(error.response.data.message)
+        } else {
+          this.showError('将来のビジョンの削除中にエラーが発生しました')
+        }
+      } finally {
+        this.futureVision.loading = false
+      }
+    }
 
   }
 }
