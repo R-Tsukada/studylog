@@ -74,8 +74,8 @@
               <span class="ml-2 text-red-500" v-if="futureVision.text.trim().length < 10">
                 ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
               </span>
-              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters">
-                (HTMLタグ文字（&lt; &gt; &amp; &quot; '）は使用できません)
+              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters" :aria-label="validationAriaDescription">
+                ({{ validationMessage }})
               </span>
             </div>
             <div class="flex gap-2">
@@ -352,6 +352,7 @@
 
 <script>
 import apiClient from '../utils/api.js'
+import { createFutureVisionValidator } from '../utils/textValidator.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
 
@@ -404,6 +405,9 @@ export default {
         loading: false,
         hasData: false
       },
+
+      // バリデーター（モジュラー設計）
+      textValidator: null,
     }
   },
   
@@ -430,37 +434,45 @@ export default {
              this.hasDisallowedCharacters
     },
 
-    // 不許可文字が含まれているかチェック（サーバーサイドバリデーションと同一ルール）
-    hasDisallowedCharacters() {
-      // 入力値が存在しない場合は問題なし
-      if (!this.futureVision.text || typeof this.futureVision.text !== 'string') {
-        return false
-      }
-      
-      // HTMLタグ形成文字とクォート文字をチェック（XSS対策）
-      const disallowedPatterns = [
-        /[<>&"']/, // HTMLタグ文字とクォート文字
-      ]
-      
-      // 複数のパターンをチェック
-      return disallowedPatterns.some(pattern => pattern.test(this.futureVision.text))
+    // バリデーション結果（新システム）
+    validationResult() {
+      if (!this.textValidator) return { isValid: true, errors: [] }
+      return this.textValidator.validate(this.futureVision.text)
     },
 
-    // 不許可文字の詳細情報を取得（デバッグ・エラー表示用）
+    // 不許可文字が含まれているかチェック（後方互換性のため）
+    hasDisallowedCharacters() {
+      return !this.validationResult.isValid
+    },
+
+    // ユーザーフレンドリーなバリデーションメッセージ
+    validationMessage() {
+      if (!this.textValidator) return ''
+      return this.textValidator.getDisplayMessage(this.validationResult)
+    },
+
+    // アクセシビリティ用説明文
+    validationAriaDescription() {
+      if (!this.textValidator) return ''
+      return this.textValidator.getAriaDescription(this.validationResult)
+    },
+
+    // 詳細なバリデーション情報（デバッグ用）
     getDisallowedCharacterDetails() {
-      if (!this.hasDisallowedCharacters) {
-        return null
-      }
-      
-      const checks = [
-        { pattern: /[<>&"']/, message: 'HTMLタグ文字・クォート文字（< > & " \')' , found: /[<>&"']/.test(this.futureVision.text) }
-      ]
-      
-      return checks.filter(check => check.found)
+      return this.validationResult.errors.map(error => ({
+        rule: error.rule,
+        message: error.message,
+        count: error.count,
+        positions: error.positions,
+        severity: error.severity
+      }))
     }
   },
   
   async mounted() {
+    // バリデーター初期化
+    this.textValidator = createFutureVisionValidator()
+    
     await this.loadInitialData()
     
     // イベントハンドラーを作成して参照を保持
@@ -928,10 +940,12 @@ export default {
 
     // ========== クライアントサイド入力制御メソッド ==========
     
-    // キーボード入力時に無効な文字をブロック
+    // キーボード入力時に無効な文字をブロック（新システム）
     preventDisallowedCharacters(event) {
-      const disallowedChars = ['<', '>', '&', '"', "'"]
-      if (disallowedChars.includes(event.key)) {
+      if (!this.textValidator) return
+      
+      const blockedChars = this.textValidator.getBlockedCharacters()
+      if (blockedChars.includes(event.key)) {
         event.preventDefault()
         return false
       }
@@ -939,8 +953,10 @@ export default {
 
     // 入力後に無効な文字を除去（ペーストやドラッグ&ドロップ対策）
     sanitizeVisionText(event) {
+      if (!this.textValidator) return
+      
       const originalValue = event.target.value
-      const sanitizedValue = originalValue.replace(/[<>&"']/g, '')
+      const sanitizedValue = this.textValidator.sanitize(originalValue)
       
       if (originalValue !== sanitizedValue) {
         this.futureVision.text = sanitizedValue
