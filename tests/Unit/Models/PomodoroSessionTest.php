@@ -12,9 +12,13 @@ class PomodoroSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function pomodoro_session_has_correct_fillable_attributes()
     {
         $fillable = [
@@ -36,9 +40,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($fillable, $pomodoroSession->getFillable());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function pomodoro_session_casts_attributes_correctly()
     {
         $casts = [
@@ -56,9 +64,13 @@ class PomodoroSessionTest extends TestCase
         }
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function pomodoro_session_belongs_to_user()
     {
         $user = User::factory()->create();
@@ -68,9 +80,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($user->id, $pomodoroSession->user->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function pomodoro_session_belongs_to_study_session()
     {
         $user = User::factory()->create();
@@ -84,9 +100,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($studySession->id, $pomodoroSession->studySession->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function by_user_scope_filters_by_user()
     {
         $user1 = User::factory()->create();
@@ -101,9 +121,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($session1->id, $user1Sessions->first()->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function completed_scope_returns_only_completed_sessions()
     {
         $user = User::factory()->create();
@@ -117,9 +141,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($completedSession->id, $completedSessions->first()->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function focus_sessions_scope_returns_only_focus_sessions()
     {
         $user = User::factory()->create();
@@ -134,9 +162,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals('focus', $focusSessions->first()->session_type);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function break_sessions_scope_returns_only_break_sessions()
     {
         $user = User::factory()->create();
@@ -152,9 +184,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertContains('long_break', $breakSessions->pluck('session_type')->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function date_range_scope_filters_by_date_range()
     {
         $user = User::factory()->create();
@@ -178,9 +214,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function today_scope_returns_todays_sessions()
     {
         $user = User::factory()->create();
@@ -201,9 +241,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function recent_scope_returns_limited_sessions_in_desc_order()
     {
         $user = User::factory()->create();
@@ -224,9 +268,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($sessions->first()->id, $recentSessions->first()->id);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_create_pomodoro_session_with_valid_data()
     {
         $user = User::factory()->create();
@@ -256,9 +304,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertIsArray($pomodoroSession->settings);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function duration_in_minutes_accessor_returns_actual_or_planned_duration()
     {
         $pomodoroSession = PomodoroSession::factory()->make([
@@ -272,9 +324,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals(23, $pomodoroSession->duration_in_minutes);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function is_active_accessor_returns_correct_status()
     {
         $activeSession = PomodoroSession::factory()->active()->make();
@@ -284,9 +340,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertFalse($completedSession->is_active);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function completion_percentage_accessor_calculates_correctly()
     {
         $pomodoroSession = PomodoroSession::factory()->make([
@@ -305,9 +365,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals(0, $pomodoroSession->completion_percentage);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_create_different_session_types()
     {
         $user = User::factory()->create();
@@ -321,9 +385,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals('long_break', $longBreakSession->session_type);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_link_to_study_session()
     {
         $user = User::factory()->create();
@@ -338,9 +406,13 @@ class PomodoroSessionTest extends TestCase
         $this->assertInstanceOf(StudySession::class, $pomodoroSession->studySession);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function study_session_link_can_be_null()
     {
         $user = User::factory()->create();

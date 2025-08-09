@@ -179,6 +179,33 @@ class UserFutureVisionTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - アンパサンド
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => 'テスト&entityで10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - ダブルクォート
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => 'テスト"クォート"で10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - シングルクォート
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->postJson('/api/user/future-vision', [
+                'vision_text' => 'テスト\'クォート\'で10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
     }
 
     // PUT /api/user/future-vision のテスト
@@ -274,6 +301,24 @@ class UserFutureVisionTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson('/api/user/future-vision', [
                 'vision_text' => '更新テスト<>で10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - アンパサンド（更新）
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => '更新テスト&entityで10文字以上にする',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['vision_text']);
+
+        // HTML特殊文字チェック - クォート（更新）
+        $response = $this->actingAs($this->user, 'sanctum')
+            ->putJson('/api/user/future-vision', [
+                'vision_text' => '更新テスト"double"\'single\'で10文字以上',
             ]);
 
         $response->assertStatus(422)

@@ -10,6 +10,9 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+
+use PHPUnit\Framework\Attributes\Test;
+
 /**
  * ダッシュボードと時間計測タイマーの統合テスト
  *
@@ -47,10 +50,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * ダッシュボードでの学習セッション開始から終了までの統合フロー
      */
+    #[Test]
     public function ダッシュボードでの学習セッション統合フローをテスト()
     {
         $this->actingAs($this->user);
@@ -139,10 +146,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $this->assertIsString($updatedDashboardData['today_study_time']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 複数画面での時間表示の一貫性をテスト
      */
+    #[Test]
     public function 複数画面での時間表示一貫性をテスト()
     {
         $this->actingAs($this->user);
@@ -178,10 +189,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $this->postJson('/api/study-sessions/end');
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * ページリロード想定での状態復元をテスト
      */
+    #[Test]
     public function ページリロード想定での状態復元をテスト()
     {
         $this->actingAs($this->user);
@@ -221,10 +236,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $this->postJson('/api/study-sessions/end');
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 複数セッション実行時のタイマー状態管理をテスト
      */
+    #[Test]
     public function 複数セッション実行時のタイマー状態管理をテスト()
     {
         $this->actingAs($this->user);
@@ -273,10 +292,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $this->postJson('/api/study-sessions/end');
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * エラー状況での状態管理をテスト
      */
+    #[Test]
     public function エラー状況での状態管理をテスト()
     {
         $this->actingAs($this->user);
@@ -319,10 +342,14 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         $this->postJson('/api/study-sessions/end');
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 長時間セッションでの時間計算精度をテスト
      */
+    #[Test]
     public function 長時間セッションでの時間計算精度をテスト()
     {
         $this->actingAs($this->user);

@@ -15,7 +15,11 @@ class UserSubjectAreaControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_get_user_subject_areas_list()
     {
         $user = User::factory()->create();
@@ -78,7 +82,11 @@ class UserSubjectAreaControllerTest extends TestCase
         $this->assertNotContains('他のユーザーの分野', $subjectNames);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_create_subject_area()
     {
         $user = User::factory()->create();
@@ -116,7 +124,11 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_create_subject_area_for_system_exam_type()
     {
         $user = User::factory()->create();
@@ -149,7 +161,11 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_subject_area_creation()
     {
         $user = User::factory()->create();
@@ -175,7 +191,11 @@ class UserSubjectAreaControllerTest extends TestCase
             ->assertJsonValidationErrors(['exam_type_id']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_access_to_other_users_exam_types()
     {
         $user1 = User::factory()->create();
@@ -201,7 +221,11 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_duplicate_subject_areas_in_same_exam_type()
     {
         $user = User::factory()->create();
@@ -233,7 +257,11 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_allows_same_subject_name_in_different_exam_types()
     {
         $user = User::factory()->create();
@@ -270,7 +298,11 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_update_subject_area()
     {
         $user = User::factory()->create();
@@ -313,7 +345,11 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_cannot_update_other_users_subject_area()
     {
         $user1 = User::factory()->create();
@@ -345,7 +381,11 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_cannot_update_system_subject_areas()
     {
         $user = User::factory()->create();
@@ -371,7 +411,11 @@ class UserSubjectAreaControllerTest extends TestCase
         $response->assertStatus(404); // システム分野はユーザーの所有物として見つからない
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_cannot_delete_subject_area_with_study_sessions()
     {
         $user = User::factory()->create();
@@ -409,7 +453,11 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_subject_area_without_study_sessions()
     {
         $user = User::factory()->create();
@@ -439,7 +487,11 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_requires_authentication()
     {
         $response = $this->getJson('/api/user/subject-areas');

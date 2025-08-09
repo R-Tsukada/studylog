@@ -28,9 +28,13 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 既定試験でカスタム学習分野が正しく作成される()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -71,9 +75,13 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $this->assertFalse($subjectAreas[1]->is_system);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function カスタム試験の学習分野作成機能が正常に動作する()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -112,9 +120,13 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $this->assertEquals('分野B', $subjectAreas[1]->name);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 空の学習分野名の場合はバリデーションエラー()
     {
         $response = $this->actingAs($this->user, 'sanctum')

@@ -11,6 +11,7 @@ class UserFutureVisionTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function test_user_future_vision_can_be_created()
     {
         $user = User::factory()->create();
@@ -27,6 +28,7 @@ class UserFutureVisionTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function test_user_future_vision_belongs_to_user()
     {
         $user = User::factory()->create();
@@ -39,6 +41,7 @@ class UserFutureVisionTest extends TestCase
         $this->assertEquals($user->id, $futureVision->user->id);
     }
 
+    #[Test]
     public function test_user_has_one_future_vision()
     {
         $user = User::factory()->create();
@@ -51,6 +54,7 @@ class UserFutureVisionTest extends TestCase
         $this->assertEquals($futureVision->id, $user->userFutureVision->id);
     }
 
+    #[Test]
     public function test_user_future_vision_has_correct_fillable_fields()
     {
         $futureVision = new UserFutureVision;
@@ -62,12 +66,14 @@ class UserFutureVisionTest extends TestCase
         $this->assertEquals($expectedFillable, $futureVision->getFillable());
     }
 
+    #[Test]
     public function test_user_future_vision_has_correct_table_name()
     {
         $futureVision = new UserFutureVision;
         $this->assertEquals('user_future_visions', $futureVision->getTable());
     }
 
+    #[Test]
     public function test_user_future_vision_casts_timestamps()
     {
         $user = User::factory()->create();

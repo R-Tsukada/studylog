@@ -13,7 +13,11 @@ class AuthControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_register_a_new_user()
     {
         $userData = [
@@ -48,7 +52,11 @@ class AuthControllerTest extends TestCase
         $this->assertTrue(Hash::check('Password123!', $user->password));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_user_registration()
     {
         // 必須項目が空の場合
@@ -95,7 +103,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['password']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_duplicate_email_registration()
     {
         // 既存ユーザーを作成
@@ -114,7 +126,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_login_with_valid_credentials()
     {
         $user = User::factory()->create([
@@ -145,7 +161,11 @@ class AuthControllerTest extends TestCase
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_rejects_invalid_login_credentials()
     {
         $user = User::factory()->create([
@@ -178,7 +198,11 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_login_input()
     {
         // 必須項目が空の場合
@@ -201,7 +225,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_get_authenticated_user_info()
     {
         $user = User::factory()->create();
@@ -224,7 +252,11 @@ class AuthControllerTest extends TestCase
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_requires_authentication_for_user_endpoint()
     {
         $response = $this->getJson('/api/user');
@@ -232,7 +264,11 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_logout_authenticated_user()
     {
         $user = User::factory()->create();
@@ -247,7 +283,11 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_update_user_profile()
     {
         $user = User::factory()->create([
@@ -276,7 +316,11 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_profile_update()
     {
         $user = User::factory()->create();
@@ -301,7 +345,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_profile_update_with_existing_email()
     {
         $user1 = User::factory()->create(['email' => 'user1@example.com']);
@@ -319,7 +367,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_allows_profile_update_with_same_email()
     {
         $user = User::factory()->create([
@@ -347,7 +399,11 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_generates_correct_avatar_url()
     {
         $userData = [
@@ -370,7 +426,11 @@ class AuthControllerTest extends TestCase
         $this->assertStringContainsString('s=100', $avatarUrl);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function tokens_are_different_for_each_login()
     {
         $user = User::factory()->create([
@@ -394,7 +454,11 @@ class AuthControllerTest extends TestCase
         $this->assertNotEquals($token1, $token2);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_nickname_field_length_in_registration()
     {
         // 長すぎるニックネーム（255文字超過）
@@ -411,7 +475,11 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_allows_valid_japanese_nicknames()
     {
         $testCases = [
@@ -439,7 +507,11 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_nickname_migration_properly()
     {
         // マイグレーションテスト用のケース
@@ -465,7 +537,11 @@ class AuthControllerTest extends TestCase
         $this->assertArrayHasKey('nickname', $responseData['user']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_authentication_flow_with_nickname()
     {
         // 登録
@@ -512,7 +588,11 @@ class AuthControllerTest extends TestCase
         $this->assertEquals('更新後ニックネーム', $userInfoData['user']['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_token_management()
     {
         $user = User::factory()->create([
@@ -539,7 +619,11 @@ class AuthControllerTest extends TestCase
             ->assertStatus(200);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_nickname_character_restrictions()
     {
         // 無効な文字を含むニックネーム
@@ -562,7 +646,11 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_enhanced_email_domain_restrictions()
     {
         // 許可されていないドメイン
@@ -609,7 +697,11 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_enhanced_password_complexity()
     {
         // 英字がないパスワード
@@ -656,7 +748,11 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(201);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_enhanced_nickname_rules()
     {
         // 短すぎるニックネーム（2文字未満）
@@ -733,7 +829,11 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_enhanced_login_rules()
     {
         $user = User::factory()->create([

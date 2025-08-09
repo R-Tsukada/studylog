@@ -16,7 +16,11 @@ class AccountDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_account_with_valid_password()
     {
         $user = User::factory()->create([
@@ -43,7 +47,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
         $user = User::factory()->create([
@@ -70,7 +78,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
         $user = User::factory()->create([
@@ -97,7 +109,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_rejects_account_deletion_with_wrong_confirmation()
     {
         $user = User::factory()->create([
@@ -121,7 +137,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_requires_authentication_for_account_deletion()
     {
         $response = $this->deleteJson('/api/auth/account', [
@@ -132,7 +152,11 @@ class AccountDeletionTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_deletes_related_user_data_when_account_is_deleted()
     {
         $user = User::factory()->create([
@@ -171,7 +195,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('study_goals', ['id' => $studyGoal->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_required_fields_for_account_deletion()
     {
         $user = User::factory()->create([
@@ -197,7 +225,11 @@ class AccountDeletionTest extends TestCase
             ->assertJsonValidationErrors(['confirmation']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
         $user = User::factory()->create([
@@ -223,7 +255,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_special_characters_in_password()
     {
         $specialPassword = 'パスワード123！@#$%^&*()';
@@ -247,7 +283,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_empty_password_field()
     {
         $user = User::factory()->create([
@@ -267,7 +307,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_empty_confirmation_field()
     {
         $user = User::factory()->create([
@@ -287,7 +331,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_incorrect_confirmation_variations()
     {
         $user = User::factory()->create([
@@ -319,7 +367,11 @@ class AccountDeletionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_very_long_password()
     {
         $longPassword = str_repeat('あ', 1000);
@@ -343,7 +395,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_concurrent_deletion_attempts()
     {
         $user = User::factory()->create([
@@ -375,7 +431,11 @@ class AccountDeletionTest extends TestCase
         $this->assertTrue(in_array($response2->status(), [200, 401]));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_preserves_system_data_when_user_is_deleted()
     {
         $user = User::factory()->create([
@@ -415,7 +475,11 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_account_deletion_with_large_amounts_of_data()
     {
         $user = User::factory()->create([
@@ -461,7 +525,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('study_goals', ['user_id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_request_without_required_fields()
     {
         $user = User::factory()->create([
@@ -480,7 +548,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_missing_authorization_header()
     {
         $user = User::factory()->create([
@@ -499,7 +571,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_invalid_token()
     {
         $user = User::factory()->create([
@@ -520,7 +596,11 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_account_deletion_during_active_study_session()
     {
         $user = User::factory()->create([

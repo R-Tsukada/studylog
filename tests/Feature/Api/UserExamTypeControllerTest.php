@@ -13,7 +13,11 @@ class UserExamTypeControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_get_user_exam_types_list()
     {
         $user = User::factory()->create();
@@ -57,7 +61,11 @@ class UserExamTypeControllerTest extends TestCase
         $this->assertNotContains('他のユーザーの試験', $examNames);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_create_exam_type()
     {
         $user = User::factory()->create();
@@ -100,7 +108,11 @@ class UserExamTypeControllerTest extends TestCase
         $this->assertStringContainsString('awssolutio', $examType->code);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_exam_type_creation()
     {
         $user = User::factory()->create();
@@ -135,7 +147,11 @@ class UserExamTypeControllerTest extends TestCase
             ->assertJsonValidationErrors(['exam_date']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_duplicate_exam_type_names()
     {
         $user = User::factory()->create();
@@ -161,7 +177,11 @@ class UserExamTypeControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_update_exam_type()
     {
         $user = User::factory()->create();
@@ -198,7 +218,11 @@ class UserExamTypeControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_cannot_update_other_users_exam_type()
     {
         $user1 = User::factory()->create();
@@ -224,7 +248,11 @@ class UserExamTypeControllerTest extends TestCase
             ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_cannot_update_system_exam_types()
     {
         $user = User::factory()->create();
@@ -244,7 +272,11 @@ class UserExamTypeControllerTest extends TestCase
         $response->assertStatus(404); // システム試験はユーザーの所有物として見つからない
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_exam_type()
     {
         $user = User::factory()->create();
@@ -268,7 +300,11 @@ class UserExamTypeControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_requires_authentication()
     {
         $response = $this->getJson('/api/user/exam-types');
@@ -280,7 +316,11 @@ class UserExamTypeControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_generates_unique_codes_for_multiple_exams()
     {
         $user = User::factory()->create();

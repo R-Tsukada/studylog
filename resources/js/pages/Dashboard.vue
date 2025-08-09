@@ -73,7 +73,7 @@
                 ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
               </span>
               <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters">
-                (HTMLタグ文字（&lt; &gt;）は使用できません)
+                (HTMLタグ文字（&lt; &gt; &amp; &quot; '）は使用できません)
               </span>
             </div>
             <div class="flex gap-2">
@@ -436,10 +436,9 @@ export default {
         return false
       }
       
-      // HTMLタグ形成文字をチェック（XSS対策）
-      // サーバーサイドのregex: /^[^<>]*$/と同じロジック
+      // HTMLタグ形成文字とクォート文字をチェック（XSS対策）
       const disallowedPatterns = [
-        /[<>]/, // HTMLタグ文字
+        /[<>&"']/, // HTMLタグ文字とクォート文字
       ]
       
       // 複数のパターンをチェック
@@ -453,7 +452,7 @@ export default {
       }
       
       const checks = [
-        { pattern: /[<>]/, message: 'HTMLタグ文字（< >）', found: /[<>]/.test(this.futureVision.text) }
+        { pattern: /[<>&"']/, message: 'HTMLタグ文字・クォート文字（< > & " \')' , found: /[<>&"']/.test(this.futureVision.text) }
       ]
       
       return checks.filter(check => check.found)

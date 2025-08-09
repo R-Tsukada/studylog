@@ -11,9 +11,13 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 有効なcustom_subjectsが受け入れられる()
     {
         $validData = [
@@ -34,9 +38,13 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function custom_subjectsが10個を超える場合はバリデーションエラー()
     {
         $subjects = [];
@@ -60,9 +68,13 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_subjects', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function custom_subjectsの名前が空の場合はバリデーションエラー()
     {
         $invalidData = [
@@ -83,9 +95,13 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_subjects.0.name', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function custom_subjectsの名前が255文字を超える場合はバリデーションエラー()
     {
         $invalidData = [

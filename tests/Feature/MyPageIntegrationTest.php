@@ -14,7 +14,11 @@ class MyPageIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function mypage_route_is_accessible_with_authentication()
     {
         $user = User::factory()->create();
@@ -27,7 +31,11 @@ class MyPageIntegrationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function mypage_route_redirects_unauthenticated_users()
     {
         // 未認証でマイページにアクセス
@@ -53,7 +61,11 @@ class MyPageIntegrationTest extends TestCase
         );
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function complete_profile_update_workflow()
     {
         $user = User::factory()->create([
@@ -108,7 +120,11 @@ class MyPageIntegrationTest extends TestCase
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function complete_account_deletion_workflow()
     {
         $user = User::factory()->create([
@@ -139,7 +155,11 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function google_user_profile_update_workflow()
     {
         $data = [
@@ -200,7 +220,11 @@ class MyPageIntegrationTest extends TestCase
         $this->assertNull($googleUser->password);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function google_user_account_deletion_workflow()
     {
         $googleUser = User::factory()->create([
@@ -224,7 +248,11 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function profile_update_error_handling_workflow()
     {
         $user1 = User::factory()->create(['email' => 'user1@example.com']);
@@ -257,7 +285,11 @@ class MyPageIntegrationTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function account_deletion_with_wrong_password_workflow()
     {
         $user = User::factory()->create([
@@ -288,7 +320,11 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function session_and_token_management_during_profile_operations()
     {
         $user = User::factory()->create([
@@ -333,7 +369,11 @@ class MyPageIntegrationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function mypage_data_consistency_across_operations()
     {
         $user = User::factory()->create([

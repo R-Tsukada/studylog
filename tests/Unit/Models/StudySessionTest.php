@@ -20,7 +20,11 @@ class StudySessionTest extends TestCase
         $this->seed();
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function study_session_has_correct_fillable_attributes()
     {
         $studySession = new StudySession;
@@ -29,7 +33,11 @@ class StudySessionTest extends TestCase
         $this->assertEquals($expected, $studySession->getFillable());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function study_session_casts_attributes_correctly()
     {
         $studySession = StudySession::factory()->create([
@@ -44,7 +52,11 @@ class StudySessionTest extends TestCase
         $this->assertEquals(60, $studySession->duration_minutes);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function study_session_belongs_to_user()
     {
         $user = User::factory()->create();
@@ -55,7 +67,11 @@ class StudySessionTest extends TestCase
         $this->assertEquals($user->nickname, $studySession->user->nickname);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function study_session_belongs_to_subject_area()
     {
         $subjectArea = SubjectArea::factory()->create();
@@ -66,7 +82,11 @@ class StudySessionTest extends TestCase
         $this->assertEquals($subjectArea->name, $studySession->subjectArea->name);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function completed_scope_returns_only_completed_sessions()
     {
         $user = User::factory()->create();
@@ -97,7 +117,11 @@ class StudySessionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function active_scope_returns_only_active_sessions()
     {
         $user = User::factory()->create();
@@ -125,7 +149,11 @@ class StudySessionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function date_range_scope_filters_by_date_range()
     {
         $user = User::factory()->create();
@@ -169,7 +197,11 @@ class StudySessionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function by_user_scope_filters_by_user()
     {
         $user1 = User::factory()->create();
@@ -187,7 +219,11 @@ class StudySessionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function recent_scope_returns_limited_sessions_in_desc_order()
     {
         $user = User::factory()->create();
@@ -215,7 +251,11 @@ class StudySessionTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function can_create_study_session_with_valid_data()
     {
         $user = User::factory()->create();

@@ -20,9 +20,13 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function オンボーディング完了後に設定画面でカスタム試験が表示される()
     {
         // 1. オンボーディング完了API呼び出し
@@ -105,9 +109,13 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         $this->assertNotNull($this->user->onboarding_completed_at);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function オンボーディング完了後に設定画面で既存試験が表示される()
     {
         // 既存試験タイプでのオンボーディング完了
@@ -149,9 +157,13 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         $this->assertEquals('aws_clf', $examTypes[0]['code']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function step_dataが空の場合でもエラーにならない()
     {
         $onboardingData = [
@@ -185,9 +197,13 @@ class OnboardingToSettingsIntegrationTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function デバッグ用_詳細ログ出力()
     {
         // テスト実行時に詳細な情報を出力
