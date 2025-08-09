@@ -74,6 +74,9 @@
           <div class="flex justify-between items-center">
             <div class="text-xs text-gray-500">
               {{ futureVision.text.length }}/2000文字
+              <span class="ml-2 text-red-500" v-if="futureVision.text.trim().length < 10">
+                ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
+              </span>
             </div>
             <div class="flex gap-2">
               <button
@@ -89,11 +92,11 @@
               </button>
               <button
                 @click="saveFutureVision"
-                :disabled="futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000"
+                :disabled="isVisionSaveDisabled"
                 class="px-4 py-2 text-sm text-white rounded transition-colors"
                 :style="{
-                  backgroundColor: (futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000) ? 'var(--color-muted-gray)' : 'var(--color-muted-purple)',
-                  cursor: (futureVision.loading || futureVision.text.trim().length < 10 || futureVision.text.length > 2000) ? 'not-allowed' : 'pointer'
+                  backgroundColor: isVisionSaveDisabled ? 'var(--color-muted-gray)' : 'var(--color-muted-purple)',
+                  cursor: isVisionSaveDisabled ? 'not-allowed' : 'pointer'
                 }"
                 onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple-dark)'"
                 onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple)'"
@@ -438,6 +441,13 @@ export default {
     
     isActive() {
       return this.globalStudyTimer.isActive
+    },
+
+    // 将来ビジョン保存ボタンの無効化条件
+    isVisionSaveDisabled() {
+      return this.futureVision.loading || 
+             this.futureVision.text.trim().length < 10 || 
+             this.futureVision.text.length > 2000
     }
   },
   
