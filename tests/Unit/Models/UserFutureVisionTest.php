@@ -17,13 +17,13 @@ class UserFutureVisionTest extends TestCase
 
         $futureVision = UserFutureVision::create([
             'user_id' => $user->id,
-            'vision_text' => 'Snƹ�oenӸ��\gM�Sh���W~Y',
+            'vision_text' => '資格を取得して、チームリーダーとして活躍したい',
         ]);
 
         $this->assertDatabaseHas('user_future_visions', [
             'id' => $futureVision->id,
             'user_id' => $user->id,
-            'vision_text' => 'Snƹ�oenӸ��\gM�Sh���W~Y',
+            'vision_text' => '資格を取得して、チームリーダーとして活躍したい',
         ]);
     }
 
@@ -32,7 +32,7 @@ class UserFutureVisionTest extends TestCase
         $user = User::factory()->create();
         $futureVision = UserFutureVision::create([
             'user_id' => $user->id,
-            'vision_text' => 'Snƹ�o���������󒺍W~Y',
+            'vision_text' => 'AWS認定を取得してクラウドエンジニアになる',
         ]);
 
         $this->assertInstanceOf(User::class, $futureVision->user);
@@ -44,7 +44,7 @@ class UserFutureVisionTest extends TestCase
         $user = User::factory()->create();
         $futureVision = UserFutureVision::create([
             'user_id' => $user->id,
-            'vision_text' => 'Snƹ�oUserK�n�����󒺍W~Y',
+            'vision_text' => 'プロジェクトマネージャーとしてチームを成功に導く',
         ]);
 
         $this->assertInstanceOf(UserFutureVision::class, $user->userFutureVision);
@@ -73,7 +73,7 @@ class UserFutureVisionTest extends TestCase
         $user = User::factory()->create();
         $futureVision = UserFutureVision::create([
             'user_id' => $user->id,
-            'vision_text' => 'Snƹ�o��๿��n��Ȓ��W~Y',
+            'vision_text' => 'フリーランスエンジニアとして独立する',
         ]);
 
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $futureVision->created_at);

@@ -40,20 +40,16 @@
           <div class="flex justify-end gap-2">
             <button 
               @click="startEditVision"
-              class="px-3 py-1 text-sm text-white rounded transition-colors"
+              class="px-3 py-1 text-sm text-white rounded transition-colors hover:bg-blue-600"
               style="background-color: var(--color-muted-blue);"
-              onmouseover="this.style.backgroundColor='var(--color-muted-blue-dark)'"
-              onmouseout="this.style.backgroundColor='var(--color-muted-blue)'"
             >
               ✏️ 編集
             </button>
             <button 
               @click="deleteFutureVision"
               :disabled="futureVision.loading"
-              class="px-3 py-1 text-sm rounded transition-colors"
+              class="px-3 py-1 text-sm rounded transition-colors hover:bg-red-500 hover:text-white"
               style="color: var(--color-muted-pink-dark); background-color: var(--color-muted-pink-light);"
-              onmouseover="this.style.backgroundColor='var(--color-muted-pink)'; this.style.color='white'"
-              onmouseout="this.style.backgroundColor='var(--color-muted-pink-light)'; this.style.color='var(--color-muted-pink-dark)'"
             >
               🗑️ 削除
             </button>
@@ -64,10 +60,8 @@
         <div v-else class="space-y-4">
           <textarea
             v-model="futureVision.text"
-            class="w-full p-4 rounded-lg resize-none"
+            class="w-full p-4 rounded-lg resize-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white; min-height: 120px;"
-            onfocus="this.style.borderColor='var(--color-muted-purple)'; this.style.boxShadow='0 0 0 2px var(--color-muted-purple-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             :placeholder="futureVision.hasData ? '将来のビジョンを編集してください...' : '資格を取得した後、どんな自分になりたいですか？将来のビジョンを描いてみましょう...'"
             rows="6"
           ></textarea>
@@ -83,23 +77,19 @@
                 v-if="futureVision.isEditing"
                 @click="cancelEditVision"
                 :disabled="futureVision.loading"
-                class="px-4 py-2 text-sm rounded transition-colors"
+                class="px-4 py-2 text-sm rounded transition-colors hover:bg-gray-600 hover:text-white"
                 style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
-                onmouseover="this.style.backgroundColor='var(--color-muted-gray-dark)'; this.style.color='white'"
-                onmouseout="this.style.backgroundColor='var(--color-muted-gray)'; this.style.color='var(--color-muted-gray-dark)'"
               >
                 キャンセル
               </button>
               <button
                 @click="saveFutureVision"
                 :disabled="isVisionSaveDisabled"
-                class="px-4 py-2 text-sm text-white rounded transition-colors"
+                class="px-4 py-2 text-sm text-white rounded transition-colors hover:bg-purple-700 disabled:hover:bg-gray-400"
                 :style="{
                   backgroundColor: isVisionSaveDisabled ? 'var(--color-muted-gray)' : 'var(--color-muted-purple)',
                   cursor: isVisionSaveDisabled ? 'not-allowed' : 'pointer'
                 }"
-                onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple-dark)'"
-                onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-purple)'"
               >
                 {{ futureVision.loading ? '保存中...' : '💾 保存' }}
               </button>
@@ -138,10 +128,8 @@
           <button 
             @click="endStudySession" 
             :disabled="loading"
-            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 hover:bg-red-500"
             style="background-color: var(--color-muted-pink-dark);"
-            onmouseover="this.style.backgroundColor='var(--color-muted-pink)'"
-            onmouseout="this.style.backgroundColor='var(--color-muted-pink-dark)'"
           >
             ⏹️ 学習終了
           </button>
@@ -195,10 +183,8 @@
           <select 
             v-model="selectedSubjectAreaId" 
             required
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
           >
             <option value="">分野を選択してください</option>
             <optgroup v-for="examType in examTypes" :key="examType.id" :label="examType.name">
@@ -219,10 +205,8 @@
           <textarea 
             v-model="studyComment"
             required
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="3"
             placeholder="今日学習する内容を簡単に記入してください"
           ></textarea>
@@ -232,13 +216,11 @@
         <button 
           type="submit" 
           :disabled="loading || !selectedSubjectAreaId || !studyComment.trim()"
-          class="w-full text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+          class="w-full text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 hover:bg-blue-700 disabled:hover:bg-gray-400"
           :style="{
             backgroundColor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
             cursor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'not-allowed' : 'pointer'
           }"
-          onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
-          onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
         >
           {{ loading ? '開始中...' : '🎯 学習開始！' }}
         </button>
@@ -257,10 +239,8 @@
         <h2 class="text-lg font-semibold" style="color: var(--color-muted-blue-dark);">📚 最近の学習履歴</h2>
         <router-link 
           to="/history"
-          class="text-sm font-medium transition-colors"
+          class="text-sm font-medium transition-colors hover:text-blue-700"
           style="color: var(--color-muted-blue);"
-          onmouseover="this.style.color='var(--color-muted-blue-dark)'"
-          onmouseout="this.style.color='var(--color-muted-blue)'"
         >
           📋 すべて見る →
         </router-link>
@@ -275,7 +255,7 @@
       </div>
       
       <div v-else class="space-y-3">
-        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 transition-colors" style="border-color: var(--color-muted-gray);" onmouseover="this.style.backgroundColor='var(--color-muted-white)'" onmouseout="this.style.backgroundColor='white'">
+        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 transition-colors hover:bg-gray-50" style="border-color: var(--color-muted-gray);">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center gap-2">
@@ -296,10 +276,8 @@
               <button 
                 v-if="session.type === 'pomodoro_session'"
                 @click="openEditNotesModal(session)"
-                class="mt-1 text-xs transition-colors"
+                class="mt-1 text-xs transition-colors hover:text-blue-700"
                 style="color: var(--color-muted-blue);"
-                onmouseover="this.style.color='var(--color-muted-blue-dark)'"
-                onmouseout="this.style.color='var(--color-muted-blue)'"
                 title="メモ編集"
               >
                 ✏️ 編集
@@ -333,10 +311,8 @@
           <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">メモ</label>
           <textarea
             v-model="editNotesModal.notes"
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="4"
             placeholder="ポモドーロセッションでのメモを入力してください..."
           ></textarea>
@@ -345,24 +321,20 @@
         <div class="flex gap-3">
           <button
             @click="closeEditNotesModal"
-            class="flex-1 px-4 py-2 rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 rounded-lg transition-colors hover:bg-gray-600 hover:text-white"
             style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
-            onmouseover="this.style.backgroundColor='var(--color-muted-gray-dark)'"
-            onmouseout="this.style.backgroundColor='var(--color-muted-gray)'"
           >
             キャンセル
           </button>
           <button
             @click="saveNotes"
             :disabled="editNotesModal.saving"
-            class="flex-1 px-4 py-2 text-white rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 text-white rounded-lg transition-colors hover:bg-blue-700 disabled:hover:bg-gray-400"
             :style="{
               backgroundColor: editNotesModal.saving ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
               cursor: editNotesModal.saving ? 'not-allowed' : 'pointer',
               opacity: editNotesModal.saving ? '0.5' : '1'
             }"
-            onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
-            onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
           >
             {{ editNotesModal.saving ? '保存中...' : '保存' }}
           </button>
@@ -649,6 +621,13 @@ export default {
         }
       } catch (error) {
         console.error('ダッシュボードデータ取得エラー:', error)
+        if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
+        } else if (error.response?.status === 401) {
+          // 認証エラーの場合はログイン画面にリダイレクト
+          localStorage.removeItem('auth_token')
+          this.$router.push('/login')
+        }
       } finally {
         this.loadingDashboard = false
       }
@@ -860,6 +839,12 @@ export default {
         console.error('将来ビジョン保存エラー:', error)
         if (error.response?.data?.message) {
           this.showError(error.response.data.message)
+        } else if (error.response?.data?.errors) {
+          // バリデーションエラーの場合
+          const errorMessages = Object.values(error.response.data.errors).flat()
+          this.showError(errorMessages.join('、'))
+        } else if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
         } else {
           this.showError('将来のビジョンの保存中にエラーが発生しました')
         }
@@ -911,6 +896,8 @@ export default {
         console.error('将来ビジョン削除エラー:', error)
         if (error.response?.data?.message) {
           this.showError(error.response.data.message)
+        } else if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
         } else {
           this.showError('将来のビジョンの削除中にエラーが発生しました')
         }

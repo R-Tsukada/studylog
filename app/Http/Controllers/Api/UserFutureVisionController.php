@@ -7,18 +7,19 @@ use App\Http\Requests\UserFutureVisionRequest;
 use App\Models\UserFutureVision;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class UserFutureVisionController extends Controller
 {
     /**
      * 将来のビジョンを取得
      */
-    public function show(Request $request): JsonResponse
+    public function show(Request $request): JsonResponse|Response
     {
         $vision = $request->user()->userFutureVision;
 
-        if (! $vision) {
-            return response()->json([], 204); // 204はボディなし
+        if (! $vision->exists) {
+            return response()->noContent();
         }
 
         return response()->json([
@@ -35,7 +36,7 @@ class UserFutureVisionController extends Controller
         $user = $request->user();
 
         // 既存のビジョンがある場合は409 Conflictを返す
-        if ($user->userFutureVision) {
+        if ($user->userFutureVision->exists) {
             return response()->json([
                 'success' => false,
                 'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。',
@@ -62,7 +63,7 @@ class UserFutureVisionController extends Controller
         $user = $request->user();
         $vision = $user->userFutureVision;
 
-        if (! $vision) {
+        if (! $vision->exists) {
             return response()->json([
                 'success' => false,
                 'message' => '更新対象の将来のビジョンが見つかりません。',
@@ -88,7 +89,7 @@ class UserFutureVisionController extends Controller
         $user = $request->user();
         $vision = $user->userFutureVision;
 
-        if (! $vision) {
+        if (! $vision->exists) {
             return response()->json([
                 'success' => false,
                 'message' => '削除対象の将来のビジョンが見つかりません。',

@@ -80,7 +80,7 @@ class User extends Authenticatable
 
     public function userFutureVision(): HasOne
     {
-        return $this->hasOne(UserFutureVision::class);
+        return $this->hasOne(UserFutureVision::class)->withDefault();
     }
 
     // ヘルパーメソッド

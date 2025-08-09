@@ -27,7 +27,7 @@ class UserFutureVisionRequest extends FormRequest
                 'string',
                 'min:10',                    // 意味ある文章として最低限の長さ
                 'max:2000',                  // ツイートの約10倍程度
-                'regex:/^[^<>&"\']*$/',      // HTML特殊文字を除外（XSS対策）
+                'regex:/^[^<>]*$/',          // HTMLタグのみを除外（XSS対策）
             ],
         ];
     }
