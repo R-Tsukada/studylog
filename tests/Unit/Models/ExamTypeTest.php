@@ -19,7 +19,11 @@ class ExamTypeTest extends TestCase
         $this->seed();
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_has_correct_fillable_attributes()
     {
         $examType = new ExamType;
@@ -31,7 +35,11 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($expected, $examType->getFillable());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_casts_is_active_to_boolean()
     {
         $examType = ExamType::factory()->create(['is_active' => 1]);
@@ -40,7 +48,11 @@ class ExamTypeTest extends TestCase
         $this->assertTrue($examType->is_active);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_casts_is_system_to_boolean()
     {
         $examType = ExamType::factory()->create(['is_system' => 1]);
@@ -49,7 +61,11 @@ class ExamTypeTest extends TestCase
         $this->assertTrue($examType->is_system);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_casts_exam_date_to_date()
     {
         $examType = ExamType::factory()->create(['exam_date' => '2025-06-15']);
@@ -58,7 +74,11 @@ class ExamTypeTest extends TestCase
         $this->assertEquals('2025-06-15', $examType->exam_date->format('Y-m-d'));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_has_many_subject_areas()
     {
         $examType = ExamType::factory()->create();
@@ -69,7 +89,11 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($subjectArea->id, $examType->subjectAreas->first()->id);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_has_many_study_goals()
     {
         $examType = ExamType::factory()->create();
@@ -80,7 +104,11 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($studyGoal->id, $examType->studyGoals->first()->id);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function active_scope_returns_only_active_exam_types()
     {
         // 既存のアクティブなExamTypeの数を取得
@@ -103,7 +131,11 @@ class ExamTypeTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function can_create_exam_type_with_valid_data()
     {
         $examTypeData = [
@@ -120,7 +152,11 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($examTypeData['name'], $examType->name);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function code_must_be_unique()
     {
         $examType1 = ExamType::factory()->create(['code' => 'unique_code']);

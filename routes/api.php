@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PomodoroController;
 use App\Http\Controllers\Api\StudyAnalyticsController;
 use App\Http\Controllers\Api\StudyGoalController;
 use App\Http\Controllers\Api\StudySessionController;
+use App\Http\Controllers\Api\UserFutureVisionController;
 use Illuminate\Support\Facades\Route;
 
 // 認証が不要なエンドポイント
@@ -30,6 +31,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // ユーザー設定管理
     Route::apiResource('user/exam-types', App\Http\Controllers\Api\UserExamTypeController::class);
     Route::apiResource('user/subject-areas', App\Http\Controllers\Api\UserSubjectAreaController::class);
+
+    // User Future Vision API（将来のビジョン機能）
+    Route::prefix('user')->middleware(['throttle:10,1'])->group(function () {
+        Route::get('/future-vision', [UserFutureVisionController::class, 'show']);
+        Route::post('/future-vision', [UserFutureVisionController::class, 'store']);
+        Route::put('/future-vision', [UserFutureVisionController::class, 'update']);
+        Route::delete('/future-vision', [UserFutureVisionController::class, 'destroy']);
+    });
 
     // Dashboard API（認証済みユーザーのデータのみ）
     Route::get('/dashboard', [DashboardController::class, 'index']);

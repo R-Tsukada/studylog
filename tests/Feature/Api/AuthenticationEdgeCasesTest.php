@@ -13,7 +13,11 @@ class AuthenticationEdgeCasesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_empty_nickname_gracefully()
     {
         $response = $this->postJson('/api/auth/register', [
@@ -27,7 +31,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_whitespace_only_nickname()
     {
         $response = $this->postJson('/api/auth/register', [
@@ -41,7 +49,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_trims_nickname_whitespace()
     {
         $response = $this->postJson('/api/auth/register', [
@@ -57,7 +69,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $this->assertEquals('トリムテスト', $user->nickname);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_rejects_special_characters_in_nickname()
     {
         $invalidNicknames = [
@@ -100,7 +116,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_email_uniqueness()
     {
         // 最初にユーザーを登録
@@ -121,7 +141,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_extremely_long_password()
     {
         $longPassword = 'Password123!'.str_repeat('a', 986); // 1000文字の複雑なパスワード
@@ -139,7 +163,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $this->assertTrue(Hash::check($longPassword, $user->password));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_unicode_characters_in_password()
     {
         $unicodePassword = 'パスワード123！@#';
@@ -162,7 +190,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $loginResponse->assertStatus(200);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_null_and_undefined_fields()
     {
         // nullフィールドを含むリクエスト
@@ -177,7 +209,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_empty_request_body()
     {
         $response = $this->postJson('/api/auth/register', []);
@@ -186,7 +222,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['nickname', 'email', 'password']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_simultaneous_login_attempts()
     {
         $user = User::factory()->create([
@@ -213,7 +253,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $this->assertEquals(count($tokens), count(array_unique($tokens)));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_token_with_invalid_bearer_prefix()
     {
         $user = User::factory()->create();
@@ -227,7 +271,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_expired_or_invalid_tokens()
     {
         $user = User::factory()->create();
@@ -247,7 +295,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_profile_update_edge_cases()
     {
         $user = User::factory()->create([
@@ -282,7 +334,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_database_constraint_violations()
     {
         // 最初のユーザーを作成
@@ -306,7 +362,11 @@ class AuthenticationEdgeCasesTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_missing_request_headers()
     {
         $user = User::factory()->create();
@@ -323,7 +383,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_logout_with_invalid_token()
     {
         // 無効なトークンでログアウト
@@ -334,7 +398,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_logout_without_token()
     {
         // トークンなしでログアウト
@@ -343,7 +411,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_user_info_access_after_logout()
     {
         $user = User::factory()->create();
@@ -358,7 +430,11 @@ class AuthenticationEdgeCasesTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_multiple_logout_attempts()
     {
         $user = User::factory()->create();

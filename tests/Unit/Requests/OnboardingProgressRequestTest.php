@@ -11,9 +11,13 @@ class OnboardingProgressRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function current_stepが必須であること()
     {
         $invalidData = [
@@ -29,9 +33,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function current_stepが数値でない場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -48,9 +56,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function current_stepが範囲外の場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -72,9 +84,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->fails());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function timestampが正しいフォーマットでない場合にバリデーションエラーになる()
     {
         // ミリ秒付きのタイムスタンプ（JavaScriptのtoISOString()デフォルト）
@@ -92,9 +108,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('timestamp', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function timestampが正しいフォーマットの場合に受け入れられる()
     {
         $validData = [
@@ -110,9 +130,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function timestampがnullの場合も受け入れられる()
     {
         $validData = [
@@ -128,9 +152,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 有効なデータが受け入れられる()
     {
         $validData = [
@@ -152,9 +180,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function completed_stepsが無効な値の場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -172,9 +204,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('completed_steps.1', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function step_dataが大きすぎる場合にバリデーションエラーになる()
     {
         // 大きなデータを作成（10KB超過）
@@ -196,9 +232,13 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('step_data', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function java_scriptからの_ap_iコール形式をテスト()
     {
         // 実際のJavaScriptから送信される可能性のあるデータ形式

@@ -39,9 +39,13 @@ class StudyActivityServiceTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_get_unified_history_with_both_session_types()
     {
         // 時間計測セッション作成
@@ -95,9 +99,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals('focus', $pomodoroItem['session_details']['session_type']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_filter_history_by_date_range()
     {
         // 範囲内のセッション
@@ -130,9 +138,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertCount(1, $history);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_get_unified_stats()
     {
         // 時間計測セッション（複数）
@@ -211,9 +223,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertIsArray($stats['insights']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_get_study_insights()
     {
         // 最近のデータを作成
@@ -258,9 +274,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertIsArray($insights['recommendations']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_suggest_study_method()
     {
         // 最近の長時間セッションを作成（時間計測推奨の条件）
@@ -298,9 +318,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertLessThan(24, $context['time_of_day']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function suggests_time_tracking_for_long_sessions()
     {
         // 長時間セッションの履歴を複数作成
@@ -323,9 +347,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertTrue($hasTimeTrackingSuggestion);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function filters_user_data_correctly()
     {
         // 他のユーザーのデータ
@@ -356,9 +384,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals(30, $stats['overview']['total_study_time']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function handles_empty_data_gracefully()
     {
         $history = $this->service->getUnifiedHistory($this->user->id);
@@ -374,9 +406,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertArrayHasKey('recommended', $suggestion);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function calculates_completion_rate_correctly()
     {
         // 完了セッション
@@ -406,9 +442,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals(50.0, $stats['by_method']['pomodoro']['completion_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function generates_appropriate_insights()
     {
         // 低い完了率のポモドーロセッション
@@ -433,9 +473,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertTrue($hasCompletionRateInsight);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_get_grass_data_correctly()
     {
         // テストデータ作成
@@ -481,9 +525,13 @@ class StudyActivityServiceTest extends TestCase
         $this->assertArrayHasKey('stats', $result);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function grass_level_calculation_is_correct()
     {
         $testCases = [
@@ -508,9 +556,13 @@ class StudyActivityServiceTest extends TestCase
         }
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function can_build_grass_data_for_year()
     {
         $year = 2024;

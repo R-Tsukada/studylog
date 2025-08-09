@@ -18,9 +18,13 @@ class OnboardingProgressApiTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 正しいパラメータで進捗更新が成功する()
     {
         $requestData = [
@@ -49,9 +53,13 @@ class OnboardingProgressApiTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function current_stepが欠如している場合に422エラーになる()
     {
         $requestData = [
@@ -72,9 +80,13 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertStringContainsString('現在のステップは必須です', $errors['current_step'][0]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function ミリ秒付きタイムスタンプで422エラーになる()
     {
         $requestData = [
@@ -91,9 +103,13 @@ class OnboardingProgressApiTest extends TestCase
             ->assertJsonValidationErrors(['timestamp']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function java_scriptのto_iso_string修正版が動作する()
     {
         // JavaScriptで new Date().toISOString().replace(/\.\d{3}Z$/, 'Z') した形式
@@ -127,9 +143,13 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertArrayHasKey('setup_step', $progress['step_data']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function camel_case形式のパラメータで422エラーになる()
     {
         // 修正前の誤ったパラメータ名（camelCase）
@@ -149,9 +169,13 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertArrayHasKey('current_step', $response->json('errors'));
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 認証なしで401エラーになる()
     {
         $requestData = [
@@ -166,9 +190,13 @@ class OnboardingProgressApiTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 複雑なstep_dataが正常に処理される()
     {
         $requestData = [

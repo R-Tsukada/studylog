@@ -19,7 +19,11 @@ class SubjectAreaTest extends TestCase
         $this->seed();
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function subject_area_has_correct_fillable_attributes()
     {
         $subjectArea = new SubjectArea;
@@ -31,7 +35,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($expected, $subjectArea->getFillable());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function subject_area_casts_attributes_correctly()
     {
         $subjectArea = SubjectArea::factory()->create([
@@ -48,7 +56,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals(5, $subjectArea->sort_order);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function subject_area_belongs_to_exam_type()
     {
         $examType = ExamType::factory()->create();
@@ -59,7 +71,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($examType->name, $subjectArea->examType->name);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function subject_area_has_many_study_sessions()
     {
         $subjectArea = SubjectArea::factory()->create();
@@ -70,7 +86,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($studySession->id, $subjectArea->studySessions->first()->id);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function active_scope_returns_only_active_subject_areas()
     {
         $examType = ExamType::factory()->create();
@@ -85,7 +105,11 @@ class SubjectAreaTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function ordered_scope_returns_subject_areas_in_sort_order()
     {
         $examType = ExamType::factory()->create();
@@ -99,7 +123,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals(3, $orderedSubjectAreas->last()->sort_order);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function can_create_subject_area_with_valid_data()
     {
         $examType = ExamType::factory()->create();
@@ -119,7 +147,11 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($subjectAreaData['name'], $subjectArea->name);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function exam_type_id_and_code_combination_must_be_unique()
     {
         $examType = ExamType::factory()->create();

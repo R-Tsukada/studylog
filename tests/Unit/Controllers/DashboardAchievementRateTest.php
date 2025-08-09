@@ -49,10 +49,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->controller = new DashboardController;
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 目標時間と学習セッションのみで正確な達成率が計算されること
      */
+    #[Test]
     public function 学習セッションのみで正確な目標達成率が計算されること()
     {
         // 目標を120分（2時間）に設定
@@ -85,10 +89,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(67, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 目標時間とポモドーロセッションのみで正確な達成率が計算されること
      */
+    #[Test]
     public function ポモドーロセッションのみで正確な目標達成率が計算されること()
     {
         // 目標を90分に設定
@@ -132,10 +140,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(50, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 目標時間と学習セッション・ポモドーロ両方で正確な合計達成率が計算されること
      */
+    #[Test]
     public function 学習セッションとポモドーロ両方で正確な合計達成率が計算されること()
     {
         // 目標を150分（2.5時間）に設定
@@ -189,10 +201,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(90, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 目標達成率が100%を超える場合は100%にキャップされること
      */
+    #[Test]
     public function 目標達成率が100パーセントを超える場合は100パーセントにキャップされること()
     {
         // 目標を60分に設定
@@ -225,10 +241,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(100, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * アクティブな目標が設定されていない場合は0%が返ること
      */
+    #[Test]
     public function アクティブな目標が設定されていない場合は0パーセントが返ること()
     {
         // 非アクティブな目標を作成
@@ -261,10 +281,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(0, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 目標時間が0の場合は0%が返ること
      */
+    #[Test]
     public function 目標時間が0の場合は0パーセントが返ること()
     {
         // 目標を0分に設定
@@ -297,10 +321,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(0, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 昨日の学習データは計算に含まれないこと
      */
+    #[Test]
     public function 昨日の学習データは計算に含まれないこと()
     {
         // 目標を60分に設定
@@ -352,10 +380,14 @@ class DashboardAchievementRateTest extends TestCase
         $this->assertEquals(50, $data['achievement_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 他のユーザーの学習データは計算に含まれないこと
      */
+    #[Test]
     public function 他のユーザーの学習データは計算に含まれないこと()
     {
         // 他のユーザーを作成

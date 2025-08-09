@@ -20,9 +20,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_でカスタム試験と学習目標が作成される()
     {
         $requestData = [
@@ -82,9 +86,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertNotNull($this->user->onboarding_completed_at);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_で既存試験タイプと学習目標が作成される()
     {
         $requestData = [
@@ -128,9 +136,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertEquals('2025-08-15', $studyGoal->exam_date->format('Y-m-d'));
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_で既存アクティブ学習目標が無効化される()
     {
         // 既存のアクティブ学習目標を作成
@@ -167,9 +179,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertEquals(45, $newGoal->daily_minutes_goal);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_でstep_dataが空の場合も正常処理される()
     {
         $requestData = [
@@ -195,9 +211,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_でトランザクションエラー時にロールバックされる()
     {
         // SQLiteのNOT NULL制約エラーを意図的に発生させる
@@ -231,9 +251,13 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function complete_でカスタム試験コード生成が正しく動作する()
     {
         $requestData = [

@@ -20,9 +20,13 @@ class PomodoroControllerTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_get_pomodoro_sessions_list()
     {
         $sessions = PomodoroSession::factory()->count(3)->create(['user_id' => $this->user->id]);
@@ -51,9 +55,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertCount(3, $response->json('data'));
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_filter_sessions_by_date()
     {
         $todaySession = PomodoroSession::factory()->create([
@@ -73,9 +81,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_filter_sessions_by_type()
     {
         $focusSession = PomodoroSession::factory()->focus()->create(['user_id' => $this->user->id]);
@@ -89,9 +101,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals('focus', $response->json('data.0.session_type'));
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_create_pomodoro_session()
     {
         $sessionData = [
@@ -125,9 +141,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_create_pomodoro_session_with_study_session_link()
     {
         $studySession = StudySession::factory()->create(['user_id' => $this->user->id]);
@@ -149,9 +169,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_validates_pomodoro_session_creation()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -161,9 +185,13 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['session_type', 'planned_duration']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_prevents_multiple_active_sessions()
     {
         $activeSession = PomodoroSession::factory()->active()->create(['user_id' => $this->user->id]);
@@ -182,9 +210,13 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_show_specific_pomodoro_session()
     {
         $session = PomodoroSession::factory()->create(['user_id' => $this->user->id]);
@@ -199,9 +231,13 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_cannot_show_other_users_session()
     {
         $otherUser = User::factory()->create();
@@ -213,9 +249,13 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_update_pomodoro_session()
     {
         $session = PomodoroSession::factory()->active()->create(['user_id' => $this->user->id]);
@@ -251,9 +291,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_update_pomodoro_session_notes_only()
     {
         $session = PomodoroSession::factory()->create([
@@ -282,9 +326,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_validates_notes_max_length()
     {
         $session = PomodoroSession::factory()->create(['user_id' => $this->user->id]);
@@ -298,9 +346,13 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['notes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_clear_pomodoro_session_notes()
     {
         $session = PomodoroSession::factory()->create([
@@ -319,9 +371,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_cannot_update_other_users_pomodoro_session_notes()
     {
         $otherUser = User::factory()->create();
@@ -333,9 +389,13 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_complete_pomodoro_session()
     {
         $session = PomodoroSession::factory()->active()->create(['user_id' => $this->user->id]);
@@ -360,9 +420,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_cannot_complete_already_completed_session()
     {
         $session = PomodoroSession::factory()->completed()->create(['user_id' => $this->user->id]);
@@ -378,9 +442,13 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_get_current_active_session()
     {
         $activeSession = PomodoroSession::factory()->active()->create(['user_id' => $this->user->id]);
@@ -396,9 +464,13 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_returns_404_when_no_current_session()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -410,9 +482,13 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_get_pomodoro_statistics()
     {
         // 今日のセッションを作成
@@ -454,9 +530,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(5, $stats['total_break_time']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_returns_zero_stats_when_no_sessions()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -470,9 +550,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(0, $stats['completion_rate']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_can_delete_pomodoro_session()
     {
         $session = PomodoroSession::factory()->create(['user_id' => $this->user->id]);
@@ -490,9 +574,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_cannot_delete_other_users_session()
     {
         $otherUser = User::factory()->create();
@@ -508,9 +596,13 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_requires_authentication()
     {
         $response = $this->getJson('/api/pomodoro');
@@ -526,9 +618,13 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_validates_session_type()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -541,9 +637,13 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['session_type']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_validates_planned_duration()
     {
         $response = $this->actingAs($this->user, 'sanctum')
@@ -565,9 +665,13 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['planned_duration']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_calculates_completion_rate_correctly()
     {
         // 完了セッション（中断なし）
@@ -595,9 +699,13 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(80.0, $stats['completion_rate']); // (10-2)/10 * 100 = 80%
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function it_filters_sessions_by_completion_status()
     {
         $completedSession = PomodoroSession::factory()->completed()->create(['user_id' => $this->user->id]);

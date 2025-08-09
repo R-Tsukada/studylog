@@ -29,9 +29,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 試験コード生成_通常の名前()
     {
         $examCode = $this->invokePrivateMethod('generateExamCode', [1, 'AWS Solutions Architect']);
@@ -41,9 +45,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $examCode);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 試験コード生成_空の名前の場合のフォールバック()
     {
         $examCode = $this->invokePrivateMethod('generateExamCode', [1, '']);
@@ -52,9 +60,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertStringContainsString('_u1_', $examCode);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 試験コード生成_特殊文字を含む名前()
     {
         $examCode = $this->invokePrivateMethod('generateExamCode', [1, 'テスト@試験#2024']);
@@ -64,9 +76,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/[@#]/', $examCode);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 試験コード生成_重複チェック機能()
     {
         $timestamp = time();
@@ -93,9 +109,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         );
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 学習分野コード生成_通常の名前()
     {
         $subjectCode = $this->invokePrivateMethod('generateSubjectCode', ['データ構造とアルゴリズム', 1]);
@@ -104,9 +124,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $subjectCode);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 学習分野コード生成_空の名前の場合のフォールバック()
     {
         $subjectCode = $this->invokePrivateMethod('generateSubjectCode', ['', 1]);
@@ -115,9 +139,13 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertStringContainsString('_1_', $subjectCode);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 学習分野コード生成_重複チェック機能()
     {
         $timestamp = time();
@@ -144,7 +172,10 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         );
     }
 
-    /**
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
      * プライベートメソッドを呼び出すためのヘルパー
      */
     private function invokePrivateMethod(string $methodName, array $parameters = [])

@@ -1,25 +1,109 @@
 <template>
   <div>
-    <!-- 試験日カウントダウン -->
-    <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
-      <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4">
-          <div class="flex justify-between items-center">
-            <div>
-              <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
-              <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
-            </div>
-            <div class="text-right">
-              <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
-                {{ exam.days_until_exam }}
+    <!-- 試験日カウントダウン & 将来のビジョン -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <!-- 試験日カウントダウンセクション -->
+      <section v-if="upcomingExams.length > 0" class="rounded-lg shadow p-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-blue-dark);">🎯 試験予定日まで</h2>
+        <div class="space-y-3">
+          <div v-for="exam in upcomingExams" :key="exam.exam_type_name" class="bg-white rounded-lg p-4 border" style="border-color: var(--color-muted-gray);">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="font-bold text-lg" style="color: var(--color-muted-blue-dark);">{{ exam.exam_type_name }}</div>
+                <div class="text-sm text-gray-600">{{ formatExamDate(exam.exam_date) }}</div>
               </div>
-              <div class="text-sm text-gray-600">日</div>
+              <div class="text-right">
+                <div class="text-3xl font-bold" :style="{ color: getCountdownColor(exam.days_until_exam) }">
+                  {{ exam.days_until_exam }}
+                </div>
+                <div class="text-sm text-gray-600">日</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- 将来のビジョンセクション -->
+      <section class="rounded-lg shadow p-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
+        <h2 class="text-lg font-semibold mb-4" style="color: var(--color-muted-purple-dark);">✨ 目標を達成したあとの自分</h2>
+        
+        <!-- ローディング表示 -->
+        <div v-if="futureVision.loading" class="text-center py-8">
+          <div class="text-gray-500">読み込み中...</div>
+        </div>
+        
+        <!-- 表示モード（データがある場合） -->
+        <div v-else-if="futureVision.hasData && !futureVision.isEditing" class="space-y-4">
+          <div class="p-4 rounded-lg text-gray-700 leading-relaxed whitespace-pre-wrap border" style="border-color: var(--color-muted-gray); background-color: transparent;">
+            {{ futureVision.text }}
+          </div>
+          <div class="flex justify-end gap-2">
+            <button 
+              @click="startEditVision"
+              class="px-3 py-1 text-sm text-white rounded transition-colors hover:bg-blue-600"
+              style="background-color: var(--color-muted-blue);"
+            >
+              ✏️ 編集
+            </button>
+            <button 
+              @click="deleteFutureVision"
+              :disabled="futureVision.loading"
+              class="px-3 py-1 text-sm rounded transition-colors hover:bg-red-500 hover:text-white"
+              style="color: var(--color-muted-pink-dark); background-color: var(--color-muted-pink-light);"
+            >
+              🗑️ 削除
+            </button>
+          </div>
+        </div>
+        
+        <!-- 入力/編集モード -->
+        <div v-else class="space-y-4">
+          <textarea
+            v-model="futureVision.text"
+            @input="sanitizeVisionText"
+            @keypress="preventDisallowedCharacters"
+            class="w-full p-4 rounded-lg resize-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+            style="border: 1px solid var(--color-muted-gray); background-color: white; min-height: 120px;"
+            :placeholder="futureVision.hasData ? '将来のビジョンを編集してください...' : '資格を取得した後、どんな自分になりたいですか？将来のビジョンを描いてみましょう...'"
+            rows="6"
+            maxlength="2000"
+          ></textarea>
+          <div class="flex justify-between items-center">
+            <div class="text-xs text-gray-500">
+              {{ futureVision.text.length }}/2000文字
+              <span class="ml-2 text-red-500" v-if="futureVision.text.trim().length < 10">
+                ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
+              </span>
+              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters">
+                (HTMLタグ文字（&lt; &gt; &amp; &quot; '）は使用できません)
+              </span>
+            </div>
+            <div class="flex gap-2">
+              <button
+                v-if="futureVision.isEditing"
+                @click="cancelEditVision"
+                :disabled="futureVision.loading"
+                class="px-4 py-2 text-sm rounded transition-colors hover:bg-gray-600 hover:text-white"
+                style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
+              >
+                キャンセル
+              </button>
+              <button
+                @click="saveFutureVision"
+                :disabled="isVisionSaveDisabled"
+                class="px-4 py-2 text-sm text-white rounded transition-colors hover:bg-purple-700 disabled:hover:bg-gray-400"
+                :style="{
+                  backgroundColor: isVisionSaveDisabled ? 'var(--color-muted-gray)' : 'var(--color-muted-purple)',
+                  cursor: isVisionSaveDisabled ? 'not-allowed' : 'pointer'
+                }"
+              >
+                {{ futureVision.loading ? '保存中...' : '💾 保存' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
     <!-- GitHub風草表示 -->
     <section class="rounded-lg shadow p-6 mb-6" style="background-color: white; border: 1px solid var(--color-muted-gray);">
@@ -50,10 +134,8 @@
           <button 
             @click="endStudySession" 
             :disabled="loading"
-            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 hover:bg-red-500"
             style="background-color: var(--color-muted-pink-dark);"
-            onmouseover="this.style.backgroundColor='var(--color-muted-pink)'"
-            onmouseout="this.style.backgroundColor='var(--color-muted-pink-dark)'"
           >
             ⏹️ 学習終了
           </button>
@@ -92,12 +174,12 @@
       
       <!-- エラーメッセージ -->
       <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-        {{ errorMessage }}
+        <div v-html="errorMessage"></div>
       </div>
       
       <!-- 成功メッセージ -->
       <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-        {{ successMessage }}
+        <div v-html="successMessage"></div>
       </div>
       
       <form @submit.prevent="startStudySession" class="space-y-4">
@@ -107,10 +189,8 @@
           <select 
             v-model="selectedSubjectAreaId" 
             required
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
           >
             <option value="">分野を選択してください</option>
             <optgroup v-for="examType in examTypes" :key="examType.id" :label="examType.name">
@@ -131,10 +211,8 @@
           <textarea 
             v-model="studyComment"
             required
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="3"
             placeholder="今日学習する内容を簡単に記入してください"
           ></textarea>
@@ -144,13 +222,11 @@
         <button 
           type="submit" 
           :disabled="loading || !selectedSubjectAreaId || !studyComment.trim()"
-          class="w-full text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200"
+          class="w-full text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 hover:bg-blue-700 disabled:hover:bg-gray-400"
           :style="{
             backgroundColor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
             cursor: (loading || !selectedSubjectAreaId || !studyComment.trim()) ? 'not-allowed' : 'pointer'
           }"
-          onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
-          onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
         >
           {{ loading ? '開始中...' : '🎯 学習開始！' }}
         </button>
@@ -169,10 +245,8 @@
         <h2 class="text-lg font-semibold" style="color: var(--color-muted-blue-dark);">📚 最近の学習履歴</h2>
         <router-link 
           to="/history"
-          class="text-sm font-medium transition-colors"
+          class="text-sm font-medium transition-colors hover:text-blue-700"
           style="color: var(--color-muted-blue);"
-          onmouseover="this.style.color='var(--color-muted-blue-dark)'"
-          onmouseout="this.style.color='var(--color-muted-blue)'"
         >
           📋 すべて見る →
         </router-link>
@@ -187,7 +261,7 @@
       </div>
       
       <div v-else class="space-y-3">
-        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 transition-colors" style="border-color: var(--color-muted-gray);" onmouseover="this.style.backgroundColor='var(--color-muted-white)'" onmouseout="this.style.backgroundColor='white'">
+        <div v-for="session in recentSessions" :key="`${session.type}-${session.id}`" class="border rounded-lg p-4 transition-colors hover:bg-gray-50" style="border-color: var(--color-muted-gray);">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center gap-2">
@@ -208,10 +282,8 @@
               <button 
                 v-if="session.type === 'pomodoro_session'"
                 @click="openEditNotesModal(session)"
-                class="mt-1 text-xs transition-colors"
+                class="mt-1 text-xs transition-colors hover:text-blue-700"
                 style="color: var(--color-muted-blue);"
-                onmouseover="this.style.color='var(--color-muted-blue-dark)'"
-                onmouseout="this.style.color='var(--color-muted-blue)'"
                 title="メモ編集"
               >
                 ✏️ 編集
@@ -245,10 +317,8 @@
           <label class="block text-sm font-medium mb-2" style="color: var(--color-muted-blue-dark);">メモ</label>
           <textarea
             v-model="editNotesModal.notes"
-            class="w-full p-3 rounded-lg"
+            class="w-full p-3 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white;"
-            onfocus="this.style.borderColor='var(--color-muted-blue)'; this.style.boxShadow='0 0 0 2px var(--color-muted-blue-alpha)'"
-            onblur="this.style.borderColor='var(--color-muted-gray)'; this.style.boxShadow='none'"
             rows="4"
             placeholder="ポモドーロセッションでのメモを入力してください..."
           ></textarea>
@@ -257,24 +327,20 @@
         <div class="flex gap-3">
           <button
             @click="closeEditNotesModal"
-            class="flex-1 px-4 py-2 rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 rounded-lg transition-colors hover:bg-gray-600 hover:text-white"
             style="color: var(--color-muted-gray-dark); background-color: var(--color-muted-gray);"
-            onmouseover="this.style.backgroundColor='var(--color-muted-gray-dark)'"
-            onmouseout="this.style.backgroundColor='var(--color-muted-gray)'"
           >
             キャンセル
           </button>
           <button
             @click="saveNotes"
             :disabled="editNotesModal.saving"
-            class="flex-1 px-4 py-2 text-white rounded-lg transition-colors"
+            class="flex-1 px-4 py-2 text-white rounded-lg transition-colors hover:bg-blue-700 disabled:hover:bg-gray-400"
             :style="{
               backgroundColor: editNotesModal.saving ? 'var(--color-muted-gray)' : 'var(--color-muted-blue)',
               cursor: editNotesModal.saving ? 'not-allowed' : 'pointer',
               opacity: editNotesModal.saving ? '0.5' : '1'
             }"
-            onmouseover="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue-dark)'"
-            onmouseout="if (!this.disabled) this.style.backgroundColor='var(--color-muted-blue)'"
           >
             {{ editNotesModal.saving ? '保存中...' : '保存' }}
           </button>
@@ -285,7 +351,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import apiClient from '../utils/api.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
 
@@ -328,6 +394,16 @@ export default {
         notes: '',
         saving: false
       },
+      
+      // 将来ビジョン関連
+      futureVision: {
+        id: null,
+        text: '',
+        originalText: '', // キャンセル時の復元用
+        isEditing: false,
+        loading: false,
+        hasData: false
+      },
     }
   },
   
@@ -344,6 +420,43 @@ export default {
     
     isActive() {
       return this.globalStudyTimer.isActive
+    },
+
+    // 将来ビジョン保存ボタンの無効化条件
+    isVisionSaveDisabled() {
+      return this.futureVision.loading || 
+             this.futureVision.text.trim().length < 10 || 
+             this.futureVision.text.length > 2000 ||
+             this.hasDisallowedCharacters
+    },
+
+    // 不許可文字が含まれているかチェック（サーバーサイドバリデーションと同一ルール）
+    hasDisallowedCharacters() {
+      // 入力値が存在しない場合は問題なし
+      if (!this.futureVision.text || typeof this.futureVision.text !== 'string') {
+        return false
+      }
+      
+      // HTMLタグ形成文字とクォート文字をチェック（XSS対策）
+      const disallowedPatterns = [
+        /[<>&"']/, // HTMLタグ文字とクォート文字
+      ]
+      
+      // 複数のパターンをチェック
+      return disallowedPatterns.some(pattern => pattern.test(this.futureVision.text))
+    },
+
+    // 不許可文字の詳細情報を取得（デバッグ・エラー表示用）
+    getDisallowedCharacterDetails() {
+      if (!this.hasDisallowedCharacters) {
+        return null
+      }
+      
+      const checks = [
+        { pattern: /[<>&"']/, message: 'HTMLタグ文字・クォート文字（< > & " \')' , found: /[<>&"']/.test(this.futureVision.text) }
+      ]
+      
+      return checks.filter(check => check.found)
     }
   },
   
@@ -366,11 +479,26 @@ export default {
     
     // ページの visibility change イベントを監視（タブ切り替えやアプリ切り替え時の対応）
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
+    
+    // 将来ビジョンを読み込み
+    await this.loadFutureVision()
   },
   
   async activated() {
     // ページがアクティブになったときにデータを再取得（設定画面からの戻りなどで即座に反映）
     await this.loadDashboardData()
+    
+    // タイマーを再開（keep-aliveでは非アクティブ時にクリアされる）
+    if (!this.dashboardTimer) {
+      this.dashboardTimer = setInterval(() => {
+        this.loadDashboardData()
+      }, 30000)
+    }
+  },
+
+  deactivated() {
+    // keep-aliveでページが非アクティブになったときにタイマーを停止（メモリリーク防止）
+    this.clearTimers()
   },
   
   beforeUnmount() {
@@ -409,11 +537,7 @@ export default {
     // 試験タイプと学習分野を取得
     async loadExamTypes() {
       try {
-        const response = await axios.get('/api/user/exam-types', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/user/exam-types')
         this.examTypes = response.data.exam_types || []
       } catch (error) {
         console.error('試験タイプ取得エラー:', error)
@@ -425,11 +549,7 @@ export default {
     async checkGlobalStudyTimerSync() {
       try {
         console.log('ダッシュボード: グローバルタイマー同期チェック')
-        const response = await axios.get('/api/study-sessions/current', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/study-sessions/current')
         
         if (response.data.success && response.data.session) {
           // API側にアクティブセッションがあり、グローバルタイマーが動いていない場合
@@ -458,13 +578,9 @@ export default {
       
       this.loading = true
       try {
-        const response = await axios.post('/api/study-sessions/start', {
+        const response = await apiClient.post('/study-sessions/start', {
           subject_area_id: this.selectedSubjectAreaId,
           study_comment: this.studyComment
-        }, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
         })
         
         if (response.data.success) {
@@ -493,11 +609,7 @@ export default {
     async endStudySession() {
       this.loading = true
       try {
-        const response = await axios.post('/api/study-sessions/end', {}, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.post('/study-sessions/end')
         
         if (response.data.success) {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
@@ -523,11 +635,7 @@ export default {
     async loadDashboardData() {
       this.loadingDashboard = true
       try {
-        const response = await axios.get('/api/dashboard', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/dashboard')
         if (response.data.success) {
           const data = response.data.data
           
@@ -542,6 +650,10 @@ export default {
         }
       } catch (error) {
         console.error('ダッシュボードデータ取得エラー:', error)
+        if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
+        }
+        // 認証エラーの処理はapiClientのインターセプターで自動処理
       } finally {
         this.loadingDashboard = false
       }
@@ -609,12 +721,8 @@ export default {
       this.editNotesModal.saving = true
       
       try {
-        const response = await axios.put(`/api/pomodoro/${this.editNotesModal.session.id}`, {
+        const response = await apiClient.put(`/pomodoro/${this.editNotesModal.session.id}`, {
           notes: this.editNotesModal.notes
-        }, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
         })
         
         if (response.data.success) {
@@ -637,9 +745,16 @@ export default {
       }
     },
     
+    // HTMLエスケープ処理
+    escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    },
+
     // エラーメッセージ表示
     showError(message) {
-      this.errorMessage = message
+      this.errorMessage = this.escapeHtml(message)
       this.successMessage = ''
       setTimeout(() => {
         this.errorMessage = ''
@@ -648,7 +763,7 @@ export default {
     
     // 成功メッセージ表示
     showSuccess(message) {
-      this.successMessage = message
+      this.successMessage = this.escapeHtml(message)
       this.errorMessage = ''
       setTimeout(() => {
         this.successMessage = ''
@@ -680,6 +795,161 @@ export default {
         await this.loadDashboardData()
       }
     },
+
+    // ========== 将来ビジョン関連メソッド ==========
+    
+    // 将来ビジョンを読み込み
+    async loadFutureVision() {
+      this.futureVision.loading = true
+      try {
+        const response = await apiClient.get('/user/future-vision')
+        
+        if (response.status === 200 && response.data.success) {
+          this.futureVision.id = response.data.data.id
+          this.futureVision.text = response.data.data.vision_text
+          this.futureVision.originalText = response.data.data.vision_text // バックアップも更新
+          this.futureVision.hasData = true
+        } else {
+          // 204 No Content の場合
+          this.futureVision.id = null
+          this.futureVision.text = ''
+          this.futureVision.originalText = ''
+          this.futureVision.hasData = false
+        }
+      } catch (error) {
+        console.error('将来ビジョン読み込みエラー:', error)
+        if (error.response?.status !== 204) {
+          this.showError('将来のビジョンの読み込みに失敗しました')
+        }
+        this.futureVision.id = null
+        this.futureVision.text = ''
+        this.futureVision.originalText = ''
+        this.futureVision.hasData = false
+      } finally {
+        this.futureVision.loading = false
+      }
+    },
+    
+    // 将来ビジョンの保存
+    async saveFutureVision() {
+      if (this.futureVision.text.trim().length < 10) {
+        this.showError('将来のビジョンは10文字以上で入力してください')
+        return
+      }
+      
+      if (this.futureVision.text.length > 2000) {
+        this.showError('将来のビジョンは2000文字以内で入力してください')
+        return
+      }
+      
+      this.futureVision.loading = true
+      try {
+        const isUpdate = this.futureVision.hasData
+        const method = isUpdate ? 'put' : 'post'
+        
+        const response = await apiClient[method]('/user/future-vision', {
+          vision_text: this.futureVision.text
+        })
+        
+        if (response.data.success) {
+          this.futureVision.id = response.data.data.id
+          this.futureVision.originalText = this.futureVision.text // 保存後のテキストをバックアップ
+          this.futureVision.hasData = true
+          this.futureVision.isEditing = false
+          this.showSuccess(response.data.message)
+        } else {
+          this.showError(response.data.message || '保存に失敗しました')
+        }
+      } catch (error) {
+        console.error('将来ビジョン保存エラー:', error)
+        if (error.response?.data?.message) {
+          this.showError(error.response.data.message)
+        } else if (error.response?.data?.errors) {
+          // バリデーションエラーの場合
+          const errorMessages = Object.values(error.response.data.errors).flat()
+          this.showError(errorMessages.join('、'))
+        } else if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
+        } else {
+          this.showError('将来のビジョンの保存中にエラーが発生しました')
+        }
+      } finally {
+        this.futureVision.loading = false
+      }
+    },
+    
+    // 編集モード開始
+    startEditVision() {
+      // 編集開始時に現在のテキストをバックアップ（キャンセル時の復元用）
+      this.futureVision.originalText = this.futureVision.text
+      this.futureVision.isEditing = true
+    },
+    
+    // 編集キャンセル
+    cancelEditVision() {
+      this.futureVision.isEditing = false
+      // ネットワークコールなしで元のテキストを復元
+      this.futureVision.text = this.futureVision.originalText
+    },
+    
+    // 将来ビジョンの削除
+    async deleteFutureVision() {
+      if (!confirm('将来のビジョンを削除してもよろしいですか？')) {
+        return
+      }
+      
+      this.futureVision.loading = true
+      try {
+        const response = await apiClient.delete('/user/future-vision')
+        
+        if (response.data.success) {
+          this.futureVision.id = null
+          this.futureVision.text = ''
+          this.futureVision.originalText = ''
+          this.futureVision.hasData = false
+          this.futureVision.isEditing = false
+          this.showSuccess(response.data.message)
+        } else {
+          this.showError(response.data.message || '削除に失敗しました')
+        }
+      } catch (error) {
+        console.error('将来ビジョン削除エラー:', error)
+        if (error.response?.data?.message) {
+          this.showError(error.response.data.message)
+        } else if (error.code === 'ERR_NETWORK') {
+          this.showError('ネットワークエラーが発生しました。接続を確認してください。')
+        } else {
+          this.showError('将来のビジョンの削除中にエラーが発生しました')
+        }
+      } finally {
+        this.futureVision.loading = false
+      }
+    },
+
+    // ========== クライアントサイド入力制御メソッド ==========
+    
+    // キーボード入力時に無効な文字をブロック
+    preventDisallowedCharacters(event) {
+      const disallowedChars = ['<', '>', '&', '"', "'"]
+      if (disallowedChars.includes(event.key)) {
+        event.preventDefault()
+        return false
+      }
+    },
+
+    // 入力後に無効な文字を除去（ペーストやドラッグ&ドロップ対策）
+    sanitizeVisionText(event) {
+      const originalValue = event.target.value
+      const sanitizedValue = originalValue.replace(/[<>&"']/g, '')
+      
+      if (originalValue !== sanitizedValue) {
+        this.futureVision.text = sanitizedValue
+        // カーソル位置を調整
+        this.$nextTick(() => {
+          event.target.value = sanitizedValue
+        })
+      }
+    }
 
   }
 }

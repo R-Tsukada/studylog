@@ -15,7 +15,11 @@ class StudyManagementIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function complete_study_management_workflow()
     {
         // 1. ユーザー登録
@@ -123,7 +127,11 @@ class StudyManagementIntegrationTest extends TestCase
         $this->assertNotContains('プログラミング', $finalSubjectNames);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function user_data_isolation_works_correctly()
     {
         // 2人のユーザーを作成
@@ -201,7 +209,11 @@ class StudyManagementIntegrationTest extends TestCase
         $unauthorizedDeleteResponse->assertStatus(404);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function system_data_and_user_data_coexistence()
     {
         $user = User::factory()->create();
@@ -281,7 +293,11 @@ class StudyManagementIntegrationTest extends TestCase
         $deleteSystemSubjectResponse->assertStatus(404); // ユーザーの所有物として見つからない
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function cascade_deletion_protection_works()
     {
         $user = User::factory()->create();
