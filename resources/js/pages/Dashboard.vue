@@ -349,6 +349,7 @@
 
 <script>
 import axios from 'axios'
+import apiClient from '../utils/api.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
 
@@ -460,6 +461,18 @@ export default {
   async activated() {
     // ページがアクティブになったときにデータを再取得（設定画面からの戻りなどで即座に反映）
     await this.loadDashboardData()
+    
+    // タイマーを再開（keep-aliveでは非アクティブ時にクリアされる）
+    if (!this.dashboardTimer) {
+      this.dashboardTimer = setInterval(() => {
+        this.loadDashboardData()
+      }, 30000)
+    }
+  },
+
+  deactivated() {
+    // keep-aliveでページが非アクティブになったときにタイマーを停止（メモリリーク防止）
+    this.clearTimers()
   },
   
   beforeUnmount() {
@@ -633,11 +646,8 @@ export default {
         console.error('ダッシュボードデータ取得エラー:', error)
         if (error.code === 'ERR_NETWORK') {
           this.showError('ネットワークエラーが発生しました。接続を確認してください。')
-        } else if (error.response?.status === 401) {
-          // 認証エラーの場合はログイン画面にリダイレクト
-          localStorage.removeItem('auth_token')
-          this.$router.push('/login')
         }
+        // 認証エラーの処理はapiClientのインターセプターで自動処理
       } finally {
         this.loadingDashboard = false
       }
@@ -783,11 +793,7 @@ export default {
     async loadFutureVision() {
       this.futureVision.loading = true
       try {
-        const response = await axios.get('/api/user/future-vision', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/user/future-vision')
         
         if (response.status === 200 && response.data.success) {
           this.futureVision.id = response.data.data.id
@@ -829,12 +835,8 @@ export default {
         const isUpdate = this.futureVision.hasData
         const method = isUpdate ? 'put' : 'post'
         
-        const response = await axios[method]('/api/user/future-vision', {
+        const response = await apiClient[method]('/user/future-vision', {
           vision_text: this.futureVision.text
-        }, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
         })
         
         if (response.data.success) {
@@ -887,11 +889,7 @@ export default {
       
       this.futureVision.loading = true
       try {
-        const response = await axios.delete('/api/user/future-vision', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.delete('/user/future-vision')
         
         if (response.data.success) {
           this.futureVision.id = null
