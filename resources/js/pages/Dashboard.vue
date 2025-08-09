@@ -60,6 +60,8 @@
         <div v-else class="space-y-4">
           <textarea
             v-model="futureVision.text"
+            @input="sanitizeVisionText"
+            @keypress="preventDisallowedCharacters"
             class="w-full p-4 rounded-lg resize-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
             style="border: 1px solid var(--color-muted-gray); background-color: white; min-height: 120px;"
             :placeholder="futureVision.hasData ? '将来のビジョンを編集してください...' : '資格を取得した後、どんな自分になりたいですか？将来のビジョンを描いてみましょう...'"
@@ -349,7 +351,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import apiClient from '../utils/api.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
@@ -536,11 +537,7 @@ export default {
     // 試験タイプと学習分野を取得
     async loadExamTypes() {
       try {
-        const response = await axios.get('/api/user/exam-types', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/user/exam-types')
         this.examTypes = response.data.exam_types || []
       } catch (error) {
         console.error('試験タイプ取得エラー:', error)
@@ -552,11 +549,7 @@ export default {
     async checkGlobalStudyTimerSync() {
       try {
         console.log('ダッシュボード: グローバルタイマー同期チェック')
-        const response = await axios.get('/api/study-sessions/current', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/study-sessions/current')
         
         if (response.data.success && response.data.session) {
           // API側にアクティブセッションがあり、グローバルタイマーが動いていない場合
@@ -585,13 +578,9 @@ export default {
       
       this.loading = true
       try {
-        const response = await axios.post('/api/study-sessions/start', {
+        const response = await apiClient.post('/study-sessions/start', {
           subject_area_id: this.selectedSubjectAreaId,
           study_comment: this.studyComment
-        }, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
         })
         
         if (response.data.success) {
@@ -620,11 +609,7 @@ export default {
     async endStudySession() {
       this.loading = true
       try {
-        const response = await axios.post('/api/study-sessions/end', {}, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.post('/study-sessions/end')
         
         if (response.data.success) {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
@@ -650,11 +635,7 @@ export default {
     async loadDashboardData() {
       this.loadingDashboard = true
       try {
-        const response = await axios.get('/api/dashboard', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
-        })
+        const response = await apiClient.get('/dashboard')
         if (response.data.success) {
           const data = response.data.data
           
@@ -740,12 +721,8 @@ export default {
       this.editNotesModal.saving = true
       
       try {
-        const response = await axios.put(`/api/pomodoro/${this.editNotesModal.session.id}`, {
+        const response = await apiClient.put(`/pomodoro/${this.editNotesModal.session.id}`, {
           notes: this.editNotesModal.notes
-        }, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-          }
         })
         
         if (response.data.success) {
@@ -946,6 +923,31 @@ export default {
         }
       } finally {
         this.futureVision.loading = false
+      }
+    },
+
+    // ========== クライアントサイド入力制御メソッド ==========
+    
+    // キーボード入力時に無効な文字をブロック
+    preventDisallowedCharacters(event) {
+      const disallowedChars = ['<', '>', '&', '"', "'"]
+      if (disallowedChars.includes(event.key)) {
+        event.preventDefault()
+        return false
+      }
+    },
+
+    // 入力後に無効な文字を除去（ペーストやドラッグ&ドロップ対策）
+    sanitizeVisionText(event) {
+      const originalValue = event.target.value
+      const sanitizedValue = originalValue.replace(/[<>&"']/g, '')
+      
+      if (originalValue !== sanitizedValue) {
+        this.futureVision.text = sanitizedValue
+        // カーソル位置を調整
+        this.$nextTick(() => {
+          event.target.value = sanitizedValue
+        })
       }
     }
 
