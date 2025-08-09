@@ -64,6 +64,7 @@
             style="border: 1px solid var(--color-muted-gray); background-color: white; min-height: 120px;"
             :placeholder="futureVision.hasData ? '将来のビジョンを編集してください...' : '資格を取得した後、どんな自分になりたいですか？将来のビジョンを描いてみましょう...'"
             rows="6"
+            maxlength="2000"
           ></textarea>
           <div class="flex justify-between items-center">
             <div class="text-xs text-gray-500">
@@ -71,7 +72,7 @@
               <span class="ml-2 text-red-500" v-if="futureVision.text.trim().length < 10">
                 ({{ futureVision.text.trim().length }}文字 - 10文字以上必要)
               </span>
-              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters()">
+              <span class="ml-2 text-red-500" v-if="hasDisallowedCharacters">
                 (使用できない文字が含まれています: < >)
               </span>
             </div>
@@ -171,12 +172,12 @@
       
       <!-- エラーメッセージ -->
       <div v-if="errorMessage" class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-        {{ errorMessage }}
+        <div v-html="errorMessage"></div>
       </div>
       
       <!-- 成功メッセージ -->
       <div v-if="successMessage" class="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-        {{ successMessage }}
+        <div v-html="successMessage"></div>
       </div>
       
       <form @submit.prevent="startStudySession" class="space-y-4">
@@ -258,7 +259,7 @@
       </div>
       
       <div v-else class="space-y-3">
-        <div v-for="(session, index) in recentSessions" :key="index" class="border rounded-lg p-4 transition-colors hover:bg-gray-50" style="border-color: var(--color-muted-gray);">
+        <div v-for="session in recentSessions" :key="`${session.type}-${session.id}`" class="border rounded-lg p-4 transition-colors hover:bg-gray-50" style="border-color: var(--color-muted-gray);">
           <div class="flex justify-between items-start">
             <div class="flex-1">
               <div class="flex items-center gap-2">
@@ -397,6 +398,7 @@ export default {
       futureVision: {
         id: null,
         text: '',
+        originalText: '', // キャンセル時の復元用
         isEditing: false,
         loading: false,
         hasData: false
@@ -424,7 +426,7 @@ export default {
       return this.futureVision.loading || 
              this.futureVision.text.trim().length < 10 || 
              this.futureVision.text.length > 2000 ||
-             this.hasDisallowedCharacters()
+             this.hasDisallowedCharacters
     },
 
     // 不許可文字が含まれているかチェック
@@ -743,9 +745,16 @@ export default {
       }
     },
     
+    // HTMLエスケープ処理
+    escapeHtml(text) {
+      const div = document.createElement('div')
+      div.textContent = text
+      return div.innerHTML
+    },
+
     // エラーメッセージ表示
     showError(message) {
-      this.errorMessage = message
+      this.errorMessage = this.escapeHtml(message)
       this.successMessage = ''
       setTimeout(() => {
         this.errorMessage = ''
@@ -754,7 +763,7 @@ export default {
     
     // 成功メッセージ表示
     showSuccess(message) {
-      this.successMessage = message
+      this.successMessage = this.escapeHtml(message)
       this.errorMessage = ''
       setTimeout(() => {
         this.successMessage = ''
@@ -798,11 +807,13 @@ export default {
         if (response.status === 200 && response.data.success) {
           this.futureVision.id = response.data.data.id
           this.futureVision.text = response.data.data.vision_text
+          this.futureVision.originalText = response.data.data.vision_text // バックアップも更新
           this.futureVision.hasData = true
         } else {
           // 204 No Content の場合
           this.futureVision.id = null
           this.futureVision.text = ''
+          this.futureVision.originalText = ''
           this.futureVision.hasData = false
         }
       } catch (error) {
@@ -812,6 +823,7 @@ export default {
         }
         this.futureVision.id = null
         this.futureVision.text = ''
+        this.futureVision.originalText = ''
         this.futureVision.hasData = false
       } finally {
         this.futureVision.loading = false
@@ -841,6 +853,7 @@ export default {
         
         if (response.data.success) {
           this.futureVision.id = response.data.data.id
+          this.futureVision.originalText = this.futureVision.text // 保存後のテキストをバックアップ
           this.futureVision.hasData = true
           this.futureVision.isEditing = false
           this.showSuccess(response.data.message)
@@ -867,18 +880,16 @@ export default {
     
     // 編集モード開始
     startEditVision() {
+      // 編集開始時に現在のテキストをバックアップ（キャンセル時の復元用）
+      this.futureVision.originalText = this.futureVision.text
       this.futureVision.isEditing = true
     },
     
     // 編集キャンセル
     cancelEditVision() {
       this.futureVision.isEditing = false
-      // データがある場合は元のテキストに戻す
-      if (this.futureVision.hasData) {
-        this.loadFutureVision()
-      } else {
-        this.futureVision.text = ''
-      }
+      // ネットワークコールなしで元のテキストを復元
+      this.futureVision.text = this.futureVision.originalText
     },
     
     // 将来ビジョンの削除
@@ -894,6 +905,7 @@ export default {
         if (response.data.success) {
           this.futureVision.id = null
           this.futureVision.text = ''
+          this.futureVision.originalText = ''
           this.futureVision.hasData = false
           this.futureVision.isEditing = false
           this.showSuccess(response.data.message)

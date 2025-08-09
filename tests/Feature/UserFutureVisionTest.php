@@ -47,8 +47,7 @@ class UserFutureVisionTest extends TestCase
         $response = $this->actingAs($this->user, 'sanctum')
             ->getJson('/api/user/future-vision');
 
-        $response->assertStatus(204);
-        // 204 No Content はレスポンスボディを持たない
+        $response->assertNoContent();
     }
 
     public function test_cannot_get_future_vision_without_authentication(): void
@@ -287,5 +286,22 @@ class UserFutureVisionTest extends TestCase
                 'success' => false,
                 'message' => '削除対象の将来のビジョンが見つかりません。',
             ]);
+    }
+
+    public function test_rate_limit_on_future_vision_endpoints(): void
+    {
+        // レートリミット（10回/分）をテスト
+        for ($i = 0; $i < 11; $i++) {
+            $response = $this->actingAs($this->user, 'sanctum')
+                ->getJson('/api/user/future-vision');
+
+            if ($i < 10) {
+                // 最初の10回は成功またはNoContent
+                $this->assertTrue(in_array($response->status(), [200, 204]));
+            } else {
+                // 11回目はレートリミット
+                $response->assertStatus(429);
+            }
+        }
     }
 }
