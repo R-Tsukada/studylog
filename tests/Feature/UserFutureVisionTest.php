@@ -38,7 +38,7 @@ class UserFutureVisionTest extends TestCase
                     'id' => $vision->id,
                     'user_id' => $this->user->id,
                     'vision_text' => '資格を取得して、チームリーダーになる',
-                ]
+                ],
             ]);
     }
 
@@ -66,7 +66,7 @@ class UserFutureVisionTest extends TestCase
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
-                'vision_text' => $visionText
+                'vision_text' => $visionText,
             ]);
 
         $response->assertStatus(201)
@@ -76,7 +76,7 @@ class UserFutureVisionTest extends TestCase
                 'data' => [
                     'user_id' => $this->user->id,
                     'vision_text' => $visionText,
-                ]
+                ],
             ]);
 
         $this->assertDatabaseHas('user_future_visions', [
@@ -94,13 +94,13 @@ class UserFutureVisionTest extends TestCase
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
-                'vision_text' => '新しいビジョンテキストを10文字以上で入力'
+                'vision_text' => '新しいビジョンテキストを10文字以上で入力',
             ]);
 
         $response->assertStatus(409)
             ->assertJson([
                 'success' => false,
-                'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。'
+                'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。',
             ]);
     }
 
@@ -116,7 +116,7 @@ class UserFutureVisionTest extends TestCase
         // 最小文字数チェック
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
-                'vision_text' => '短い'
+                'vision_text' => '短い',
             ]);
 
         $response->assertStatus(422)
@@ -125,7 +125,7 @@ class UserFutureVisionTest extends TestCase
         // 最大文字数チェック
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
-                'vision_text' => str_repeat('あ', 2001)
+                'vision_text' => str_repeat('あ', 2001),
             ]);
 
         $response->assertStatus(422)
@@ -134,7 +134,7 @@ class UserFutureVisionTest extends TestCase
         // HTML特殊文字チェック
         $response = $this->actingAs($this->user, 'sanctum')
             ->postJson('/api/user/future-vision', [
-                'vision_text' => 'テスト<script>alert("xss")</script>'
+                'vision_text' => 'テスト<script>alert("xss")</script>',
             ]);
 
         $response->assertStatus(422)
@@ -154,7 +154,7 @@ class UserFutureVisionTest extends TestCase
 
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson('/api/user/future-vision', [
-                'vision_text' => $newVisionText
+                'vision_text' => $newVisionText,
             ]);
 
         $response->assertStatus(200)
@@ -165,7 +165,7 @@ class UserFutureVisionTest extends TestCase
                     'id' => $vision->id,
                     'user_id' => $this->user->id,
                     'vision_text' => $newVisionText,
-                ]
+                ],
             ]);
 
         $this->assertDatabaseHas('user_future_visions', [
@@ -178,13 +178,13 @@ class UserFutureVisionTest extends TestCase
     {
         $response = $this->actingAs($this->user, 'sanctum')
             ->putJson('/api/user/future-vision', [
-                'vision_text' => '更新テストで10文字以上にする'
+                'vision_text' => '更新テストで10文字以上にする',
             ]);
 
         $response->assertStatus(404)
             ->assertJson([
                 'success' => false,
-                'message' => '更新対象の将来のビジョンが見つかりません。'
+                'message' => '更新対象の将来のビジョンが見つかりません。',
             ]);
     }
 
@@ -203,7 +203,7 @@ class UserFutureVisionTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => '将来のビジョンを削除しました'
+                'message' => '将来のビジョンを削除しました',
             ]);
 
         $this->assertDatabaseMissing('user_future_visions', [
@@ -219,7 +219,7 @@ class UserFutureVisionTest extends TestCase
         $response->assertStatus(404)
             ->assertJson([
                 'success' => false,
-                'message' => '削除対象の将来のビジョンが見つかりません。'
+                'message' => '削除対象の将来のビジョンが見つかりません。',
             ]);
     }
 }

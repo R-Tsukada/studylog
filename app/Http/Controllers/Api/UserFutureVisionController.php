@@ -16,14 +16,14 @@ class UserFutureVisionController extends Controller
     public function show(Request $request): JsonResponse
     {
         $vision = $request->user()->userFutureVision;
-        
-        if (!$vision) {
+
+        if (! $vision) {
             return response()->json([], 204); // 204はボディなし
         }
-        
+
         return response()->json([
             'success' => true,
-            'data' => $vision
+            'data' => $vision,
         ], 200);
     }
 
@@ -33,24 +33,24 @@ class UserFutureVisionController extends Controller
     public function store(UserFutureVisionRequest $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // 既存のビジョンがある場合は409 Conflictを返す
         if ($user->userFutureVision) {
             return response()->json([
                 'success' => false,
-                'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。'
+                'message' => '将来のビジョンは既に登録されています。更新する場合はPUTメソッドを使用してください。',
             ], 409);
         }
 
         $vision = UserFutureVision::create([
             'user_id' => $user->id,
-            'vision_text' => $request->validated()['vision_text']
+            'vision_text' => $request->validated()['vision_text'],
         ]);
 
         return response()->json([
             'success' => true,
             'message' => '将来のビジョンを保存しました',
-            'data' => $vision
+            'data' => $vision,
         ], 201);
     }
 
@@ -61,22 +61,22 @@ class UserFutureVisionController extends Controller
     {
         $user = $request->user();
         $vision = $user->userFutureVision;
-        
-        if (!$vision) {
+
+        if (! $vision) {
             return response()->json([
                 'success' => false,
-                'message' => '更新対象の将来のビジョンが見つかりません。'
+                'message' => '更新対象の将来のビジョンが見つかりません。',
             ], 404);
         }
 
         $vision->update([
-            'vision_text' => $request->validated()['vision_text']
+            'vision_text' => $request->validated()['vision_text'],
         ]);
 
         return response()->json([
             'success' => true,
             'message' => '将来のビジョンを更新しました',
-            'data' => $vision->fresh()
+            'data' => $vision->fresh(),
         ]);
     }
 
@@ -87,11 +87,11 @@ class UserFutureVisionController extends Controller
     {
         $user = $request->user();
         $vision = $user->userFutureVision;
-        
-        if (!$vision) {
+
+        if (! $vision) {
             return response()->json([
                 'success' => false,
-                'message' => '削除対象の将来のビジョンが見つかりません。'
+                'message' => '削除対象の将来のビジョンが見つかりません。',
             ], 404);
         }
 
@@ -99,7 +99,7 @@ class UserFutureVisionController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => '将来のビジョンを削除しました'
+            'message' => '将来のビジョンを削除しました',
         ]);
     }
 }

@@ -14,7 +14,7 @@ class UserFutureVisionTest extends TestCase
     public function test_user_future_vision_can_be_created()
     {
         $user = User::factory()->create();
-        
+
         $futureVision = UserFutureVision::create([
             'user_id' => $user->id,
             'vision_text' => 'SnÆ¹ÈoenÓ¸çó’\gM‹Sh’ºW~Y',
@@ -53,7 +53,7 @@ class UserFutureVisionTest extends TestCase
 
     public function test_user_future_vision_has_correct_fillable_fields()
     {
-        $futureVision = new UserFutureVision();
+        $futureVision = new UserFutureVision;
         $expectedFillable = [
             'user_id',
             'vision_text',
@@ -64,7 +64,7 @@ class UserFutureVisionTest extends TestCase
 
     public function test_user_future_vision_has_correct_table_name()
     {
-        $futureVision = new UserFutureVision();
+        $futureVision = new UserFutureVision;
         $this->assertEquals('user_future_visions', $futureVision->getTable());
     }
 
