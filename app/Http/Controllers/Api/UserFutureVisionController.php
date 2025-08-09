@@ -17,10 +17,14 @@ class UserFutureVisionController extends Controller
     {
         $vision = $request->user()->userFutureVision;
         
+        if (!$vision) {
+            return response()->json([], 204); // 204はボディなし
+        }
+        
         return response()->json([
             'success' => true,
             'data' => $vision
-        ], $vision ? 200 : 204);
+        ], 200);
     }
 
     /**
