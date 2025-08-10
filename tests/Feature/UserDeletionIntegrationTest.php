@@ -18,7 +18,11 @@ class UserDeletionIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function complete_user_deletion_workflow()
     {
         // 完全なユーザーデータセットを作成
@@ -110,7 +114,11 @@ class UserDeletionIntegrationTest extends TestCase
         $this->assertEquals(0, DailyStudySummary::where('user_id', $user->id)->count());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function user_deletion_does_not_affect_other_users_data()
     {
         // 削除対象ユーザー
@@ -172,7 +180,11 @@ class UserDeletionIntegrationTest extends TestCase
         $this->assertEquals(5, StudySession::where('user_id', $otherUser->id)->count());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function system_data_is_preserved_during_user_deletion()
     {
         $user = User::factory()->create([
@@ -223,7 +235,11 @@ class UserDeletionIntegrationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function google_user_deletion_workflow()
     {
         $googleUser = User::factory()->create([
@@ -256,7 +272,11 @@ class UserDeletionIntegrationTest extends TestCase
         $this->assertEquals(0, StudySession::where('user_id', $googleUser->id)->count());
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function user_deletion_with_mixed_data_types()
     {
         $user = User::factory()->create([
@@ -324,7 +344,11 @@ class UserDeletionIntegrationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function user_deletion_performance_with_large_dataset()
     {
         $user = User::factory()->create([

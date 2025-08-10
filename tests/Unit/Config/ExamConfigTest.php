@@ -6,9 +6,13 @@ use Tests\TestCase;
 
 class ExamConfigTest extends TestCase
 {
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function exam_config_has_required_structure()
     {
         $config = config('exams');
@@ -20,9 +24,13 @@ class ExamConfigTest extends TestCase
         $this->assertArrayHasKey('categories', $config);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function exam_types_have_required_fields()
     {
         $examTypes = config('exams.types');
@@ -44,9 +52,13 @@ class ExamConfigTest extends TestCase
         }
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function validation_config_has_required_values()
     {
         $validation = config('exams.validation');
@@ -70,9 +82,13 @@ class ExamConfigTest extends TestCase
         $this->assertLessThanOrEqual(50, $validation['max_custom_subjects']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function subjects_config_matches_exam_types()
     {
         $examTypes = array_keys(config('exams.types'));
@@ -85,9 +101,13 @@ class ExamConfigTest extends TestCase
         }
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function required_exam_types_are_present()
     {
         $examTypes = array_keys(config('exams.types'));

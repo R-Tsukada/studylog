@@ -11,9 +11,13 @@ class OnboardingCompleteRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 基本的なバリデーションルールが正しく設定されている()
     {
         $request = new OnboardingCompleteRequest;
@@ -30,9 +34,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step', $rules);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function step_data_setup_stepのバリデーションルールが正しく設定されている()
     {
         $request = new OnboardingCompleteRequest;
@@ -50,9 +58,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_notes', $rules);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 有効なstep_dataが受け入れられる()
     {
         $validData = [
@@ -73,9 +85,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function カスタム試験データが有効な場合に受け入れられる()
     {
         $validData = [
@@ -100,9 +116,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 試験日が過去の場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -120,9 +140,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.exam_date', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function 学習時間が無効な値の場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -140,9 +164,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.daily_goal_minutes', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function カスタム試験名が長すぎる場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -160,9 +188,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_name', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function カスタム試験カラーが無効な形式の場合にバリデーションエラーになる()
     {
         $invalidData = [
@@ -180,9 +212,13 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_color', $validator->errors()->toArray());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      */
+    #[Test]
     public function step_dataが空でも受け入れられる()
     {
         $validData = [

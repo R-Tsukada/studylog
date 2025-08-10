@@ -46,10 +46,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->controller = new DashboardController;
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 学習セッションのみが存在する場合の最近の学習履歴取得
      */
+    #[Test]
     public function 学習セッションのみの場合の最近の学習履歴が正しく取得されること()
     {
         // 学習セッションを3つ作成
@@ -88,10 +92,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('学習セッション0のメモ', $firstSession['notes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * ポモドーロセッションのみが存在する場合の最近の学習履歴取得
      */
+    #[Test]
     public function ポモドーロセッションのみの場合の最近の学習履歴が正しく取得されること()
     {
         // ポモドーロセッションを2つ作成
@@ -131,10 +139,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('ポモドーロ0のメモ', $firstSession['notes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 学習セッションとポモドーロセッションが混在する場合の時系列順表示
      */
+    #[Test]
     public function 学習セッションとポモドーロセッションが時系列順で正しく表示されること()
     {
         // 時系列データを作成（新しい順）
@@ -180,10 +192,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('古い学習セッションメモ', $data['recent_subjects'][1]['notes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 5件制限の確認
      */
+    #[Test]
     public function 最近の学習履歴が5件に制限されること()
     {
         // 学習セッションを4つ作成
@@ -223,10 +239,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertCount(5, $data['recent_subjects']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 未完了のポモドーロセッションは表示されないこと
      */
+    #[Test]
     public function 未完了のポモドーロセッションは表示されないこと()
     {
         // 完了したポモドーロセッション
@@ -275,10 +295,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals(25, $data['recent_subjects'][0]['duration_minutes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 他のユーザーのデータは表示されないこと
      */
+    #[Test]
     public function 他のユーザーのデータは表示されないこと()
     {
         $otherUser = User::factory()->create();
@@ -329,10 +353,14 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals(30, $data['recent_subjects'][0]['duration_minutes']);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * subject_area_idがnullのポモドーロセッションの表示
      */
+    #[Test]
     public function subject_area_idがnullのポモドーロセッションも正しく表示されること()
     {
         // subject_area_idがnullのポモドーロセッション

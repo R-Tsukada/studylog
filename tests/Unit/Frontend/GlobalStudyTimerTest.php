@@ -9,6 +9,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+
+use PHPUnit\Framework\Attributes\Test;
+
 /**
  * グローバル時間計測タイマーのテストクラス
  *
@@ -35,10 +38,14 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * グローバルタイマーの基本的な状態管理をテスト
      */
+    #[Test]
     public function グローバル時間計測タイマーの基本状態をテスト()
     {
         // 認証
@@ -101,10 +108,14 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * グローバルタイマーの時間計算精度をテスト
      */
+    #[Test]
     public function グローバルタイマーの時間計算精度をテスト()
     {
         $this->actingAs($this->user);
@@ -137,10 +148,14 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertLessThan(5, $elapsedMinutes); // 5分未満であること
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 複数セッション開始の防止をテスト
      */
+    #[Test]
     public function 複数セッション開始の防止をテスト()
     {
         $this->actingAs($this->user);
@@ -168,10 +183,14 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * グローバルタイマー状態の復元シナリオをテスト
      */
+    #[Test]
     public function グローバルタイマー状態復元シナリオをテスト()
     {
         $this->actingAs($this->user);
@@ -201,10 +220,14 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertArrayHasKey('exam_type_name', $session);
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * セッション終了時のデータ整合性をテスト
      */
+    #[Test]
     public function セッション終了時のデータ整合性をテスト()
     {
         $this->actingAs($this->user);
@@ -240,10 +263,14 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertFalse($session->isActive());
     }
 
-    /**
-     * @test
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/**
+     * テストメソッド
      * 認証エラー時の処理をテスト
      */
+    #[Test]
     public function 認証エラー時の処理をテスト()
     {
         // 認証なしでAPI呼び出し

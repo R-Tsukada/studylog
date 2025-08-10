@@ -31,7 +31,11 @@ class MyPageTest extends TestCase
         return User::factory()->create($data);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_access_user_information_for_mypage()
     {
         $user = $this->createTestUser();
@@ -54,7 +58,11 @@ class MyPageTest extends TestCase
         $this->assertFalse($response->json('user.is_google_user'));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_identifies_google_users_correctly()
     {
         $googleUser = $this->createTestUser(true);
@@ -71,7 +79,11 @@ class MyPageTest extends TestCase
         }
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_update_user_profile_nickname_and_email()
     {
         $user = $this->createTestUser();
@@ -101,7 +113,11 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_update_user_password()
     {
         $user = $this->createTestUser();
@@ -127,7 +143,11 @@ class MyPageTest extends TestCase
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_validates_profile_update_data()
     {
         $user = $this->createTestUser();
@@ -170,7 +190,11 @@ class MyPageTest extends TestCase
             ->assertJsonValidationErrors(['password']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_prevents_duplicate_email_during_profile_update()
     {
         $user1 = $this->createTestUser();
@@ -187,7 +211,11 @@ class MyPageTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_allows_keeping_same_email_during_profile_update()
     {
         $user = $this->createTestUser();
@@ -202,7 +230,11 @@ class MyPageTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_regular_user_account_with_password()
     {
         $user = $this->createTestUser();
@@ -223,7 +255,11 @@ class MyPageTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
         $googleUser = $this->createTestUser(true);
@@ -243,7 +279,11 @@ class MyPageTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
         $user = $this->createTestUser();
@@ -262,7 +302,11 @@ class MyPageTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_requires_authentication_for_mypage_endpoints()
     {
         // 認証なしでユーザー情報取得
@@ -283,7 +327,11 @@ class MyPageTest extends TestCase
         $response->assertStatus(401);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
         $user = $this->createTestUser();
@@ -318,7 +366,11 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_handles_profile_update_for_google_users()
     {
         $googleUser = $this->createTestUser(true);
@@ -341,7 +393,11 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    /** @test */
+    
+use PHPUnit\Framework\Attributes\Test;
+
+/** @test */
+    #[Test]
     public function it_maintains_data_integrity_during_profile_updates()
     {
         $user = $this->createTestUser();
