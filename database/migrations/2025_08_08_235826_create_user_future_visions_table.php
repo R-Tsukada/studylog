@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->comment('ユーザーID');
             $table->text('vision_text')->comment('将来のビジョンテキスト');
             $table->timestamps();
-
-            $table->index('user_id', 'idx_user_future_visions_user_id');
         });
     }
 

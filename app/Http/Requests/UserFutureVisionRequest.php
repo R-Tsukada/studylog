@@ -23,6 +23,7 @@ class UserFutureVisionRequest extends FormRequest
     {
         return [
             'vision_text' => [
+                'bail',
                 'required',
                 'string',
                 'min:10',                    // 意味ある文章として最低限の長さ
