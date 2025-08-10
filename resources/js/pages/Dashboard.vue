@@ -351,7 +351,7 @@
 </template>
 
 <script>
-import apiClient from '../utils/api.js'
+import apiClient from '../utils/ApiClient.js'
 import { createFutureVisionValidator } from '../utils/textValidator.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
@@ -500,12 +500,13 @@ export default {
     // ページがアクティブになったときにデータを再取得（設定画面からの戻りなどで即座に反映）
     await this.loadDashboardData()
     
-    // タイマーを再開（keep-aliveでは非アクティブ時にクリアされる）
-    if (!this.dashboardTimer) {
-      this.dashboardTimer = setInterval(() => {
-        this.loadDashboardData()
-      }, 30000)
-    }
+    // 既存のタイマーを確実にクリア（重複防止）
+    this.clearTimers()
+    
+    // タイマーを再開
+    this.dashboardTimer = setInterval(() => {
+      this.loadDashboardData()
+    }, 30000)
   },
 
   deactivated() {

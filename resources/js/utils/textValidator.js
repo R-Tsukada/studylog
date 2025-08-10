@@ -145,12 +145,15 @@ export class TextValidator {
     const chars = new Set()
     
     for (const rule of this.rules) {
-      // 単純な文字パターンから文字を抽出
-      const pattern = rule.pattern.source || rule.pattern.toString()
-      const simpleChars = pattern.match(/[\w\s<>&"']/g)
-      
-      if (simpleChars) {
-        simpleChars.forEach(char => chars.add(char))
+      // ルール名に基づいて直接文字を指定（正規表現解析より確実）
+      if (rule.name === 'html_tags') {
+        chars.add('<')
+        chars.add('>')
+      } else if (rule.name === 'html_entities') {
+        chars.add('&')
+      } else if (rule.name === 'quotes') {
+        chars.add('"')
+        chars.add("'")
       }
     }
 
