@@ -793,16 +793,18 @@ export default {
     // ========== 自動開始管理メソッド ==========
     
     // 自動開始をスケジュール
-    scheduleAutoStart(nextSession, delayMs = POMODORO_CONSTANTS.AUTO_START_DELAY_MS) {
+    scheduleAutoStart(next, delayMs = POMODORO_CONSTANTS.AUTO_START_DELAY_MS) {
       // 既存の自動開始をクリア
       this.clearAutoStart()
       
       this.autoStartState.isPending = true
-      this.autoStartState.pendingSession = nextSession
+      // Accept either a session object or a callback that will start the next session
+      this.autoStartState.pendingSession = next
       this.autoStartState.startTime = Date.now() + delayMs
       this.autoStartState.remainingMs = delayMs
       
-      console.log(`自動開始スケジュール: ${nextSession.session_type} (${delayMs}ms後)`)
+      const typeLabel = typeof next === 'function' ? 'callback' : next?.session_type
+      console.log(`自動開始スケジュール: ${typeLabel} (${delayMs}ms後)`)
       
       this.autoStartState.timeoutId = setTimeout(() => {
         this.executeAutoStart()
@@ -812,14 +814,25 @@ export default {
     // 自動開始を実行
     executeAutoStart() {
       if (this.autoStartState.isPending && this.autoStartState.pendingSession) {
-        const session = this.autoStartState.pendingSession
-        console.log('自動開始実行:', session.session_type)
+        const pending = this.autoStartState.pendingSession
+        const typeLabel = typeof pending === 'function' ? 'callback' : pending?.session_type
+        console.log('自動開始実行:', typeLabel)
+        
+        // セッションを開始（既に稼働中ならスキップ）
+        if (this.globalPomodoroTimer?.isActive) {
+          console.log('自動開始スキップ: 既にタイマーが稼働中')
+          return
+        }
         
         // 状態をクリア
         this.clearAutoStart()
         
         // セッションを開始
-        this.startGlobalPomodoroTimer(session)
+        if (typeof pending === 'function') {
+          pending()
+        } else {
+          this.startGlobalPomodoroTimer(pending)
+        }
       }
     },
     
