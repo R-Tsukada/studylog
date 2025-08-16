@@ -24,7 +24,7 @@ export default {
   },
   
   // セットアップファイル
-  setupFilesAfterEnv: ['<rootDir>/tests/setup-vue.js'],
+  setupFilesAfterEnv: [],
   
   // 変換設定 - Babel使用 + Vue.jsファイル対応
   transform: {
