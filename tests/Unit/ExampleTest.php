@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 class ExampleTest extends TestCase
 {
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * A basic test example.

@@ -4,11 +4,11 @@ namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExampleTest extends TestCase
 {
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * A basic test example.

@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class StudySessionTest extends TestCase
 {
@@ -21,7 +22,6 @@ class StudySessionTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -34,7 +34,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -53,7 +52,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -68,7 +66,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -83,7 +80,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -118,7 +114,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -150,7 +145,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -198,7 +192,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -220,7 +213,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -252,7 +244,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]

@@ -11,13 +11,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class AccountDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -48,7 +48,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -79,7 +78,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -110,7 +108,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -138,7 +135,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -153,7 +149,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -196,7 +191,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -226,7 +220,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -256,7 +249,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -284,7 +276,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -308,7 +299,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -332,7 +322,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -368,7 +357,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -396,7 +384,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -432,7 +419,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -476,7 +462,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -526,7 +511,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -549,7 +533,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -572,7 +555,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -597,7 +579,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]

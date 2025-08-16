@@ -7,6 +7,7 @@ use App\Models\StudyGoal;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExamTypeTest extends TestCase
 {
@@ -20,7 +21,6 @@ class ExamTypeTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -36,7 +36,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -49,7 +48,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -62,7 +60,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -75,7 +72,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -90,7 +86,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -105,7 +100,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -132,7 +126,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -153,7 +146,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]

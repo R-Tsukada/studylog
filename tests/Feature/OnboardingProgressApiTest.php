@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingProgressApiTest extends TestCase
 {
@@ -19,7 +20,6 @@ class OnboardingProgressApiTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -54,7 +54,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -81,7 +80,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -104,7 +102,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -144,7 +141,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -170,7 +166,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -191,7 +186,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド

@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class MyPageIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -32,7 +32,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -62,7 +61,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -121,7 +119,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -156,7 +153,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -221,7 +217,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -249,7 +244,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -286,7 +280,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -321,7 +314,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -370,7 +362,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]

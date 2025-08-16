@@ -6,13 +6,13 @@ use App\Http\Requests\OnboardingCompleteRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
 {
     use RefreshDatabase;
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -39,7 +39,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -69,7 +68,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -96,7 +94,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド

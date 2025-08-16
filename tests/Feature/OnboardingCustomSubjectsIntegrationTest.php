@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingCustomSubjectsIntegrationTest extends TestCase
 {
@@ -29,7 +30,6 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -44,7 +44,7 @@ use PHPUnit\Framework\Attributes\Test;
                 'step_data' => [
                     'setup_step' => [
                         'exam_type' => 'ipa_fe',
-                        'exam_date' => '2025-08-15',
+                        'exam_date' => now()->addDays(30)->format('Y-m-d'),
                         'daily_goal_minutes' => 60,
                         'custom_subjects' => [
                             ['name' => 'データベース'],
@@ -76,7 +76,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -121,7 +120,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド

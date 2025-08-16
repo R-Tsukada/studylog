@@ -7,6 +7,7 @@ use App\Models\StudySession;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class SubjectAreaTest extends TestCase
 {
@@ -20,7 +21,6 @@ class SubjectAreaTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -36,7 +36,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -57,7 +56,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -72,7 +70,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -87,7 +84,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -106,7 +102,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -124,7 +119,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]
@@ -148,7 +142,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /** @test */
     #[Test]

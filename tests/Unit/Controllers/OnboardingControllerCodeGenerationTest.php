@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use ReflectionClass;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingControllerCodeGenerationTest extends TestCase
 {
@@ -30,7 +31,6 @@ class OnboardingControllerCodeGenerationTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -46,7 +46,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -61,7 +60,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -77,7 +75,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -110,7 +107,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -125,7 +121,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -140,7 +135,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -173,7 +167,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * プライベートメソッドを呼び出すためのヘルパー

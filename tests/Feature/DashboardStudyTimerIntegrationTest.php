@@ -9,9 +9,9 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
-
 use PHPUnit\Framework\Attributes\Test;
+
+
 
 /**
  * ダッシュボードと時間計測タイマーの統合テスト
@@ -51,7 +51,6 @@ class DashboardStudyTimerIntegrationTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -147,7 +146,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -190,7 +188,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -237,7 +234,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -293,7 +289,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -343,7 +338,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド

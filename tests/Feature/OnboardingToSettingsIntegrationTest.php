@@ -7,6 +7,7 @@ use App\Models\StudyGoal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingToSettingsIntegrationTest extends TestCase
 {
@@ -21,7 +22,6 @@ class OnboardingToSettingsIntegrationTest extends TestCase
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -110,7 +110,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -125,7 +124,7 @@ use PHPUnit\Framework\Attributes\Test;
             'step_data' => [
                 'setup_step' => [
                     'exam_type' => 'aws_clf',
-                    'exam_date' => '2025-08-15',
+                    'exam_date' => now()->addDays(30)->format('Y-m-d'),
                     'daily_goal_minutes' => 60,
                 ],
             ],
@@ -158,7 +157,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド
@@ -198,7 +196,6 @@ use PHPUnit\Framework\Attributes\Test;
     }
 
     
-use PHPUnit\Framework\Attributes\Test;
 
 /**
      * テストメソッド

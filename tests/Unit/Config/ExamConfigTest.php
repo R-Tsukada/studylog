@@ -3,13 +3,11 @@
 namespace Tests\Unit\Config;
 
 use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class ExamConfigTest extends TestCase
 {
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -24,10 +22,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('categories', $config);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -52,10 +47,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -82,10 +74,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertLessThanOrEqual(50, $validation['max_custom_subjects']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -101,10 +90,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
