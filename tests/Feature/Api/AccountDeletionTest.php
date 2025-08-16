@@ -10,16 +10,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class AccountDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_account_with_valid_password()
     {
@@ -47,9 +45,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
@@ -77,9 +73,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
@@ -107,9 +101,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_confirmation()
     {
@@ -134,9 +126,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_account_deletion()
     {
@@ -148,9 +138,7 @@ class AccountDeletionTest extends TestCase
         $response->assertStatus(401);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_related_user_data_when_account_is_deleted()
     {
@@ -190,9 +178,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('study_goals', ['id' => $studyGoal->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_required_fields_for_account_deletion()
     {
@@ -219,9 +205,7 @@ class AccountDeletionTest extends TestCase
             ->assertJsonValidationErrors(['confirmation']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
@@ -248,9 +232,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_special_characters_in_password()
     {
@@ -275,9 +257,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_password_field()
     {
@@ -298,9 +278,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_confirmation_field()
     {
@@ -321,9 +299,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_incorrect_confirmation_variations()
     {
@@ -356,9 +332,7 @@ class AccountDeletionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_very_long_password()
     {
@@ -383,9 +357,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_concurrent_deletion_attempts()
     {
@@ -418,9 +390,7 @@ class AccountDeletionTest extends TestCase
         $this->assertTrue(in_array($response2->status(), [200, 401]));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_preserves_system_data_when_user_is_deleted()
     {
@@ -461,9 +431,7 @@ class AccountDeletionTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_account_deletion_with_large_amounts_of_data()
     {
@@ -510,9 +478,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseMissing('study_goals', ['user_id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_request_without_required_fields()
     {
@@ -532,9 +498,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_missing_authorization_header()
     {
@@ -554,9 +518,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_invalid_token()
     {
@@ -578,9 +540,7 @@ class AccountDeletionTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_account_deletion_during_active_study_session()
     {

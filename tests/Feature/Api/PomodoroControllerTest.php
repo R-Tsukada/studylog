@@ -6,8 +6,8 @@ use App\Models\PomodoroSession;
 use App\Models\StudySession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class PomodoroControllerTest extends TestCase
 {
@@ -21,9 +21,7 @@ class PomodoroControllerTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -55,9 +53,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertCount(3, $response->json('data'));
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -80,9 +76,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertCount(1, $response->json('data'));
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -99,9 +93,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals('focus', $response->json('data.0.session_type'));
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -138,9 +130,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -165,9 +155,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -180,9 +168,7 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['session_type', 'planned_duration']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -204,9 +190,7 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -224,9 +208,7 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -241,9 +223,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -282,9 +262,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -316,9 +294,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -335,9 +311,7 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['notes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -359,9 +333,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -376,9 +348,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -406,9 +376,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -427,9 +395,7 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -448,9 +414,7 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -465,9 +429,7 @@ class PomodoroControllerTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -512,9 +474,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(5, $stats['total_break_time']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -531,9 +491,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(0, $stats['completion_rate']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -554,9 +512,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -575,9 +531,7 @@ class PomodoroControllerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -596,9 +550,7 @@ class PomodoroControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -614,9 +566,7 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['session_type']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -641,9 +591,7 @@ class PomodoroControllerTest extends TestCase
             ->assertJsonValidationErrors(['planned_duration']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -674,9 +622,7 @@ class PomodoroControllerTest extends TestCase
         $this->assertEquals(80.0, $stats['completion_rate']); // (10-2)/10 * 100 = 80%
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

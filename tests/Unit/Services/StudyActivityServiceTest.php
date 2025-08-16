@@ -10,8 +10,8 @@ use App\Models\User;
 use App\Services\StudyActivityService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class StudyActivityServiceTest extends TestCase
 {
@@ -40,9 +40,7 @@ class StudyActivityServiceTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -99,9 +97,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals('focus', $pomodoroItem['session_details']['session_type']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -137,9 +133,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertCount(1, $history);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -221,9 +215,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertIsArray($stats['insights']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -271,9 +263,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertIsArray($insights['recommendations']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -314,9 +304,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertLessThan(24, $context['time_of_day']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -342,9 +330,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertTrue($hasTimeTrackingSuggestion);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -378,9 +364,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals(30, $stats['overview']['total_study_time']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -399,9 +383,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertArrayHasKey('recommended', $suggestion);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -434,9 +416,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertEquals(50.0, $stats['by_method']['pomodoro']['completion_rate']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -464,9 +444,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertTrue($hasCompletionRateInsight);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -515,9 +493,7 @@ class StudyActivityServiceTest extends TestCase
         $this->assertArrayHasKey('stats', $result);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -545,9 +521,7 @@ class StudyActivityServiceTest extends TestCase
         }
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

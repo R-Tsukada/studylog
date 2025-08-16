@@ -5,16 +5,14 @@ namespace Tests\Unit\Requests;
 use App\Http\Requests\OnboardingCompleteRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingCompleteRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -34,9 +32,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step', $rules);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -57,9 +53,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_notes', $rules);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -83,9 +77,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -113,9 +105,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -136,9 +126,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.exam_date', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -159,9 +147,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.daily_goal_minutes', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -182,9 +168,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_name', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -205,9 +189,7 @@ class OnboardingCompleteRequestTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_color', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

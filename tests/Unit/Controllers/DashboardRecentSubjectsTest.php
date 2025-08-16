@@ -9,8 +9,8 @@ use App\Models\StudySession;
 use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class DashboardRecentSubjectsTest extends TestCase
 {
@@ -47,9 +47,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->controller = new DashboardController;
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 学習セッションのみが存在する場合の最近の学習履歴取得
      */
@@ -92,9 +90,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('学習セッション0のメモ', $firstSession['notes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * ポモドーロセッションのみが存在する場合の最近の学習履歴取得
      */
@@ -138,9 +134,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('ポモドーロ0のメモ', $firstSession['notes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 学習セッションとポモドーロセッションが混在する場合の時系列順表示
      */
@@ -190,9 +184,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals('古い学習セッションメモ', $data['recent_subjects'][1]['notes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 5件制限の確認
      */
@@ -236,9 +228,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertCount(5, $data['recent_subjects']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 未完了のポモドーロセッションは表示されないこと
      */
@@ -291,9 +281,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals(25, $data['recent_subjects'][0]['duration_minutes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 他のユーザーのデータは表示されないこと
      */
@@ -348,9 +336,7 @@ class DashboardRecentSubjectsTest extends TestCase
         $this->assertEquals(30, $data['recent_subjects'][0]['duration_minutes']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * subject_area_idがnullのポモドーロセッションの表示
      */

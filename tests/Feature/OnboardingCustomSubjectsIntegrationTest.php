@@ -7,8 +7,8 @@ use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingCustomSubjectsIntegrationTest extends TestCase
 {
@@ -29,9 +29,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -75,9 +73,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $this->assertFalse($subjectAreas[1]->is_system);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -119,9 +115,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         $this->assertEquals('分野B', $subjectAreas[1]->name);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

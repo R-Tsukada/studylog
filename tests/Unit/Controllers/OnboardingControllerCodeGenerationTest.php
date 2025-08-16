@@ -7,9 +7,9 @@ use App\Models\ExamType;
 use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use Tests\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class OnboardingControllerCodeGenerationTest extends TestCase
 {
@@ -30,9 +30,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -45,9 +43,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $examCode);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -59,9 +55,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertStringContainsString('_u1_', $examCode);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -74,9 +68,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/[@#]/', $examCode);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -106,9 +98,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         );
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -120,9 +110,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $subjectCode);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -134,9 +122,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->assertStringContainsString('_1_', $subjectCode);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -166,9 +152,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         );
     }
 
-    
-
-/**
+    /**
      * プライベートメソッドを呼び出すためのヘルパー
      */
     private function invokePrivateMethod(string $methodName, array $parameters = [])

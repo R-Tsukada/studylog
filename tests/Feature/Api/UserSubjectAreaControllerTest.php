@@ -9,16 +9,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class UserSubjectAreaControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_get_user_subject_areas_list()
     {
@@ -82,9 +80,7 @@ class UserSubjectAreaControllerTest extends TestCase
         $this->assertNotContains('他のユーザーの分野', $subjectNames);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_create_subject_area()
     {
@@ -123,9 +119,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_create_subject_area_for_system_exam_type()
     {
@@ -159,9 +153,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_subject_area_creation()
     {
@@ -188,9 +180,7 @@ class UserSubjectAreaControllerTest extends TestCase
             ->assertJsonValidationErrors(['exam_type_id']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_access_to_other_users_exam_types()
     {
@@ -217,9 +207,7 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_subject_areas_in_same_exam_type()
     {
@@ -252,9 +240,7 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_same_subject_name_in_different_exam_types()
     {
@@ -292,9 +278,7 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_subject_area()
     {
@@ -338,9 +322,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_other_users_subject_area()
     {
@@ -373,9 +355,7 @@ class UserSubjectAreaControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_system_subject_areas()
     {
@@ -402,9 +382,7 @@ class UserSubjectAreaControllerTest extends TestCase
         $response->assertStatus(404); // システム分野はユーザーの所有物として見つからない
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_delete_subject_area_with_study_sessions()
     {
@@ -443,9 +421,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_subject_area_without_study_sessions()
     {
@@ -476,9 +452,7 @@ class UserSubjectAreaControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication()
     {

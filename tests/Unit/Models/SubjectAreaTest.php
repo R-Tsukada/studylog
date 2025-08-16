@@ -6,8 +6,8 @@ use App\Models\ExamType;
 use App\Models\StudySession;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class SubjectAreaTest extends TestCase
 {
@@ -20,9 +20,7 @@ class SubjectAreaTest extends TestCase
         $this->seed();
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_has_correct_fillable_attributes()
     {
@@ -35,9 +33,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($expected, $subjectArea->getFillable());
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_casts_attributes_correctly()
     {
@@ -55,9 +51,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals(5, $subjectArea->sort_order);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_belongs_to_exam_type()
     {
@@ -69,9 +63,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($examType->name, $subjectArea->examType->name);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_has_many_study_sessions()
     {
@@ -83,9 +75,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($studySession->id, $subjectArea->studySessions->first()->id);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_subject_areas()
     {
@@ -101,9 +91,7 @@ class SubjectAreaTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function ordered_scope_returns_subject_areas_in_sort_order()
     {
@@ -118,9 +106,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals(3, $orderedSubjectAreas->last()->sort_order);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_subject_area_with_valid_data()
     {
@@ -141,9 +127,7 @@ class SubjectAreaTest extends TestCase
         $this->assertEquals($subjectAreaData['name'], $subjectArea->name);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_id_and_code_combination_must_be_unique()
     {

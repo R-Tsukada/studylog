@@ -7,8 +7,8 @@ use App\Models\SubjectArea;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class StudySessionTest extends TestCase
 {
@@ -21,9 +21,7 @@ class StudySessionTest extends TestCase
         $this->seed();
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_has_correct_fillable_attributes()
     {
@@ -33,9 +31,7 @@ class StudySessionTest extends TestCase
         $this->assertEquals($expected, $studySession->getFillable());
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_casts_attributes_correctly()
     {
@@ -51,9 +47,7 @@ class StudySessionTest extends TestCase
         $this->assertEquals(60, $studySession->duration_minutes);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_belongs_to_user()
     {
@@ -65,9 +59,7 @@ class StudySessionTest extends TestCase
         $this->assertEquals($user->nickname, $studySession->user->nickname);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_belongs_to_subject_area()
     {
@@ -79,9 +71,7 @@ class StudySessionTest extends TestCase
         $this->assertEquals($subjectArea->name, $studySession->subjectArea->name);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function completed_scope_returns_only_completed_sessions()
     {
@@ -113,9 +103,7 @@ class StudySessionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_sessions()
     {
@@ -144,9 +132,7 @@ class StudySessionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function date_range_scope_filters_by_date_range()
     {
@@ -191,9 +177,7 @@ class StudySessionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function by_user_scope_filters_by_user()
     {
@@ -212,9 +196,7 @@ class StudySessionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function recent_scope_returns_limited_sessions_in_desc_order()
     {
@@ -243,9 +225,7 @@ class StudySessionTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_study_session_with_valid_data()
     {

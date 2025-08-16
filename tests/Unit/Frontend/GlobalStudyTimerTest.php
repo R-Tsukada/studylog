@@ -7,10 +7,8 @@ use App\Models\StudySession;
 use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
-
-
+use Tests\TestCase;
 
 /**
  * グローバル時間計測タイマーのテストクラス
@@ -38,9 +36,7 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * グローバルタイマーの基本的な状態管理をテスト
      */
@@ -107,9 +103,7 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * グローバルタイマーの時間計算精度をテスト
      */
@@ -146,9 +140,7 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertLessThan(5, $elapsedMinutes); // 5分未満であること
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 複数セッション開始の防止をテスト
      */
@@ -180,9 +172,7 @@ class GlobalStudyTimerTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * グローバルタイマー状態の復元シナリオをテスト
      */
@@ -216,9 +206,7 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertArrayHasKey('exam_type_name', $session);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * セッション終了時のデータ整合性をテスト
      */
@@ -258,9 +246,7 @@ class GlobalStudyTimerTest extends TestCase
         $this->assertFalse($session->isActive());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      * 認証エラー時の処理をテスト
      */

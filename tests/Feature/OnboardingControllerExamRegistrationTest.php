@@ -6,8 +6,8 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingControllerExamRegistrationTest extends TestCase
 {
@@ -21,9 +21,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -86,9 +84,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertNotNull($this->user->onboarding_completed_at);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -136,9 +132,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertEquals($expectedDate, $studyGoal->exam_date->format('Y-m-d'));
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -178,9 +172,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->assertEquals(45, $newGoal->daily_minutes_goal);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -209,9 +201,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -248,9 +238,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

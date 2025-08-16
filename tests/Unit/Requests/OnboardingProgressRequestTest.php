@@ -5,16 +5,14 @@ namespace Tests\Unit\Requests;
 use App\Http\Requests\OnboardingProgressRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingProgressRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -33,9 +31,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -55,9 +51,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -82,9 +76,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->fails());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -105,9 +97,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('timestamp', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -126,9 +116,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -147,9 +135,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -174,9 +160,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -197,9 +181,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('completed_steps.1', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -224,9 +206,7 @@ class OnboardingProgressRequestTest extends TestCase
         $this->assertArrayHasKey('step_data', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

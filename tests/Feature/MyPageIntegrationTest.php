@@ -8,16 +8,14 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class MyPageIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_route_is_accessible_with_authentication()
     {
@@ -31,9 +29,7 @@ class MyPageIntegrationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_route_redirects_unauthenticated_users()
     {
@@ -60,9 +56,7 @@ class MyPageIntegrationTest extends TestCase
         );
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_profile_update_workflow()
     {
@@ -118,9 +112,7 @@ class MyPageIntegrationTest extends TestCase
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_account_deletion_workflow()
     {
@@ -152,9 +144,7 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function google_user_profile_update_workflow()
     {
@@ -216,9 +206,7 @@ class MyPageIntegrationTest extends TestCase
         $this->assertNull($googleUser->password);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function google_user_account_deletion_workflow()
     {
@@ -243,9 +231,7 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function profile_update_error_handling_workflow()
     {
@@ -279,9 +265,7 @@ class MyPageIntegrationTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function account_deletion_with_wrong_password_workflow()
     {
@@ -313,9 +297,7 @@ class MyPageIntegrationTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function session_and_token_management_during_profile_operations()
     {
@@ -361,9 +343,7 @@ class MyPageIntegrationTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_data_consistency_across_operations()
     {

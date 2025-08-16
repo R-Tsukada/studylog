@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Config;
 
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ExamConfigTest extends TestCase
 {

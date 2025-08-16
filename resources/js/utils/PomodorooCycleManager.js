@@ -107,6 +107,18 @@ export class PomodorooCycleManager {
   }
 
   /**
+   * セッション完了の汎用処理（統合テスト用）
+   * @param {Object} session - 完了したセッション情報
+   */
+  markSessionCompleted(session) {
+    if (session && session.session_type === 'focus') {
+      this.incrementFocusSession()
+    } else if (session && (session.session_type === 'short_break' || session.session_type === 'long_break')) {
+      this.completeBreakSession()
+    }
+  }
+
+  /**
    * 統計情報取得
    * @returns {Object} 現在のサイクル状態統計
    */

@@ -6,8 +6,8 @@ use App\Models\DailyStudySummary;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class DailyStudySummaryTest extends TestCase
 {
@@ -20,9 +20,7 @@ class DailyStudySummaryTest extends TestCase
         $this->seed();
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_has_correct_fillable_attributes()
     {
@@ -43,9 +41,7 @@ class DailyStudySummaryTest extends TestCase
         $this->assertEquals($expected, $summary->getFillable());
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_casts_attributes_correctly()
     {
@@ -65,9 +61,7 @@ class DailyStudySummaryTest extends TestCase
         $this->assertEquals(['テスト基礎' => 60, 'テスト技法' => 60], $summary->subject_breakdown);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_belongs_to_user()
     {
@@ -79,9 +73,7 @@ class DailyStudySummaryTest extends TestCase
         $this->assertEquals($user->nickname, $summary->user->nickname);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function date_range_scope_filters_by_date_range()
     {
@@ -111,9 +103,7 @@ class DailyStudySummaryTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function by_user_scope_filters_by_user()
     {
@@ -131,9 +121,7 @@ class DailyStudySummaryTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function recent_scope_returns_summaries_in_desc_order()
     {
@@ -159,9 +147,7 @@ class DailyStudySummaryTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_daily_study_summary_with_valid_data()
     {
@@ -190,9 +176,7 @@ class DailyStudySummaryTest extends TestCase
         $this->assertEquals($summaryData['subject_breakdown'], $summary->subject_breakdown);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_id_and_study_date_combination_must_be_unique()
     {
@@ -211,9 +195,7 @@ class DailyStudySummaryTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_handle_null_subject_breakdown()
     {
@@ -226,9 +208,7 @@ class DailyStudySummaryTest extends TestCase
         $this->assertNull($summary->subject_breakdown);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_handle_empty_subject_breakdown()
     {

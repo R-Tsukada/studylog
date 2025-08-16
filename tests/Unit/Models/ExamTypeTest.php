@@ -6,8 +6,8 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class ExamTypeTest extends TestCase
 {
@@ -20,9 +20,7 @@ class ExamTypeTest extends TestCase
         $this->seed();
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_correct_fillable_attributes()
     {
@@ -35,9 +33,7 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($expected, $examType->getFillable());
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_is_active_to_boolean()
     {
@@ -47,9 +43,7 @@ class ExamTypeTest extends TestCase
         $this->assertTrue($examType->is_active);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_is_system_to_boolean()
     {
@@ -59,9 +53,7 @@ class ExamTypeTest extends TestCase
         $this->assertTrue($examType->is_system);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_exam_date_to_date()
     {
@@ -71,9 +63,7 @@ class ExamTypeTest extends TestCase
         $this->assertEquals('2025-06-15', $examType->exam_date->format('Y-m-d'));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_many_subject_areas()
     {
@@ -85,9 +75,7 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($subjectArea->id, $examType->subjectAreas->first()->id);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_many_study_goals()
     {
@@ -99,9 +87,7 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($studyGoal->id, $examType->studyGoals->first()->id);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_exam_types()
     {
@@ -125,9 +111,7 @@ class ExamTypeTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_exam_type_with_valid_data()
     {
@@ -145,9 +129,7 @@ class ExamTypeTest extends TestCase
         $this->assertEquals($examTypeData['name'], $examType->name);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function code_must_be_unique()
     {

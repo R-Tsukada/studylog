@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingProgressApiTest extends TestCase
 {
@@ -19,9 +19,7 @@ class OnboardingProgressApiTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -53,9 +51,7 @@ class OnboardingProgressApiTest extends TestCase
             ]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -79,9 +75,7 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertStringContainsString('現在のステップは必須です', $errors['current_step'][0]);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -101,9 +95,7 @@ class OnboardingProgressApiTest extends TestCase
             ->assertJsonValidationErrors(['timestamp']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -140,9 +132,7 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertArrayHasKey('setup_step', $progress['step_data']);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -165,9 +155,7 @@ class OnboardingProgressApiTest extends TestCase
         $this->assertArrayHasKey('current_step', $response->json('errors'));
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -185,9 +173,7 @@ class OnboardingProgressApiTest extends TestCase
         $response->assertStatus(401);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

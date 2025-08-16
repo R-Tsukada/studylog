@@ -6,16 +6,14 @@ use App\Models\PomodoroSession;
 use App\Models\StudySession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class PomodoroSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -40,9 +38,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($fillable, $pomodoroSession->getFillable());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -63,9 +59,7 @@ class PomodoroSessionTest extends TestCase
         }
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -78,9 +72,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($user->id, $pomodoroSession->user->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -97,9 +89,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($studySession->id, $pomodoroSession->studySession->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -117,9 +107,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($session1->id, $user1Sessions->first()->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -136,9 +124,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($completedSession->id, $completedSessions->first()->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -156,9 +142,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals('focus', $focusSessions->first()->session_type);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -177,9 +161,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertContains('long_break', $breakSessions->pluck('session_type')->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -206,9 +188,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -232,9 +212,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -258,9 +236,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals($sessions->first()->id, $recentSessions->first()->id);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -293,9 +269,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertIsArray($pomodoroSession->settings);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -312,9 +286,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals(23, $pomodoroSession->duration_in_minutes);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -327,9 +299,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertFalse($completedSession->is_active);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -351,9 +321,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals(0, $pomodoroSession->completion_percentage);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -370,9 +338,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertEquals('long_break', $longBreakSession->session_type);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -390,9 +356,7 @@ class PomodoroSessionTest extends TestCase
         $this->assertInstanceOf(StudySession::class, $pomodoroSession->studySession);
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

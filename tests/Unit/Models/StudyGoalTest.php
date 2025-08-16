@@ -7,8 +7,8 @@ use App\Models\StudyGoal;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class StudyGoalTest extends TestCase
 {
@@ -21,9 +21,7 @@ class StudyGoalTest extends TestCase
         $this->seed();
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_goal_has_correct_fillable_attributes()
     {
@@ -33,9 +31,7 @@ class StudyGoalTest extends TestCase
         $this->assertEquals($expected, $studyGoal->getFillable());
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_goal_casts_attributes_correctly()
     {
@@ -55,9 +51,7 @@ class StudyGoalTest extends TestCase
         $this->assertTrue($studyGoal->is_active);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_goal_belongs_to_user()
     {
@@ -69,9 +63,7 @@ class StudyGoalTest extends TestCase
         $this->assertEquals($user->nickname, $studyGoal->user->nickname);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_goal_belongs_to_exam_type()
     {
@@ -83,9 +75,7 @@ class StudyGoalTest extends TestCase
         $this->assertEquals($examType->name, $studyGoal->examType->name);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_goals()
     {
@@ -112,9 +102,7 @@ class StudyGoalTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function by_user_scope_filters_by_user()
     {
@@ -133,9 +121,7 @@ class StudyGoalTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function for_exam_type_scope_filters_by_exam_type()
     {
@@ -154,9 +140,7 @@ class StudyGoalTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_study_goal_with_valid_data()
     {
@@ -187,9 +171,7 @@ class StudyGoalTest extends TestCase
         $this->assertEquals($goalData['weekly_minutes_goal'], $studyGoal->weekly_minutes_goal);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_study_goal_without_optional_fields()
     {
@@ -210,9 +192,7 @@ class StudyGoalTest extends TestCase
         $this->assertNull($studyGoal->exam_date);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_have_multiple_inactive_goals_for_same_user_and_exam_type()
     {
@@ -239,9 +219,7 @@ class StudyGoalTest extends TestCase
         $this->assertCount(2, $goals);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_date_can_be_null()
     {

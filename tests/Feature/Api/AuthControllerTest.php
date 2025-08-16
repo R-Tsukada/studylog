@@ -7,16 +7,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_register_a_new_user()
     {
@@ -52,9 +50,7 @@ class AuthControllerTest extends TestCase
         $this->assertTrue(Hash::check('Password123!', $user->password));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_user_registration()
     {
@@ -102,9 +98,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['password']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_email_registration()
     {
@@ -124,9 +118,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_login_with_valid_credentials()
     {
@@ -158,9 +150,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_invalid_login_credentials()
     {
@@ -194,9 +184,7 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_login_input()
     {
@@ -220,9 +208,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_get_authenticated_user_info()
     {
@@ -246,9 +232,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_user_endpoint()
     {
@@ -257,9 +241,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(401);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_logout_authenticated_user()
     {
@@ -275,9 +257,7 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_profile()
     {
@@ -307,9 +287,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_profile_update()
     {
@@ -335,9 +313,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_profile_update_with_existing_email()
     {
@@ -356,9 +332,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_profile_update_with_same_email()
     {
@@ -387,9 +361,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_generates_correct_avatar_url()
     {
@@ -413,9 +385,7 @@ class AuthControllerTest extends TestCase
         $this->assertStringContainsString('s=100', $avatarUrl);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function tokens_are_different_for_each_login()
     {
@@ -440,9 +410,7 @@ class AuthControllerTest extends TestCase
         $this->assertNotEquals($token1, $token2);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_nickname_field_length_in_registration()
     {
@@ -460,9 +428,7 @@ class AuthControllerTest extends TestCase
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_valid_japanese_nicknames()
     {
@@ -491,9 +457,7 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_nickname_migration_properly()
     {
@@ -520,9 +484,7 @@ class AuthControllerTest extends TestCase
         $this->assertArrayHasKey('nickname', $responseData['user']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_authentication_flow_with_nickname()
     {
@@ -570,9 +532,7 @@ class AuthControllerTest extends TestCase
         $this->assertEquals('更新後ニックネーム', $userInfoData['user']['nickname']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_token_management()
     {
@@ -600,9 +560,7 @@ class AuthControllerTest extends TestCase
             ->assertStatus(200);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_nickname_character_restrictions()
     {
@@ -626,9 +584,7 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_email_domain_restrictions()
     {
@@ -676,9 +632,7 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_password_complexity()
     {
@@ -726,9 +680,7 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(201);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_nickname_rules()
     {
@@ -806,9 +758,7 @@ class AuthControllerTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_login_rules()
     {

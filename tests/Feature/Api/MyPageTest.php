@@ -8,8 +8,8 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class MyPageTest extends TestCase
 {
@@ -32,9 +32,7 @@ class MyPageTest extends TestCase
         return User::factory()->create($data);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_access_user_information_for_mypage()
     {
@@ -58,9 +56,7 @@ class MyPageTest extends TestCase
         $this->assertFalse($response->json('user.is_google_user'));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_identifies_google_users_correctly()
     {
@@ -78,9 +74,7 @@ class MyPageTest extends TestCase
         }
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_profile_nickname_and_email()
     {
@@ -111,9 +105,7 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_password()
     {
@@ -140,9 +132,7 @@ class MyPageTest extends TestCase
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_profile_update_data()
     {
@@ -186,9 +176,7 @@ class MyPageTest extends TestCase
             ->assertJsonValidationErrors(['password']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_email_during_profile_update()
     {
@@ -206,9 +194,7 @@ class MyPageTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_keeping_same_email_during_profile_update()
     {
@@ -224,9 +210,7 @@ class MyPageTest extends TestCase
             ->assertJson(['success' => true]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_regular_user_account_with_password()
     {
@@ -248,9 +232,7 @@ class MyPageTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
@@ -271,9 +253,7 @@ class MyPageTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
@@ -293,9 +273,7 @@ class MyPageTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_mypage_endpoints()
     {
@@ -317,9 +295,7 @@ class MyPageTest extends TestCase
         $response->assertStatus(401);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
@@ -355,9 +331,7 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_profile_update_for_google_users()
     {
@@ -381,9 +355,7 @@ class MyPageTest extends TestCase
         ]);
     }
 
-    
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_maintains_data_integrity_during_profile_updates()
     {

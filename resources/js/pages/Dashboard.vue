@@ -564,7 +564,10 @@ export default {
         console.log('ダッシュボード: グローバルタイマー同期チェック')
         const response = await apiClient.get('/study-sessions/current')
         
-        if (response.data.success && response.data.session) {
+        console.log('APIレスポンス確認:', response.data)
+        
+        // APIレスポンスの構造を安全にチェック
+        if (response.data && (response.data.success !== false) && response.data.session) {
           // API側にアクティブセッションがあり、グローバルタイマーが動いていない場合
           if (!this.globalStudyTimer.isActive) {
             console.log('ダッシュボード: API側セッション発見、グローバルタイマー開始')

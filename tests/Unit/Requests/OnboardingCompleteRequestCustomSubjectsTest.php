@@ -5,16 +5,14 @@ namespace Tests\Unit\Requests;
 use App\Http\Requests\OnboardingCompleteRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
-use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -38,9 +36,7 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertTrue($validator->passes());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -67,9 +63,7 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_subjects', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -93,9 +87,7 @@ class OnboardingCompleteRequestCustomSubjectsTest extends TestCase
         $this->assertArrayHasKey('step_data.setup_step.custom_subjects.0.name', $validator->errors()->toArray());
     }
 
-    
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
