@@ -230,7 +230,14 @@ const detailedMockAppComponent = {
     
     // タイマー完了処理
     handleGlobalTimerComplete() {
-      const completedSession = { ...this.globalPomodoroTimer.currentSession }
+      const completedSession = this.globalPomodoroTimer.currentSession
+        ? { ...this.globalPomodoroTimer.currentSession }
+        : null
+
+      if (!completedSession) {
+        console.warn('No active session to complete')
+        return null
+      }
       
       // サイクル管理: 完了セッションを記録
       if (completedSession && completedSession.session_type === 'focus') {
