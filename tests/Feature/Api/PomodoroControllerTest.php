@@ -6,6 +6,7 @@ use App\Models\PomodoroSession;
 use App\Models\StudySession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PomodoroControllerTest extends TestCase
@@ -20,10 +21,7 @@ class PomodoroControllerTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -55,10 +53,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertCount(3, $response->json('data'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -81,10 +76,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertCount(1, $response->json('data'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -101,10 +93,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('focus', $response->json('data.0.session_type'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -141,10 +130,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -169,10 +155,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -185,10 +168,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['session_type', 'planned_duration']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -210,10 +190,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -231,10 +208,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -249,10 +223,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(403);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -291,10 +262,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -326,10 +294,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -346,10 +311,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['notes']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -371,10 +333,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -389,10 +348,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(403);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -420,10 +376,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -442,10 +395,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -464,10 +414,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -482,10 +429,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -530,10 +474,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(5, $stats['total_break_time']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -550,10 +491,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, $stats['completion_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -574,10 +512,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -596,10 +531,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -618,10 +550,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -637,10 +566,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['session_type']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -665,10 +591,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['planned_duration']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -699,10 +622,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(80.0, $stats['completion_rate']); // (10-2)/10 * 100 = 80%
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

@@ -6,6 +6,7 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OnboardingToSettingsIntegrationTest extends TestCase
@@ -20,10 +21,7 @@ class OnboardingToSettingsIntegrationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -109,10 +107,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotNull($this->user->onboarding_completed_at);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -125,7 +120,7 @@ use PHPUnit\Framework\Attributes\Test;
             'step_data' => [
                 'setup_step' => [
                     'exam_type' => 'aws_clf',
-                    'exam_date' => '2025-08-15',
+                    'exam_date' => now()->addDays(30)->format('Y-m-d'),
                     'daily_goal_minutes' => 60,
                 ],
             ],
@@ -157,10 +152,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('aws_clf', $examTypes[0]['code']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -197,10 +189,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

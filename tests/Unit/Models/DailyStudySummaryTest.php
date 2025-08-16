@@ -6,6 +6,7 @@ use App\Models\DailyStudySummary;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DailyStudySummaryTest extends TestCase
@@ -19,10 +20,7 @@ class DailyStudySummaryTest extends TestCase
         $this->seed();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_has_correct_fillable_attributes()
     {
@@ -43,10 +41,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($expected, $summary->getFillable());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_casts_attributes_correctly()
     {
@@ -66,10 +61,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(['テスト基礎' => 60, 'テスト技法' => 60], $summary->subject_breakdown);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function daily_study_summary_belongs_to_user()
     {
@@ -81,10 +73,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($user->nickname, $summary->user->nickname);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function date_range_scope_filters_by_date_range()
     {
@@ -114,10 +103,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function by_user_scope_filters_by_user()
     {
@@ -135,10 +121,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function recent_scope_returns_summaries_in_desc_order()
     {
@@ -164,10 +147,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_daily_study_summary_with_valid_data()
     {
@@ -196,10 +176,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($summaryData['subject_breakdown'], $summary->subject_breakdown);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_id_and_study_date_combination_must_be_unique()
     {
@@ -218,10 +195,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_handle_null_subject_breakdown()
     {
@@ -234,10 +208,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNull($summary->subject_breakdown);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_handle_empty_subject_breakdown()
     {

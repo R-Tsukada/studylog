@@ -9,16 +9,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StudyManagementIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_study_management_workflow()
     {
@@ -127,10 +125,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotContains('プログラミング', $finalSubjectNames);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_data_isolation_works_correctly()
     {
@@ -209,10 +204,7 @@ use PHPUnit\Framework\Attributes\Test;
         $unauthorizedDeleteResponse->assertStatus(404);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function system_data_and_user_data_coexistence()
     {
@@ -293,10 +285,7 @@ use PHPUnit\Framework\Attributes\Test;
         $deleteSystemSubjectResponse->assertStatus(404); // ユーザーの所有物として見つからない
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function cascade_deletion_protection_works()
     {

@@ -5,16 +5,14 @@ namespace Tests\Unit\Requests;
 use App\Http\Requests\OnboardingProgressRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OnboardingProgressRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -33,10 +31,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -56,10 +51,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('current_step', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -84,10 +76,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->fails());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -108,10 +97,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('timestamp', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -130,10 +116,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->passes());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -152,10 +135,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->passes());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -180,10 +160,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->passes());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -204,10 +181,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('completed_steps.1', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -232,10 +206,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

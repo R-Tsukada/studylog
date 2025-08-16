@@ -7,16 +7,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_register_a_new_user()
     {
@@ -52,10 +50,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue(Hash::check('Password123!', $user->password));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_user_registration()
     {
@@ -103,10 +98,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['password']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_email_registration()
     {
@@ -126,10 +118,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_login_with_valid_credentials()
     {
@@ -161,10 +150,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_invalid_login_credentials()
     {
@@ -198,10 +184,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_login_input()
     {
@@ -225,10 +208,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_get_authenticated_user_info()
     {
@@ -252,10 +232,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($user->email, $responseData['user']['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_user_endpoint()
     {
@@ -264,10 +241,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_logout_authenticated_user()
     {
@@ -283,10 +257,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_profile()
     {
@@ -316,10 +287,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_profile_update()
     {
@@ -345,10 +313,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_profile_update_with_existing_email()
     {
@@ -367,10 +332,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_profile_update_with_same_email()
     {
@@ -399,10 +361,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_generates_correct_avatar_url()
     {
@@ -426,10 +385,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertStringContainsString('s=100', $avatarUrl);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function tokens_are_different_for_each_login()
     {
@@ -454,10 +410,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotEquals($token1, $token2);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_nickname_field_length_in_registration()
     {
@@ -475,10 +428,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_valid_japanese_nicknames()
     {
@@ -507,10 +457,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_nickname_migration_properly()
     {
@@ -537,10 +484,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('nickname', $responseData['user']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_authentication_flow_with_nickname()
     {
@@ -588,10 +532,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('更新後ニックネーム', $userInfoData['user']['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_token_management()
     {
@@ -619,10 +560,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertStatus(200);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_nickname_character_restrictions()
     {
@@ -646,10 +584,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_email_domain_restrictions()
     {
@@ -697,10 +632,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_password_complexity()
     {
@@ -748,10 +680,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(201);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_nickname_rules()
     {
@@ -829,10 +758,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_enhanced_login_rules()
     {

@@ -9,16 +9,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserSubjectAreaControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_get_user_subject_areas_list()
     {
@@ -82,10 +80,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotContains('他のユーザーの分野', $subjectNames);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_create_subject_area()
     {
@@ -124,10 +119,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_create_subject_area_for_system_exam_type()
     {
@@ -161,10 +153,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_subject_area_creation()
     {
@@ -191,10 +180,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['exam_type_id']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_access_to_other_users_exam_types()
     {
@@ -221,10 +207,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_subject_areas_in_same_exam_type()
     {
@@ -257,10 +240,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_same_subject_name_in_different_exam_types()
     {
@@ -298,10 +278,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_subject_area()
     {
@@ -345,10 +322,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_other_users_subject_area()
     {
@@ -381,10 +355,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_system_subject_areas()
     {
@@ -411,10 +382,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(404); // システム分野はユーザーの所有物として見つからない
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_delete_subject_area_with_study_sessions()
     {
@@ -453,10 +421,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_subject_area_without_study_sessions()
     {
@@ -487,10 +452,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication()
     {

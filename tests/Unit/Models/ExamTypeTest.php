@@ -6,6 +6,7 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ExamTypeTest extends TestCase
@@ -19,10 +20,7 @@ class ExamTypeTest extends TestCase
         $this->seed();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_correct_fillable_attributes()
     {
@@ -35,10 +33,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($expected, $examType->getFillable());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_is_active_to_boolean()
     {
@@ -48,10 +43,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($examType->is_active);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_is_system_to_boolean()
     {
@@ -61,10 +53,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($examType->is_system);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_casts_exam_date_to_date()
     {
@@ -74,10 +63,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('2025-06-15', $examType->exam_date->format('Y-m-d'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_many_subject_areas()
     {
@@ -89,10 +75,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($subjectArea->id, $examType->subjectAreas->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_has_many_study_goals()
     {
@@ -104,10 +87,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($studyGoal->id, $examType->studyGoals->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_exam_types()
     {
@@ -131,10 +111,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_exam_type_with_valid_data()
     {
@@ -152,10 +129,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($examTypeData['name'], $examType->name);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function code_must_be_unique()
     {

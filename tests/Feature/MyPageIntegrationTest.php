@@ -8,16 +8,14 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MyPageIntegrationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_route_is_accessible_with_authentication()
     {
@@ -31,10 +29,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(200);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_route_redirects_unauthenticated_users()
     {
@@ -61,10 +56,7 @@ use PHPUnit\Framework\Attributes\Test;
         );
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_profile_update_workflow()
     {
@@ -120,10 +112,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_account_deletion_workflow()
     {
@@ -155,10 +144,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function google_user_profile_update_workflow()
     {
@@ -220,10 +206,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNull($googleUser->password);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function google_user_account_deletion_workflow()
     {
@@ -248,10 +231,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function profile_update_error_handling_workflow()
     {
@@ -285,10 +265,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJson(['success' => true]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function account_deletion_with_wrong_password_workflow()
     {
@@ -320,10 +297,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function session_and_token_management_during_profile_operations()
     {
@@ -369,10 +343,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function mypage_data_consistency_across_operations()
     {

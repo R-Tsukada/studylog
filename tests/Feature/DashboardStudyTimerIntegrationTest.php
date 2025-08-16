@@ -8,10 +8,8 @@ use App\Models\SubjectArea;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
-
 use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
 /**
  * ダッシュボードと時間計測タイマーの統合テスト
@@ -50,10 +48,7 @@ class DashboardStudyTimerIntegrationTest extends TestCase
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * ダッシュボードでの学習セッション開始から終了までの統合フロー
      */
@@ -146,10 +141,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertIsString($updatedDashboardData['today_study_time']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 複数画面での時間表示の一貫性をテスト
      */
@@ -189,10 +181,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->postJson('/api/study-sessions/end');
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * ページリロード想定での状態復元をテスト
      */
@@ -236,10 +225,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->postJson('/api/study-sessions/end');
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 複数セッション実行時のタイマー状態管理をテスト
      */
@@ -292,10 +278,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->postJson('/api/study-sessions/end');
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * エラー状況での状態管理をテスト
      */
@@ -342,10 +325,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->postJson('/api/study-sessions/end');
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 長時間セッションでの時間計算精度をテスト
      */

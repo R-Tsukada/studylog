@@ -6,6 +6,7 @@ use App\Models\ExamType;
 use App\Models\StudyGoal;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OnboardingControllerExamRegistrationTest extends TestCase
@@ -20,10 +21,7 @@ class OnboardingControllerExamRegistrationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -86,10 +84,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotNull($this->user->onboarding_completed_at);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -101,7 +96,7 @@ use PHPUnit\Framework\Attributes\Test;
             'step_data' => [
                 'setup_step' => [
                     'exam_type' => 'aws_clf',
-                    'exam_date' => '2025-08-15',
+                    'exam_date' => now()->addDays(30)->format('Y-m-d'),
                     'daily_goal_minutes' => 60,
                 ],
             ],
@@ -122,7 +117,8 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
 
         $examType = ExamType::where('user_id', $this->user->id)->first();
-        $this->assertEquals('2025-08-15', $examType->exam_date->format('Y-m-d'));
+        $expectedDate = now()->addDays(30)->format('Y-m-d');
+        $this->assertEquals($expectedDate, $examType->exam_date->format('Y-m-d'));
 
         // 学習目標が作成される
         $this->assertDatabaseHas('study_goals', [
@@ -133,13 +129,10 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
 
         $studyGoal = StudyGoal::where('user_id', $this->user->id)->first();
-        $this->assertEquals('2025-08-15', $studyGoal->exam_date->format('Y-m-d'));
+        $this->assertEquals($expectedDate, $studyGoal->exam_date->format('Y-m-d'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -179,10 +172,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(45, $newGoal->daily_minutes_goal);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -211,10 +201,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -251,10 +238,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

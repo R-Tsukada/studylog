@@ -10,16 +10,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AccountDeletionTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_account_with_valid_password()
     {
@@ -47,10 +45,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
@@ -78,10 +73,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
@@ -109,10 +101,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_confirmation()
     {
@@ -137,10 +126,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_account_deletion()
     {
@@ -152,10 +138,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_related_user_data_when_account_is_deleted()
     {
@@ -195,10 +178,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('study_goals', ['id' => $studyGoal->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_required_fields_for_account_deletion()
     {
@@ -225,10 +205,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['confirmation']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
@@ -255,10 +232,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_special_characters_in_password()
     {
@@ -283,10 +257,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_password_field()
     {
@@ -307,10 +278,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_confirmation_field()
     {
@@ -331,10 +299,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_incorrect_confirmation_variations()
     {
@@ -367,10 +332,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_very_long_password()
     {
@@ -395,10 +357,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_concurrent_deletion_attempts()
     {
@@ -431,10 +390,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue(in_array($response2->status(), [200, 401]));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_preserves_system_data_when_user_is_deleted()
     {
@@ -475,10 +431,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_account_deletion_with_large_amounts_of_data()
     {
@@ -525,10 +478,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('study_goals', ['user_id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_request_without_required_fields()
     {
@@ -548,10 +498,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_missing_authorization_header()
     {
@@ -571,10 +518,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_invalid_token()
     {
@@ -596,10 +540,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_account_deletion_during_active_study_session()
     {

@@ -6,6 +6,7 @@ use App\Models\ExamType;
 use App\Models\StudySession;
 use App\Models\SubjectArea;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SubjectAreaTest extends TestCase
@@ -19,10 +20,7 @@ class SubjectAreaTest extends TestCase
         $this->seed();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_has_correct_fillable_attributes()
     {
@@ -35,10 +33,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($expected, $subjectArea->getFillable());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_casts_attributes_correctly()
     {
@@ -56,10 +51,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(5, $subjectArea->sort_order);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_belongs_to_exam_type()
     {
@@ -71,10 +63,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($examType->name, $subjectArea->examType->name);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function subject_area_has_many_study_sessions()
     {
@@ -86,10 +75,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($studySession->id, $subjectArea->studySessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_subject_areas()
     {
@@ -105,10 +91,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function ordered_scope_returns_subject_areas_in_sort_order()
     {
@@ -123,10 +106,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(3, $orderedSubjectAreas->last()->sort_order);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_subject_area_with_valid_data()
     {
@@ -147,10 +127,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($subjectAreaData['name'], $subjectArea->name);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function exam_type_id_and_code_combination_must_be_unique()
     {

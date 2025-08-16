@@ -7,6 +7,7 @@ use App\Models\SubjectArea;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StudySessionTest extends TestCase
@@ -20,10 +21,7 @@ class StudySessionTest extends TestCase
         $this->seed();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_has_correct_fillable_attributes()
     {
@@ -33,10 +31,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($expected, $studySession->getFillable());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_casts_attributes_correctly()
     {
@@ -52,10 +47,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(60, $studySession->duration_minutes);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_belongs_to_user()
     {
@@ -67,10 +59,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($user->nickname, $studySession->user->nickname);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function study_session_belongs_to_subject_area()
     {
@@ -82,10 +71,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($subjectArea->name, $studySession->subjectArea->name);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function completed_scope_returns_only_completed_sessions()
     {
@@ -117,10 +103,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function active_scope_returns_only_active_sessions()
     {
@@ -149,10 +132,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function date_range_scope_filters_by_date_range()
     {
@@ -197,10 +177,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function by_user_scope_filters_by_user()
     {
@@ -219,10 +196,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function recent_scope_returns_limited_sessions_in_desc_order()
     {
@@ -251,10 +225,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function can_create_study_session_with_valid_data()
     {

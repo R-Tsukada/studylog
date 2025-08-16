@@ -7,6 +7,7 @@ use App\Models\ExamType;
 use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
 use Tests\TestCase;
 
@@ -29,10 +30,7 @@ class OnboardingControllerCodeGenerationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -45,10 +43,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $examCode);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -60,10 +55,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertStringContainsString('_u1_', $examCode);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -76,10 +68,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDoesNotMatchRegularExpression('/[@#]/', $examCode);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -109,10 +98,7 @@ use PHPUnit\Framework\Attributes\Test;
         );
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -124,10 +110,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertMatchesRegularExpression('/^[a-z0-9_]+$/', $subjectCode);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -139,10 +122,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertStringContainsString('_1_', $subjectCode);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -172,10 +152,7 @@ use PHPUnit\Framework\Attributes\Test;
         );
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * プライベートメソッドを呼び出すためのヘルパー
      */
     private function invokePrivateMethod(string $methodName, array $parameters = [])

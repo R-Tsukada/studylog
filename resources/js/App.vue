@@ -147,6 +147,10 @@
 import axios from 'axios'
 import { reactive } from 'vue'
 import OnboardingModal from './components/onboarding/OnboardingModal.vue'
+import PomodoroTimer from './utils/PomodoroTimer.js'
+import { PomodorooCycleManager } from './utils/PomodorooCycleManager.js'
+import { POMODORO_CONSTANTS } from './utils/constants.js'
+import { debounce } from './utils/debounce.js'
 
 export default {
   name: 'App',
@@ -167,7 +171,13 @@ export default {
       // コンポーネント間通信用のイベントバス
       eventBus: new Map(),
       
-      // グローバルポモドーロタイマー（reactiveで明示的にリアクティブ化）
+      // 新しいポモドーロタイマー（v2.0）- Issue #62対応
+      pomodoroTimerInstance: null,
+      
+      // ポモドーロサイクル管理（新規）
+      pomodorooCycleManager: null,
+      
+      // 後方互換性のためのreactiveプロキシ（既存のコードが動作するように保持）
       globalPomodoroTimer: reactive({
         isActive: false,
         currentSession: null,
@@ -175,6 +185,18 @@ export default {
         startTime: 0,
         timer: null
       }),
+      
+      // 自動開始管理（新規）
+      autoStartState: reactive({
+        timeoutId: null,                   // setTimeout ID
+        isPending: false,                  // 自動開始待機中フラグ
+        pendingSession: null,              // 次のセッション情報
+        startTime: null,                   // 自動開始スケジュール時刻
+        remainingMs: 0                     // 残り時間（ミリ秒）
+      }),
+      
+      // デバウンスされたストレージ保存関数
+      debouncedSaveStorage: null,
       
       // グローバル時間計測タイマー
       globalStudyTimer: reactive({
@@ -193,14 +215,21 @@ export default {
     // 認証状態をチェック
     this.checkAuthState()
     
+    // v2.0ポモドーロタイマーを初期化
+    this.initializePomodoroTimer()
+    
+    // ポモドーロサイクル管理を初期化
+    this.initializePomodorooCycleManager()
+    
     // タイマー状態を復元
     this.restoreTimerStateFromStorage()
     this.restoreStudyTimerStateFromStorage()
+    this.restoreCycleStateFromStorage()
     
-    // 通知権限を要求
-    if (Notification.permission === 'default') {
-      Notification.requestPermission()
-    }
+    // 通知権限を要求（遅延実行）
+    setTimeout(() => {
+      this.requestNotificationPermission()
+    }, POMODORO_CONSTANTS.NOTIFICATION_PERMISSION_REQUEST_DELAY_MS)
   },
   methods: {
     // 認証状態をチェック
@@ -249,10 +278,8 @@ export default {
         console.error('エラーレスポンス:', error.response?.data)
         // 認証エラー（401）以外は再試行の余地があるかもしれないので、すぐにはログアウトしない
         if (error.response?.status === 401) {
-          console.log('認証トークンが無効です。ログアウトします。')
           this.handleLogout()
         } else {
-          console.log('一時的なエラーの可能性があります。認証状態を保持します。')
         }
       }
     },
@@ -331,51 +358,109 @@ export default {
       }
     },
     
-    // グローバルポモドーロタイマー管理
-    startGlobalPomodoroTimer(session) {
-      console.log('グローバルタイマー開始:', session)
-      this.globalPomodoroTimer.currentSession = session
-      this.globalPomodoroTimer.isActive = true
-      this.globalPomodoroTimer.startTime = Date.now()
-      this.globalPomodoroTimer.timeRemaining = session.planned_duration * 60
+    // v2.0ポモドーロタイマー初期化
+    initializePomodoroTimer() {
+      this.pomodoroTimerInstance = new PomodoroTimer()
       
-      // 既存のタイマーがあれば停止
-      if (this.globalPomodoroTimer.timer) {
-        clearInterval(this.globalPomodoroTimer.timer)
+      // デバウンスされたストレージ保存関数を作成（パフォーマンス最適化）
+      this.debouncedSaveStorage = debounce(() => {
+        this.saveTimerStateToStorage()
+      }, POMODORO_CONSTANTS.STORAGE_DEBOUNCE_MS)
+    },
+    
+    // ポモドーロサイクル管理初期化
+    initializePomodorooCycleManager() {
+      this.pomodorooCycleManager = new PomodorooCycleManager()
+    },
+    
+    // 通知権限リクエスト
+    async requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          const permission = await Notification.requestPermission()
+        } catch (error) {
+          console.warn('通知権限リクエストエラー:', error)
+        }
+      }
+    },
+    
+    // グローバルポモドーロタイマー管理（v2.0対応）- Issue #62修正
+    startGlobalPomodoroTimer(session) {
+      
+      const durationSeconds = session.planned_duration * 60
+      
+      const callbacks = {
+        onTick: (remainingSeconds) => {
+          // 後方互換性のため既存のreactiveオブジェクトを更新
+          this.globalPomodoroTimer.timeRemaining = remainingSeconds
+          this.debouncedSaveStorage()
+        },
+        onComplete: () => {
+          this.handleGlobalTimerComplete()
+        },
+        onError: (error) => {
+          console.error('ポモドーロタイマーエラー:', error)
+          this.stopGlobalPomodoroTimer()
+        }
       }
       
-      // 新しいタイマーを開始
-      this.globalPomodoroTimer.timer = setInterval(() => {
-        this.globalPomodoroTimer.timeRemaining--
-        
-        // 毎秒localStorage を更新
-        this.saveTimerStateToStorage()
-        
-        if (this.globalPomodoroTimer.timeRemaining <= 0) {
-          this.handleGlobalTimerComplete()
-        }
-      }, 1000)
+      // v2.0タイマー開始（レースコンディション問題完全修正）
+      this.pomodoroTimerInstance.start(durationSeconds, callbacks, session)
+      
+      // 後方互換性のため既存のreactiveオブジェクトを更新
+      this.globalPomodoroTimer.isActive = true
+      this.globalPomodoroTimer.currentSession = session
+      this.globalPomodoroTimer.startTime = this.pomodoroTimerInstance.startTime
+      this.globalPomodoroTimer.timer = 'v2.0' // v2.0使用の識別
     },
     
     stopGlobalPomodoroTimer() {
-      console.log('グローバルタイマー停止')
-      if (this.globalPomodoroTimer.timer) {
-        clearInterval(this.globalPomodoroTimer.timer)
-        this.globalPomodoroTimer.timer = null
+      
+      if (this.pomodoroTimerInstance) {
+        this.pomodoroTimerInstance.stop()
       }
       
+      // 自動開始もキャンセル
+      this.clearAutoStart()
+      
+      // 後方互換性のため既存のreactiveオブジェクトをクリア
       this.globalPomodoroTimer.isActive = false
       this.globalPomodoroTimer.currentSession = null
       this.globalPomodoroTimer.timeRemaining = 0
       this.globalPomodoroTimer.startTime = 0
+      this.globalPomodoroTimer.timer = null
       
       // localStorage をクリア
       localStorage.removeItem('pomodoroTimer')
     },
     
+    // 一時停止・再開機能（v2.0対応）
+    pauseGlobalPomodoroTimer() {
+      if (this.pomodoroTimerInstance) {
+        this.pomodoroTimerInstance.pause()
+      }
+    },
+    
+    resumeGlobalPomodoroTimer() {
+      if (this.pomodoroTimerInstance) {
+        this.pomodoroTimerInstance.resume()
+      }
+    },
+    
     async handleGlobalTimerComplete() {
-      console.log('ポモドーロタイマー完了')
       const completedSession = { ...this.globalPomodoroTimer.currentSession }
+      
+      // ポモドーロサイクル状態を更新
+      if (this.pomodorooCycleManager && completedSession) {
+        if (completedSession.session_type === 'focus') {
+          this.pomodorooCycleManager.incrementFocusSession()
+        } else {
+          this.pomodorooCycleManager.completeBreakSession()
+        }
+        
+        // サイクル状態を保存
+        this.saveCycleStateToStorage()
+      }
       
       // 通知表示
       if (Notification.permission === 'granted') {
@@ -395,22 +480,14 @@ export default {
       // 音声通知
       this.playNotificationSound()
       
+      // API セッション完了処理を先に実行
+      await this.completeCurrentSession(completedSession)
+      
       // 一旦タイマー停止（状態をクリア）
       this.stopGlobalPomodoroTimer()
       
-      // API セッション完了処理
-      await this.completeCurrentSession(completedSession)
-      
-      // 自動開始設定がONの場合、次のセッションを自動開始
-      const settings = completedSession.settings
-      const shouldAutoStart = settings?.auto_start_break || settings?.auto_start_focus
-      
-      if (shouldAutoStart) {
-        console.log('次のセッション自動開始準備:', completedSession.session_type)
-        setTimeout(() => {
-          this.startNextAutoSession(completedSession)
-        }, 2000) // 2秒後に自動開始
-      }
+      // サイクルベースの自動開始判定
+      this.handleAutoStartWithCycleManagement(completedSession)
     },
     
     playNotificationSound() {
@@ -430,19 +507,15 @@ export default {
         oscillator.start(context.currentTime)
         oscillator.stop(context.currentTime + 0.5)
       } catch (error) {
-        console.log('音声通知をスキップ:', error)
         // 音声が再生できなくてもエラーにしない
       }
     },
     
     saveTimerStateToStorage() {
-      const state = {
-        isActive: this.globalPomodoroTimer.isActive,
-        currentSession: this.globalPomodoroTimer.currentSession,
-        timeRemaining: this.globalPomodoroTimer.timeRemaining,
-        startTime: this.globalPomodoroTimer.startTime
+      if (this.pomodoroTimerInstance) {
+        const serializedState = this.pomodoroTimerInstance.serialize()
+        localStorage.setItem('pomodoroTimer', JSON.stringify(serializedState))
       }
-      localStorage.setItem('pomodoroTimer', JSON.stringify(state))
     },
     
     restoreTimerStateFromStorage() {
@@ -451,51 +524,77 @@ export default {
         if (saved) {
           const state = JSON.parse(saved)
           
-          if (state.isActive && state.currentSession) {
-            // 経過時間を計算
-            const elapsed = Math.floor((Date.now() - state.startTime) / 1000)
-            const remaining = state.timeRemaining - elapsed
+          if (this.pomodoroTimerInstance) {
+            const callbacks = {
+              onTick: (remainingSeconds) => {
+                this.globalPomodoroTimer.timeRemaining = remainingSeconds
+                this.debouncedSaveStorage()
+              },
+              onComplete: () => {
+                this.handleGlobalTimerComplete()
+              },
+              onError: (error) => {
+                console.error('復元時タイマーエラー:', error)
+                this.stopGlobalPomodoroTimer()
+              }
+            }
             
-            if (remaining > 0) {
-              // タイマーを復元
-              this.globalPomodoroTimer.currentSession = state.currentSession
-              this.globalPomodoroTimer.isActive = true
-              this.globalPomodoroTimer.startTime = state.startTime
-              this.globalPomodoroTimer.timeRemaining = remaining
+            const restored = this.pomodoroTimerInstance.deserialize(state, callbacks)
+            
+            if (restored && this.pomodoroTimerInstance.state !== POMODORO_CONSTANTS.TIMER_STATES.IDLE) {
+              // 後方互換性のため既存のreactiveオブジェクトを更新
+              this.globalPomodoroTimer.isActive = this.pomodoroTimerInstance.state === POMODORO_CONSTANTS.TIMER_STATES.RUNNING
+              this.globalPomodoroTimer.currentSession = this.pomodoroTimerInstance.sessionData
+              this.globalPomodoroTimer.startTime = this.pomodoroTimerInstance.startTime
+              this.globalPomodoroTimer.timer = 'v2.0'
               
-              this.globalPomodoroTimer.timer = setInterval(() => {
-                this.globalPomodoroTimer.timeRemaining--
-                
-                if (this.globalPomodoroTimer.timeRemaining <= 0) {
-                  this.handleGlobalTimerComplete()
-                }
-              }, 1000)
-              
-              console.log('タイマー状態復元成功:', remaining, '秒残り')
-            } else {
-              // 時間切れ
-              this.handleGlobalTimerComplete()
             }
           }
         }
       } catch (error) {
-        console.error('タイマー状態復元エラー:', error)
+        console.error('タイマー状態復元エラー (v2.0):', error)
         localStorage.removeItem('pomodoroTimer')
+      }
+    },
+    
+    // ポモドーロサイクル状態をローカルストレージに保存
+    saveCycleStateToStorage() {
+      if (this.pomodorooCycleManager) {
+        const serializedState = this.pomodorooCycleManager.serialize()
+        localStorage.setItem(POMODORO_CONSTANTS.STORAGE_KEYS.CYCLE_STATE, JSON.stringify(serializedState))
+      }
+    },
+    
+    // ポモドーロサイクル状態をローカルストレージから復元
+    restoreCycleStateFromStorage() {
+      try {
+        const saved = localStorage.getItem(POMODORO_CONSTANTS.STORAGE_KEYS.CYCLE_STATE)
+        if (saved && this.pomodorooCycleManager) {
+          const state = JSON.parse(saved)
+          this.pomodorooCycleManager.restoreFromStorage(state)
+        }
+      } catch (error) {
+        console.error('サイクル状態復元エラー:', error)
+        localStorage.removeItem(POMODORO_CONSTANTS.STORAGE_KEYS.CYCLE_STATE)
       }
     },
     
     async completeCurrentSession(session) {
       try {
-        const actualDuration = Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60)
+        // v2.0タイマーから正確な実際の経過時間を取得
+        const actualDuration = this.pomodoroTimerInstance ? 
+          this.pomodoroTimerInstance.getActualDurationMinutes() :
+          (this.globalPomodoroTimer && this.globalPomodoroTimer.startTime ? 
+            Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60) : 
+            session.planned_duration)
         
         const response = await axios.post(`/api/pomodoro/${session.id}/complete`, {
           actual_duration: actualDuration,
           was_interrupted: false,
-          notes: '自動完了'
+          notes: 'v2.0タイマー自動完了'
         })
         
         if (response.status === 200) {
-          console.log('セッション自動完了:', session.session_type)
         }
       } catch (error) {
         console.error('セッション完了エラー:', error)
@@ -505,7 +604,6 @@ export default {
     
     async startNextAutoSession(completedSession) {
       try {
-        console.log('次のセッション自動開始:', completedSession.session_type)
         
         // 次のセッションタイプを決定
         let nextSessionType
@@ -533,7 +631,6 @@ export default {
         )
         
         if (!shouldAutoStart) {
-          console.log('自動開始設定が無効なため、次のセッションは開始しません')
           return
         }
         
@@ -550,7 +647,6 @@ export default {
         
         if (response.status === 201 || response.status === 200) {
           const newSession = response.data
-          console.log('次のセッション自動開始:', newSession.session_type)
           
           // グローバルタイマーで新しいセッションを開始
           this.startGlobalPomodoroTimer(newSession)
@@ -576,11 +672,171 @@ export default {
       }
     },
     
+    // サイクル管理を使った自動開始処理
+    handleAutoStartWithCycleManagement(completedSession) {
+      
+      if (!this.pomodorooCycleManager || !completedSession) {
+        return
+      }
+      
+      const settings = completedSession.settings
+      
+      if (!settings?.auto_start_break && !settings?.auto_start_focus) {
+        return
+      }
+      
+      // サイクル管理から次のセッションタイプを決定
+      const nextSessionType = this.pomodorooCycleManager.getNextSessionType()
+      const cycleStats = this.pomodorooCycleManager.getCycleStats()
+      
+      
+      // 自動開始設定の個別チェック
+      const breakCondition = (nextSessionType !== 'focus' && settings?.auto_start_break)
+      const focusCondition = (nextSessionType === 'focus' && settings?.auto_start_focus)
+      const shouldAutoStart = breakCondition || focusCondition
+      
+      
+      if (!shouldAutoStart) {
+        return
+      }
+      
+      
+      // 長い休憩の場合はサイクル完了処理
+      if (nextSessionType === 'long_break' && cycleStats.isLongBreakTime) {
+        const completedCycle = this.pomodorooCycleManager.completeCycle()
+        this.saveCycleStateToStorage()
+      }
+      
+      // 自動開始実行（遅延あり）
+      this.scheduleAutoStart(() => {
+        this.startNextAutoSessionWithCycleInfo(completedSession, nextSessionType)
+      }, POMODORO_CONSTANTS.AUTO_START_DELAY_MS)
+    },
+    
+    // サイクル情報を使った次セッション開始
+    async startNextAutoSessionWithCycleInfo(completedSession, nextSessionType) {
+      try {
+        const settings = completedSession.settings
+        
+        // デフォルト時間設定
+        let nextDuration
+        if (nextSessionType === 'focus') {
+          nextDuration = settings?.focus_duration || POMODORO_CONSTANTS.DEFAULT_FOCUS_DURATION
+        } else if (nextSessionType === 'short_break') {
+          nextDuration = settings?.short_break_duration || POMODORO_CONSTANTS.DEFAULT_SHORT_BREAK_DURATION
+        } else if (nextSessionType === 'long_break') {
+          nextDuration = settings?.long_break_duration || POMODORO_CONSTANTS.DEFAULT_LONG_BREAK_DURATION
+        }
+        
+        
+        // APIで次のセッションを作成
+        const sessionData = {
+          session_type: nextSessionType,
+          planned_duration: nextDuration,
+          study_session_id: null,
+          subject_area_id: nextSessionType === 'focus' ? completedSession.subject_area_id : null,
+          settings: settings
+        }
+        
+        const response = await axios.post('/api/pomodoro', sessionData)
+        
+        if (response.status === 201 || response.status === 200) {
+          const newSession = response.data
+          
+          // グローバルタイマーで新しいセッションを開始
+          this.startGlobalPomodoroTimer(newSession)
+          
+          // 自動開始通知
+          if (Notification.permission === 'granted') {
+            const messages = {
+              focus: '🎯 集中セッション自動開始！',
+              short_break: '☕ 短い休憩自動開始！',
+              long_break: '🛋️ 長い休憩自動開始！'
+            }
+            
+            new Notification('ポモドーロタイマー', {
+              body: messages[nextSessionType] || '次のセッション自動開始！',
+              icon: '/favicon.ico'
+            })
+          }
+        } else {
+          console.error('サイクルベース次セッション作成失敗:', response.status, response.data)
+        }
+      } catch (error) {
+        console.error('サイクルベース自動開始エラー:', error)
+      }
+    },
+    
+    // ========== 自動開始管理メソッド ==========
+    
+    // 自動開始をスケジュール
+    scheduleAutoStart(next, delayMs = POMODORO_CONSTANTS.AUTO_START_DELAY_MS) {
+      // 既存の自動開始をクリア
+      this.clearAutoStart()
+      
+      this.autoStartState.isPending = true
+      // Accept either a session object or a callback that will start the next session
+      this.autoStartState.pendingSession = next
+      this.autoStartState.startTime = Date.now() + delayMs
+      this.autoStartState.remainingMs = delayMs
+      
+      const typeLabel = typeof next === 'function' ? 'callback' : next?.session_type
+      
+      this.autoStartState.timeoutId = setTimeout(() => {
+        this.executeAutoStart()
+      }, delayMs)
+    },
+    
+    // 自動開始を実行
+    executeAutoStart() {
+      if (this.autoStartState.isPending && this.autoStartState.pendingSession) {
+        const pending = this.autoStartState.pendingSession
+        const typeLabel = typeof pending === 'function' ? 'callback' : pending?.session_type
+        
+        // セッションを開始（既に稼働中ならスキップ）
+        if (this.globalPomodoroTimer?.isActive) {
+          return
+        }
+        
+        // 状態をクリア
+        this.clearAutoStart()
+        
+        // セッションを開始
+        if (typeof pending === 'function') {
+          pending()
+        } else {
+          this.startGlobalPomodoroTimer(pending)
+        }
+      }
+    },
+    
+    // 自動開始をキャンセル/クリア
+    clearAutoStart() {
+      if (this.autoStartState.timeoutId) {
+        clearTimeout(this.autoStartState.timeoutId)
+      }
+      
+      this.autoStartState.timeoutId = null
+      this.autoStartState.isPending = false
+      this.autoStartState.pendingSession = null
+      this.autoStartState.startTime = null
+      this.autoStartState.remainingMs = 0
+    },
+    
+    // 自動開始の残り時間を取得
+    getAutoStartRemainingTime() {
+      if (!this.autoStartState.isPending || !this.autoStartState.startTime) {
+        return 0
+      }
+      
+      const remaining = Math.max(0, this.autoStartState.startTime - Date.now())
+      return Math.ceil(remaining / 1000) // 秒単位で返す
+    },
+    
     // ========== 時間計測タイマー管理 ==========
     
     // 時間計測タイマー開始
     startGlobalStudyTimer(session) {
-      console.log('グローバル時間計測タイマー開始:', session)
       this.globalStudyTimer.currentSession = session
       this.globalStudyTimer.isActive = true
       this.globalStudyTimer.startTime = Date.now()
@@ -600,7 +856,6 @@ export default {
     
     // 時間計測タイマー停止
     stopGlobalStudyTimer() {
-      console.log('グローバル時間計測タイマー停止')
       if (this.globalStudyTimer.timer) {
         clearInterval(this.globalStudyTimer.timer)
         this.globalStudyTimer.timer = null
@@ -658,7 +913,6 @@ export default {
               this.saveStudyTimerStateToStorage()
             }, 1000)
             
-            console.log('時間計測タイマー状態復元成功:', elapsed, '分経過')
           }
         }
       } catch (error) {
@@ -756,6 +1010,8 @@ export default {
       globalPomodoroTimer: this.globalPomodoroTimer,
       startGlobalPomodoroTimer: this.startGlobalPomodoroTimer,
       stopGlobalPomodoroTimer: this.stopGlobalPomodoroTimer,
+      pauseGlobalPomodoroTimer: this.pauseGlobalPomodoroTimer,  // v2.0新機能
+      resumeGlobalPomodoroTimer: this.resumeGlobalPomodoroTimer, // v2.0新機能
       globalStudyTimer: this.globalStudyTimer,
       startGlobalStudyTimer: this.startGlobalStudyTimer,
       stopGlobalStudyTimer: this.stopGlobalStudyTimer,

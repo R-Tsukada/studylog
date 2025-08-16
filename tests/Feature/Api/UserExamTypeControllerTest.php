@@ -7,16 +7,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserExamTypeControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_get_user_exam_types_list()
     {
@@ -61,10 +59,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertNotContains('他のユーザーの試験', $examNames);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_create_exam_type()
     {
@@ -108,10 +103,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertStringContainsString('awssolutio', $examType->code);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_exam_type_creation()
     {
@@ -147,10 +139,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['exam_date']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_exam_type_names()
     {
@@ -177,10 +166,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_exam_type()
     {
@@ -218,10 +204,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_other_users_exam_type()
     {
@@ -248,10 +231,7 @@ use PHPUnit\Framework\Attributes\Test;
             ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_cannot_update_system_exam_types()
     {
@@ -272,10 +252,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(404); // システム試験はユーザーの所有物として見つからない
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_exam_type()
     {
@@ -300,10 +277,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication()
     {
@@ -316,10 +290,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_generates_unique_codes_for_multiple_exams()
     {

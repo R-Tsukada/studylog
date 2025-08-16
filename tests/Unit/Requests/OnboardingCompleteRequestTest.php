@@ -5,16 +5,14 @@ namespace Tests\Unit\Requests;
 use App\Http\Requests\OnboardingCompleteRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OnboardingCompleteRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -34,10 +32,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step', $rules);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -58,10 +53,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_notes', $rules);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -73,7 +65,7 @@ use PHPUnit\Framework\Attributes\Test;
             'step_data' => [
                 'setup_step' => [
                     'exam_type' => 'aws_clf',
-                    'exam_date' => '2025-08-15',
+                    'exam_date' => now()->addDays(30)->format('Y-m-d'), // 30日後の日付
                     'daily_goal_minutes' => 60,
                 ],
             ],
@@ -85,10 +77,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->passes());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -116,10 +105,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($validator->passes());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -140,10 +126,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step.exam_date', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -164,10 +147,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step.daily_goal_minutes', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -188,10 +168,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_name', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -212,10 +189,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('step_data.setup_step.custom_exam_color', $validator->errors()->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

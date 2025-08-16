@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MyPageTest extends TestCase
@@ -31,10 +32,7 @@ class MyPageTest extends TestCase
         return User::factory()->create($data);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_access_user_information_for_mypage()
     {
@@ -58,10 +56,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertFalse($response->json('user.is_google_user'));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_identifies_google_users_correctly()
     {
@@ -79,10 +74,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_profile_nickname_and_email()
     {
@@ -113,10 +105,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_update_user_password()
     {
@@ -143,10 +132,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue(Hash::check('NewPassword123!', $user->password));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_validates_profile_update_data()
     {
@@ -190,10 +176,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['password']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_prevents_duplicate_email_during_profile_update()
     {
@@ -211,10 +194,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_allows_keeping_same_email_during_profile_update()
     {
@@ -230,10 +210,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJson(['success' => true]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_regular_user_account_with_password()
     {
@@ -255,10 +232,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_can_delete_google_user_account_without_password()
     {
@@ -279,10 +253,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseMissing('users', ['id' => $googleUser->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_account_deletion_with_wrong_password()
     {
@@ -302,10 +273,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertDatabaseHas('users', ['id' => $user->id]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_requires_authentication_for_mypage_endpoints()
     {
@@ -327,10 +295,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_deletes_user_tokens_when_account_is_deleted()
     {
@@ -366,10 +331,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_profile_update_for_google_users()
     {
@@ -393,10 +355,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_maintains_data_integrity_during_profile_updates()
     {

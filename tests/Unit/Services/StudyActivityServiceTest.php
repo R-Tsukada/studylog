@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\StudyActivityService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StudyActivityServiceTest extends TestCase
@@ -39,10 +40,7 @@ class StudyActivityServiceTest extends TestCase
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -99,10 +97,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('focus', $pomodoroItem['session_details']['session_type']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -138,10 +133,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertCount(1, $history);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -223,10 +215,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertIsArray($stats['insights']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -274,10 +263,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertIsArray($insights['recommendations']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -318,10 +304,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertLessThan(24, $context['time_of_day']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -347,10 +330,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($hasTimeTrackingSuggestion);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -384,10 +364,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(30, $stats['overview']['total_study_time']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -406,10 +383,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('recommended', $suggestion);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -442,10 +416,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(50.0, $stats['by_method']['pomodoro']['completion_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -473,10 +444,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue($hasCompletionRateInsight);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -525,10 +493,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertArrayHasKey('stats', $result);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -556,10 +521,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

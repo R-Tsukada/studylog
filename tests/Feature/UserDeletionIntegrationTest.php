@@ -12,16 +12,14 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserDeletionIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function complete_user_deletion_workflow()
     {
@@ -114,10 +112,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, DailyStudySummary::where('user_id', $user->id)->count());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_deletion_does_not_affect_other_users_data()
     {
@@ -180,10 +175,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(5, StudySession::where('user_id', $otherUser->id)->count());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function system_data_is_preserved_during_user_deletion()
     {
@@ -235,10 +227,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function google_user_deletion_workflow()
     {
@@ -272,10 +261,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, StudySession::where('user_id', $googleUser->id)->count());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_deletion_with_mixed_data_types()
     {
@@ -344,10 +330,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function user_deletion_performance_with_large_dataset()
     {

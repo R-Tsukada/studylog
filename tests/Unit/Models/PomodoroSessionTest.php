@@ -6,16 +6,14 @@ use App\Models\PomodoroSession;
 use App\Models\StudySession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PomodoroSessionTest extends TestCase
 {
     use RefreshDatabase;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -40,10 +38,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($fillable, $pomodoroSession->getFillable());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -64,10 +59,7 @@ use PHPUnit\Framework\Attributes\Test;
         }
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -80,10 +72,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($user->id, $pomodoroSession->user->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -100,10 +89,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($studySession->id, $pomodoroSession->studySession->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -121,10 +107,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($session1->id, $user1Sessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -141,10 +124,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($completedSession->id, $completedSessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -162,10 +142,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('focus', $focusSessions->first()->session_type);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -184,10 +161,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertContains('long_break', $breakSessions->pluck('session_type')->toArray());
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -214,10 +188,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -241,10 +212,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($todaySession->id, $todaySessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -268,10 +236,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals($sessions->first()->id, $recentSessions->first()->id);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -304,10 +269,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertIsArray($pomodoroSession->settings);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -324,10 +286,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(23, $pomodoroSession->duration_in_minutes);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -340,10 +299,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertFalse($completedSession->is_active);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -365,10 +321,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, $pomodoroSession->completion_percentage);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -385,10 +338,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('long_break', $longBreakSession->session_type);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -406,10 +356,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertInstanceOf(StudySession::class, $pomodoroSession->studySession);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

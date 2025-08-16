@@ -10,6 +10,7 @@ use App\Models\StudySession;
 use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DashboardAchievementRateTest extends TestCase
@@ -49,10 +50,7 @@ class DashboardAchievementRateTest extends TestCase
         $this->controller = new DashboardController;
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 目標時間と学習セッションのみで正確な達成率が計算されること
      */
@@ -89,10 +87,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(67, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 目標時間とポモドーロセッションのみで正確な達成率が計算されること
      */
@@ -140,10 +135,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(50, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 目標時間と学習セッション・ポモドーロ両方で正確な合計達成率が計算されること
      */
@@ -201,10 +193,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(90, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 目標達成率が100%を超える場合は100%にキャップされること
      */
@@ -241,10 +230,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(100, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * アクティブな目標が設定されていない場合は0%が返ること
      */
@@ -281,10 +267,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 目標時間が0の場合は0%が返ること
      */
@@ -321,10 +304,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(0, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 昨日の学習データは計算に含まれないこと
      */
@@ -380,10 +360,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(50, $data['achievement_rate']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      * 他のユーザーの学習データは計算に含まれないこと
      */

@@ -7,6 +7,7 @@ use App\Models\SubjectArea;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OnboardingCustomSubjectsIntegrationTest extends TestCase
@@ -28,10 +29,7 @@ class OnboardingCustomSubjectsIntegrationTest extends TestCase
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -44,7 +42,7 @@ use PHPUnit\Framework\Attributes\Test;
                 'step_data' => [
                     'setup_step' => [
                         'exam_type' => 'ipa_fe',
-                        'exam_date' => '2025-08-15',
+                        'exam_date' => now()->addDays(30)->format('Y-m-d'),
                         'daily_goal_minutes' => 60,
                         'custom_subjects' => [
                             ['name' => 'データベース'],
@@ -75,10 +73,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertFalse($subjectAreas[1]->is_system);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]
@@ -120,10 +115,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('分野B', $subjectAreas[1]->name);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/**
+    /**
      * テストメソッド
      */
     #[Test]

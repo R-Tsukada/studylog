@@ -7,16 +7,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthenticationEdgeCasesTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_nickname_gracefully()
     {
@@ -31,10 +29,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_whitespace_only_nickname()
     {
@@ -49,10 +44,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_trims_nickname_whitespace()
     {
@@ -69,10 +61,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals('トリムテスト', $user->nickname);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_rejects_special_characters_in_nickname()
     {
@@ -116,10 +105,7 @@ use PHPUnit\Framework\Attributes\Test;
         ]);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_email_uniqueness()
     {
@@ -141,10 +127,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_extremely_long_password()
     {
@@ -163,10 +146,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertTrue(Hash::check($longPassword, $user->password));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_unicode_characters_in_password()
     {
@@ -190,10 +170,7 @@ use PHPUnit\Framework\Attributes\Test;
         $loginResponse->assertStatus(200);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_null_and_undefined_fields()
     {
@@ -209,10 +186,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_empty_request_body()
     {
@@ -222,10 +196,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname', 'email', 'password']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_simultaneous_login_attempts()
     {
@@ -253,10 +224,7 @@ use PHPUnit\Framework\Attributes\Test;
         $this->assertEquals(count($tokens), count(array_unique($tokens)));
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_token_with_invalid_bearer_prefix()
     {
@@ -271,10 +239,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_expired_or_invalid_tokens()
     {
@@ -295,10 +260,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_profile_update_edge_cases()
     {
@@ -334,10 +296,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['nickname']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_database_constraint_violations()
     {
@@ -362,10 +321,7 @@ use PHPUnit\Framework\Attributes\Test;
             ->assertJsonValidationErrors(['email']);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_missing_request_headers()
     {
@@ -383,10 +339,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(200);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_logout_with_invalid_token()
     {
@@ -398,10 +351,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_logout_without_token()
     {
@@ -411,10 +361,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(401);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_user_info_access_after_logout()
     {
@@ -430,10 +377,7 @@ use PHPUnit\Framework\Attributes\Test;
         $response->assertStatus(200);
     }
 
-    
-use PHPUnit\Framework\Attributes\Test;
-
-/** @test */
+    /** @test */
     #[Test]
     public function it_handles_multiple_logout_attempts()
     {
