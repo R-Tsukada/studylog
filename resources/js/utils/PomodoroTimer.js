@@ -56,11 +56,6 @@ class PomodoroTimer {
       this.tick()
     }, POMODORO_CONSTANTS.TICK_INTERVAL_MS)
     
-    console.log('タイマー開始:', {
-      duration: durationSeconds,
-      startTime: this.startTime,
-      deadline: this.deadline
-    })
     
     // 初回実行
     this.tick()
@@ -113,11 +108,6 @@ class PomodoroTimer {
     this.state = POMODORO_CONSTANTS.TIMER_STATES.COMPLETED
     this.cleanup()
     
-    console.log('タイマー完了:', {
-      startTime: this.startTime,
-      completedAt: Date.now(),
-      actualDuration: this.getActualDurationMinutes()
-    })
     
     if (this.callbacks.onComplete) {
       // 非同期でコールバック実行（UIブロック回避）
@@ -138,10 +128,6 @@ class PomodoroTimer {
       this.pausedRemaining = Math.max(0, Math.ceil(remainingMs / 1000))
       this.cleanup()
       
-      console.log('タイマー一時停止:', {
-        pausedAt: this.pausedAt,
-        remainingSeconds: this.pausedRemaining
-      })
     }
   }
 
@@ -162,11 +148,6 @@ class PomodoroTimer {
         this.tick()
       }, POMODORO_CONSTANTS.TICK_INTERVAL_MS)
       
-      console.log('タイマー再開:', {
-        resumedAt: now,
-        newDeadline: this.deadline,
-        remainingSeconds: this.pausedRemaining
-      })
       
       this.tick() // 即座に更新
     }
@@ -292,25 +273,15 @@ class PomodoroTimer {
             this.tick()
           }, POMODORO_CONSTANTS.TICK_INTERVAL_MS)
           
-          console.log('タイマー状態復元（実行中）:', {
-            remainingSeconds,
-            startTime: this.startTime,
-            deadline: this.deadline
-          })
           
           this.tick() // 即座に更新
         } else {
           // 期限切れのため自動完了
-          console.log('タイマー状態復元（期限切れ）: 自動完了')
           this.complete()
         }
       } else if (this.state === POMODORO_CONSTANTS.TIMER_STATES.PAUSED) {
         // 一時停止状態の復元
         if (this.pausedRemaining > 0) {
-          console.log('タイマー状態復元（一時停止）:', {
-            pausedRemaining: this.pausedRemaining,
-            pausedAt: this.pausedAt
-          })
         } else {
           // 不正な一時停止状態
           this.state = POMODORO_CONSTANTS.TIMER_STATES.IDLE
