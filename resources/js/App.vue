@@ -229,7 +229,7 @@ export default {
     // 通知権限を要求（遅延実行）
     setTimeout(() => {
       this.requestNotificationPermission()
-    }, POMODORO_CONSTANTS.NOTIFICATION_PERMISSION_REQUEST_DELAY)
+    }, POMODORO_CONSTANTS.NOTIFICATION_PERMISSION_REQUEST_DELAY_MS)
   },
   methods: {
     // 認証状態をチェック
@@ -591,7 +591,9 @@ export default {
         // v2.0タイマーから正確な実際の経過時間を取得
         const actualDuration = this.pomodoroTimerInstance ? 
           this.pomodoroTimerInstance.getActualDurationMinutes() :
-          Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60)
+          (this.globalPomodoroTimer && this.globalPomodoroTimer.startTime ? 
+            Math.ceil((Date.now() - this.globalPomodoroTimer.startTime) / 1000 / 60) : 
+            session.planned_duration)
         
         const response = await axios.post(`/api/pomodoro/${session.id}/complete`, {
           actual_duration: actualDuration,
@@ -727,7 +729,7 @@ export default {
       }
       
       // 自動開始実行（遅延あり）
-      setTimeout(() => {
+      this.scheduleAutoStart(() => {
         this.startNextAutoSessionWithCycleInfo(completedSession, nextSessionType)
       }, POMODORO_CONSTANTS.AUTO_START_DELAY_MS)
     },

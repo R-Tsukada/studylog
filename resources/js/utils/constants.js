@@ -20,7 +20,7 @@ export const POMODORO_CONSTANTS = {
   
   // 自動開始関連（新規）
   AUTO_START_COUNTDOWN_INTERVAL: 100,        // カウントダウン更新間隔（100ms）
-  NOTIFICATION_PERMISSION_REQUEST_DELAY: 1000, // 通知権限要求の遅延
+  NOTIFICATION_PERMISSION_REQUEST_DELAY_MS: 1000, // 通知権限要求の遅延
   
   // ポモドーロサイクル管理（拡張）
   POMODORO_CYCLE_LENGTH: 4,        // 4回のfocus後にlong_break（既存のFOCUS_SESSIONS_PER_CYCLEと統合）

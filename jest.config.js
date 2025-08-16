@@ -15,8 +15,8 @@ export default {
     '!resources/js/app.js'
   ],
   
-  // テスト環境
-  testEnvironment: 'node',
+  // テスト環境 - Vue.jsコンポーネントテスト用にjsdomを使用
+  testEnvironment: 'jsdom',
   
   // モジュール解決
   moduleNameMapper: {
@@ -24,14 +24,20 @@ export default {
   },
   
   // セットアップファイル
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup-vue.js'],
   
-  // 変換設定 - Babel使用
+  // 変換設定 - Babel使用 + Vue.jsファイル対応
   transform: {
     '^.+\\.js$': ['babel-jest', { 
       presets: [['@babel/preset-env', { targets: { node: 'current' } }]]
-    }]
+    }],
+    '^.+\\.vue$': '@vue/vue3-jest'
   },
+  
+  // Vue.js 3 用の追加設定
+  transformIgnorePatterns: [
+    'node_modules/(?!(vue|@vue)/)'
+  ],
   
   // 詳細出力
   verbose: true
