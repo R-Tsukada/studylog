@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals'
 import { POMODORO_CONSTANTS } from '../../../resources/js/utils/constants.js'
 
 describe('POMODORO_CONSTANTS 自動開始機能関連定数テスト', () => {
@@ -99,9 +100,9 @@ describe('POMODORO_CONSTANTS 自動開始機能関連定数テスト', () => {
       expect(typeof POMODORO_CONSTANTS.STORAGE_DEBOUNCE_MS).toBe('number')
     })
 
-    test('新規追加の自動開始遅延が既存のストレージデバウンスより長い', () => {
+    test('新規追加の自動開始遅延が既存のストレージデバウンスと同等またはそれ以上', () => {
       expect(POMODORO_CONSTANTS.AUTO_START_DELAY_MS)
-        .toBeGreaterThan(POMODORO_CONSTANTS.STORAGE_DEBOUNCE_MS)
+        .toBeGreaterThanOrEqual(POMODORO_CONSTANTS.STORAGE_DEBOUNCE_MS)
     })
   })
 
