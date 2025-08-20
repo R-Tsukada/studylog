@@ -455,7 +455,7 @@ export default {
         if (completedSession.session_type === 'focus') {
           this.pomodorooCycleManager.incrementFocusSession()
         } else {
-          this.pomodorooCycleManager.completeBreakSession()
+          this.pomodorooCycleManager.completeBreakSession(completedSession.session_type)
         }
         
         // サイクル状態を保存
