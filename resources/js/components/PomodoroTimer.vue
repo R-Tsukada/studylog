@@ -169,6 +169,7 @@
         <button
           @click="pauseSession"
           v-if="!isPaused"
+          data-testid="pause-button"
           class="py-2 px-4 text-white font-medium rounded-lg transition-colors"
           style="background-color: var(--color-muted-yellow);"
           @mouseover="handleControlButtonHover($event, 'var(--color-muted-yellow-dark)')"
@@ -179,6 +180,7 @@
         <button
           @click="resumeSession"
           v-else
+          data-testid="resume-button"
           class="py-2 px-4 text-white font-medium rounded-lg transition-colors"
           style="background-color: var(--color-muted-green);"
           @mouseover="handleControlButtonHover($event, 'var(--color-muted-green-dark)')"
@@ -243,7 +245,7 @@
 <script>
 export default {
   name: 'PomodoroTimer',
-  inject: ['globalPomodoroTimer', 'startGlobalPomodoroTimer', 'stopGlobalPomodoroTimer'],
+  inject: ['globalPomodoroTimer', 'startGlobalPomodoroTimer', 'stopGlobalPomodoroTimer', 'pauseGlobalPomodoroTimer', 'resumeGlobalPomodoroTimer'],
   data() {
     return {
       // セッション設定
@@ -675,6 +677,31 @@ export default {
     handleInputBlur(event) {
       event.target.style.borderColor = 'var(--color-muted-gray)';
       event.target.style.boxShadow = 'none';
+    },
+    
+    // 一時停止・再開機能
+    pauseSession() {
+      try {
+        this.isPaused = true;
+        if (this.pauseGlobalPomodoroTimer && typeof this.pauseGlobalPomodoroTimer === 'function') {
+          this.pauseGlobalPomodoroTimer();
+        }
+      } catch (error) {
+        console.warn('一時停止に失敗しました:', error.message);
+        // エラーが発生してもisPausedは変更される（UI状態は更新）
+      }
+    },
+    
+    resumeSession() {
+      try {
+        this.isPaused = false;
+        if (this.resumeGlobalPomodoroTimer && typeof this.resumeGlobalPomodoroTimer === 'function') {
+          this.resumeGlobalPomodoroTimer();
+        }
+      } catch (error) {
+        console.warn('再開に失敗しました:', error.message);
+        // エラーが発生してもisPausedはfalseにする（UI状態は更新）
+      }
     }
     
   }
