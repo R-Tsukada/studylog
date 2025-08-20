@@ -218,7 +218,8 @@ describe('PomodorooCycleManager ポモドーロサイクル管理テスト', () 
       expect(stats.currentCycleStartTime).toBe(savedState.currentCycleStartTime)
       expect(stats.lastSessionCompletedAt).toBe(savedState.lastSessionCompletedAt)
       expect(stats.cycleHistoryLength).toBe(2)
-      expect(stats.nextSessionType).toBe('short_break')
+      // 修正後: 最後がbreakなので次は focus が提案される
+      expect(stats.nextSessionType).toBe('focus')
     })
 
     test('不正な復元データを安全に処理する', () => {
@@ -237,6 +238,208 @@ describe('PomodorooCycleManager ポモドーロサイクル管理テスト', () 
       cycleManager.restoreFromStorage('invalid')
       stats = cycleManager.getCycleStats()
       expect(stats.completedFocusSessions).toBe(0)
+    })
+  })
+
+  // ✅ Issue #62 修正確認 - 修正後の正しい動作確認
+  describe('✅ 休憩サイクル問題 (Issue #62) 修正確認', () => {
+    test('修正後: 短い休憩完了後は集中セッションが提案される', () => {
+      // 1. 集中セッション完了 → 短い休憩提案 (正常)
+      cycleManager.incrementFocusSession()
+      expect(cycleManager.getNextSessionType()).toBe('short_break')
+      
+      // 2. 短い休憩完了
+      cycleManager.completeBreakSession()
+      
+      // 3. 修正後: 集中セッションが提案される（修正済み）
+      const nextType = cycleManager.getNextSessionType()
+      expect(nextType).toBe('focus') // 修正後の正しい動作
+      
+      // 履歴確認: focus → break の順で記録されているはず
+      const history = cycleManager.pomodoroCounterState.cycleHistory
+      expect(history).toHaveLength(2)
+      expect(history[0].sessionType).toBe('focus')
+      expect(history[1].sessionType).toBe('break')
+    })
+
+    test('修正後: 長い休憩完了後は新サイクルの集中セッションが提案される', () => {
+      // 4回の集中セッション完了
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      
+      // 長い休憩完了
+      cycleManager.completeBreakSession()
+      
+      // 修正後: 新サイクルの集中セッションが提案される（修正済み）
+      const nextType = cycleManager.getNextSessionType()
+      expect(nextType).toBe('focus') // 修正後の正しい動作
+      
+      // 履歴確認
+      const history = cycleManager.pomodoroCounterState.cycleHistory
+      expect(history).toHaveLength(5) // focus×4 + break×1
+      expect(history[4].sessionType).toBe('break')
+    })
+
+    test('修正確認: getNextSessionTypeは履歴も参照するようになった', () => {
+      // 集中 → 休憩 → (次のセッションタイプ決定)
+      cycleManager.incrementFocusSession()
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(1)
+      
+      cycleManager.completeBreakSession()
+      // 休憩完了後も集中セッション数は変わらない
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(1)
+      
+      // 修正後: 履歴を参照して正しく focus が提案される
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+    })
+  })
+
+  // 🟢 TDD Green Phase - 修正後の期待動作
+  describe('🟢 休憩サイクル修正 - 期待される動作 (実装後に成功)', () => {
+    test('【修正目標】短い休憩完了後は集中セッションが提案される', () => {
+      // 集中 → 短い休憩 → 集中 のサイクル
+      cycleManager.incrementFocusSession()
+      expect(cycleManager.getNextSessionType()).toBe('short_break')
+      
+      cycleManager.completeBreakSession()
+      
+      // 修正後: 集中セッションが提案されるべき
+      const nextType = cycleManager.getNextSessionType()
+      expect(nextType).toBe('focus') // 修正目標
+    })
+
+    test('【修正目標】長い休憩完了後は新サイクルの集中セッションが提案される', () => {
+      // 4回集中 → 長い休憩 → 新サイクル集中
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      
+      cycleManager.completeBreakSession()
+      
+      // 修正後: 新サイクルの集中セッションが提案されるべき
+      const nextType = cycleManager.getNextSessionType()
+      expect(nextType).toBe('focus') // 修正目標
+    })
+
+    test('【修正目標】完全なポモドーロサイクルテスト', () => {
+      const expectedSequence = [
+        'focus',       // 初回
+        'short_break', // 1回目集中完了後
+        'focus',       // 1回目休憩完了後
+        'short_break', // 2回目集中完了後
+        'focus',       // 2回目休憩完了後
+        'short_break', // 3回目集中完了後
+        'focus',       // 3回目休憩完了後
+        'long_break',  // 4回目集中完了後
+        'focus'        // 長い休憩完了後（新サイクル）
+      ]
+      
+      let actualSequence = []
+      
+      // 初回
+      actualSequence.push(cycleManager.getNextSessionType())
+      
+      // 4回のサイクル
+      for (let cycle = 0; cycle < 4; cycle++) {
+        // 集中セッション完了
+        cycleManager.incrementFocusSession()
+        actualSequence.push(cycleManager.getNextSessionType())
+        
+        // 休憩セッション完了
+        cycleManager.completeBreakSession()
+        actualSequence.push(cycleManager.getNextSessionType())
+      }
+      
+      // 修正後は期待するシーケンスと一致するはず
+      expect(actualSequence).toEqual(expectedSequence)
+    })
+  })
+
+  // 🔵 TDD Refactor Phase - エッジケースと安全性テスト
+  describe('🔵 Refactor Phase - エッジケースと安全性', () => {
+    test('空の履歴でも安全に動作する', () => {
+      // 初期状態（履歴なし）
+      expect(cycleManager.pomodoroCounterState.cycleHistory.length).toBe(0)
+      
+      // 初回は集中セッションが提案される
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+    })
+
+    test('不正な履歴データでも安全に動作する', () => {
+      // 意図的に不正なデータを設定
+      cycleManager.pomodoroCounterState.cycleHistory = [
+        { sessionType: 'invalid_type', completedAt: Date.now() }
+      ]
+      
+      // フォールバックでfocusが返される
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+    })
+
+    test('履歴データが不完全でも安全に動作する', () => {
+      // sessionTypeが欠けているデータ
+      cycleManager.pomodoroCounterState.cycleHistory = [
+        { completedAt: Date.now() }
+      ]
+      
+      // フォールバックでfocusが返される
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+    })
+
+    test('サイクルリセット後の動作確認', () => {
+      // 長いサイクルを完了
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+        cycleManager.completeBreakSession()
+      }
+      
+      // サイクル完了
+      const completedCycle = cycleManager.completeCycle()
+      expect(completedCycle.completedFocusSessions).toBe(4)
+      
+      // リセット後は初回状態
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(0)
+    })
+
+    test('大量のセッション履歴でも正しく動作する', () => {
+      // 大量のセッションをシミュレート
+      for (let i = 0; i < 100; i++) {
+        cycleManager.incrementFocusSession()
+        cycleManager.completeBreakSession()
+      }
+      
+      // 最後は休憩セッションなので次は集中
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+      
+      // 履歴数確認
+      expect(cycleManager.getCycleStats().cycleHistoryLength).toBe(200) // focus×100 + break×100
+    })
+
+    test('長い休憩後のサイクルリセット確認', () => {
+      // 4回集中 + 3回短い休憩 + 長い休憩
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+        if (i < 3) {
+          // 短い休憩
+          expect(cycleManager.getNextSessionType()).toBe('short_break')
+          cycleManager.completeBreakSession()
+        }
+      }
+      
+      // 4回目後は長い休憩
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      cycleManager.completeBreakSession()
+      
+      // 長い休憩後は新サイクルの集中
+      expect(cycleManager.getNextSessionType()).toBe('focus')
+      
+      // 状態確認
+      const stats = cycleManager.getCycleStats()
+      expect(stats.completedFocusSessions).toBe(4) // まだリセットされていない
+      expect(stats.cycleHistoryLength).toBe(8) // focus×4 + break×4
     })
   })
 })

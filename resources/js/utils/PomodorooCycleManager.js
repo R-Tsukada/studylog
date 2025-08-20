@@ -48,20 +48,43 @@ export class PomodorooCycleManager {
 
   /**
    * 次のセッションタイプを決定
+   * Issue #62対応: 履歴を参照して最後に完了したセッションタイプも考慮
    * @returns {string} 'focus' | 'short_break' | 'long_break'
    */
   getNextSessionType() {
     const focusCount = this.pomodoroCounterState.completedFocusSessions
+    const history = this.pomodoroCounterState.cycleHistory
     
-    if (focusCount === 0) {
-      return 'focus' // 初回は集中セッション
+    // 履歴がない場合は初回集中セッション
+    if (!Array.isArray(history) || history.length === 0) {
+      return 'focus'
     }
     
-    if (focusCount >= POMODORO_CONSTANTS.POMODORO_CYCLE_LENGTH) {
-      return 'long_break' // 4回完了後は長い休憩
+    // 最後に完了したセッションを安全に取得
+    const lastSession = history[history.length - 1]
+    if (!lastSession || typeof lastSession.sessionType !== 'string') {
+      return 'focus' // 不正なデータの場合はフォールバック
     }
     
-    return 'short_break' // その他は短い休憩
+    const lastSessionType = lastSession.sessionType
+    
+    // 最後が集中セッションの場合 → 休憩提案
+    if (lastSessionType === 'focus') {
+      // 4回目の集中セッション完了後は長い休憩
+      if (focusCount >= POMODORO_CONSTANTS.POMODORO_CYCLE_LENGTH) {
+        return 'long_break'
+      }
+      // それ以外は短い休憩
+      return 'short_break'
+    }
+    
+    // 最後が休憩セッションの場合 → 集中提案
+    if (lastSessionType === 'break') {
+      return 'focus' // 休憩後は常に集中セッション
+    }
+    
+    // フォールバック：不正なデータ（予期しないsessionType）の場合は集中セッション
+    return 'focus'
   }
 
   /**
