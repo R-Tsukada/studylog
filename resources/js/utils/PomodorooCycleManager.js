@@ -146,7 +146,7 @@ export class PomodorooCycleManager {
     if (session && session.session_type === 'focus') {
       this.incrementFocusSession()
     } else if (session && (session.session_type === 'short_break' || session.session_type === 'long_break')) {
-      this.completeBreakSession()
+      this.completeBreakSession(session.session_type)
     }
   }
 
