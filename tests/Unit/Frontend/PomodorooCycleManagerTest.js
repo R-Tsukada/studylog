@@ -425,21 +425,133 @@ describe('PomodorooCycleManager ポモドーロサイクル管理テスト', () 
         if (i < 3) {
           // 短い休憩
           expect(cycleManager.getNextSessionType()).toBe('short_break')
-          cycleManager.completeBreakSession()
+          cycleManager.completeBreakSession('short_break')
         }
       }
       
       // 4回目後は長い休憩
       expect(cycleManager.getNextSessionType()).toBe('long_break')
-      cycleManager.completeBreakSession()
+      cycleManager.completeBreakSession('long_break')
       
       // 長い休憩後は新サイクルの集中
       expect(cycleManager.getNextSessionType()).toBe('focus')
       
-      // 状態確認
+      // 修正: 自動リセット後の状態確認
       const stats = cycleManager.getCycleStats()
-      expect(stats.completedFocusSessions).toBe(4) // まだリセットされていない
-      expect(stats.cycleHistoryLength).toBe(8) // focus×4 + break×4
+      expect(stats.completedFocusSessions).toBe(0) // 自動リセット済み
+      expect(stats.cycleHistoryLength).toBe(0) // 履歴もリセット済み
+    })
+  })
+
+  // 🆕 CodeRabbit指摘対応 - 長い休憩後の自動サイクルリセット
+  describe('🔄 CodeRabbit指摘対応 - 長い休憩後の自動サイクルリセット', () => {
+    test('長い休憩完了時にサイクルが自動でリセットされる', () => {
+      // 4回の集中セッション完了
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      
+      // 現在の状態確認
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(4)
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      
+      // 長い休憩完了（セッションタイプを明示的に指定）
+      const resetInfo = cycleManager.completeBreakSession('long_break')
+      
+      // リセット情報が返される
+      expect(resetInfo).not.toBeNull()
+      expect(resetInfo.completedFocusSessions).toBe(4)
+      expect(resetInfo.cycleStartTime).toBeDefined()
+      expect(resetInfo.cycleEndTime).toBeDefined()
+      
+      // リセット後の状態確認
+      const stats = cycleManager.getCycleStats()
+      expect(stats.completedFocusSessions).toBe(0) // リセット済み
+      expect(stats.cycleHistoryLength).toBe(0) // 履歴もリセット
+      expect(stats.nextSessionType).toBe('focus') // 新サイクル開始
+    })
+
+    test('短い休憩完了時はサイクルリセットされない', () => {
+      // 1回の集中セッション完了
+      cycleManager.incrementFocusSession()
+      expect(cycleManager.getNextSessionType()).toBe('short_break')
+      
+      // 短い休憩完了（セッションタイプを明示的に指定、リセットは発動しない）
+      const resetInfo = cycleManager.completeBreakSession('short_break')
+      
+      // リセット情報は返されない
+      expect(resetInfo).toBeNull()
+      
+      // 状態は維持される
+      const stats = cycleManager.getCycleStats()
+      expect(stats.completedFocusSessions).toBe(1) // 維持
+      expect(stats.cycleHistoryLength).toBe(2) // focus + break
+      expect(stats.nextSessionType).toBe('focus') // 次の集中セッション
+    })
+
+    test('複数回のポモドーロサイクルで正しくリセットされる', () => {
+      // 第1サイクル: 4集中 + 長い休憩
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      
+      const firstReset = cycleManager.completeBreakSession('long_break')
+      expect(firstReset.completedFocusSessions).toBe(4)
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(0)
+      
+      // 第2サイクル: 再び4集中 + 長い休憩
+      for (let i = 0; i < 4; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      
+      const secondReset = cycleManager.completeBreakSession('long_break')
+      expect(secondReset.completedFocusSessions).toBe(4)
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(0)
+      
+      // 両方のサイクル情報が独立している（サイクル情報が返されることを確認）
+      expect(firstReset).not.toBeNull()
+      expect(secondReset).not.toBeNull()
+      expect(firstReset.cycleEndTime).toBeLessThanOrEqual(secondReset.cycleEndTime)
+      
+      // 重要: それぞれのサイクルで正しくリセットされている
+      expect(firstReset.completedFocusSessions).toBe(4)
+      expect(secondReset.completedFocusSessions).toBe(4)
+    })
+
+    test('境界値テスト: ちょうど4回の集中セッション後', () => {
+      // 3回まで集中セッション
+      for (let i = 0; i < 3; i++) {
+        cycleManager.incrementFocusSession()
+        cycleManager.completeBreakSession('short_break') // 短い休憩、リセットなし
+      }
+      
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(3)
+      
+      // 4回目の集中セッション
+      cycleManager.incrementFocusSession()
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(4)
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      
+      // 長い休憩完了でリセット発動
+      const resetInfo = cycleManager.completeBreakSession('long_break')
+      expect(resetInfo).not.toBeNull()
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(0)
+    })
+
+    test('5回目以降の集中セッション後でも正しくリセットされる', () => {
+      // 5回の集中セッション（異常ケースだが対応確認）
+      for (let i = 0; i < 5; i++) {
+        cycleManager.incrementFocusSession()
+      }
+      
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(5)
+      expect(cycleManager.getNextSessionType()).toBe('long_break')
+      
+      // 長い休憩完了でリセット
+      const resetInfo = cycleManager.completeBreakSession('long_break')
+      expect(resetInfo).not.toBeNull()
+      expect(resetInfo.completedFocusSessions).toBe(5)
+      expect(cycleManager.getCycleStats().completedFocusSessions).toBe(0)
     })
   })
 })

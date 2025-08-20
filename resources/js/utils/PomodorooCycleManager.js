@@ -117,8 +117,9 @@ export class PomodorooCycleManager {
 
   /**
    * 休憩セッション完了後の処理
+   * @param {string} sessionType - 'short_break' | 'long_break' | null (従来互換)
    */
-  completeBreakSession() {
+  completeBreakSession(sessionType = null) {
     this.pomodoroCounterState.lastSessionCompletedAt = Date.now()
     
     // 履歴に記録
@@ -127,6 +128,14 @@ export class PomodorooCycleManager {
       completedAt: this.pomodoroCounterState.lastSessionCompletedAt,
       sessionCount: this.pomodoroCounterState.completedFocusSessions
     })
+
+    // CodeRabbit指摘対応: 長い休憩完了時のみ自動サイクルリセット
+    if (sessionType === 'long_break') {
+      const completedCycleInfo = this.completeCycle()
+      return completedCycleInfo
+    }
+    
+    return null // 短い休憩または未指定の場合は何も返さない
   }
 
   /**
