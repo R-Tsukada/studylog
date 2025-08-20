@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   // ESモジュール設定（Node.js native ESM support）
   preset: null,
   
@@ -24,7 +24,7 @@ export default {
   },
   
   // セットアップファイル
-  setupFilesAfterEnv: [],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup-vue.js'],
   
   // 変換設定 - Babel使用 + Vue.jsファイル対応
   transform: {
