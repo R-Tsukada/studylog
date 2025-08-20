@@ -624,13 +624,25 @@ export default {
           nextDuration = settings?.focus_duration || 25
         }
         
-        // 自動開始の設定確認
+        // 後方互換性対応の自動開始設定確認
+        const hasAutoStartBreak = settings?.auto_start_break ?? settings?.auto_start ?? false
+        const hasAutoStartFocus = settings?.auto_start_focus ?? settings?.auto_start ?? false
+        
         const shouldAutoStart = (
-          (nextSessionType !== 'focus' && settings?.auto_start_break) ||
-          (nextSessionType === 'focus' && settings?.auto_start_focus)
+          (nextSessionType !== 'focus' && hasAutoStartBreak) ||
+          (nextSessionType === 'focus' && hasAutoStartFocus)
         )
         
+        console.log('🔍 [自動開始] startNextAutoSessionWithCycleInfo 設定確認:', {
+          nextSessionType: nextSessionType,
+          shouldAutoStart: shouldAutoStart,
+          hasAutoStartBreak: hasAutoStartBreak,
+          hasAutoStartFocus: hasAutoStartFocus,
+          original_auto_start: settings?.auto_start
+        })
+        
         if (!shouldAutoStart) {
+          console.log('❌ [自動開始] startNextAutoSessionWithCycleInfo 中止: 設定が無効です')
           return
         }
         
@@ -647,6 +659,12 @@ export default {
         
         if (response.status === 201 || response.status === 200) {
           const newSession = response.data
+          
+          console.log('✅ [自動開始] セッション作成成功:', {
+            sessionType: newSession.session_type,
+            sessionId: newSession.id,
+            duration: newSession.planned_duration
+          })
           
           // グローバルタイマーで新しいセッションを開始
           this.startGlobalPomodoroTimer(newSession)
@@ -674,14 +692,40 @@ export default {
     
     // サイクル管理を使った自動開始処理
     handleAutoStartWithCycleManagement(completedSession) {
+      console.log('🔍 [自動開始] 判定開始:', {
+        hasSession: !!completedSession,
+        sessionType: completedSession?.session_type,
+        sessionId: completedSession?.id,
+        hasCycleManager: !!this.pomodorooCycleManager,
+        timestamp: new Date().toISOString()
+      })
       
       if (!this.pomodorooCycleManager || !completedSession) {
+        console.log('❌ [自動開始] 中止: サイクルマネージャーまたはセッションがありません')
         return
       }
       
       const settings = completedSession.settings
+      console.log('🔍 [自動開始] 設定確認:', {
+        settings: settings,
+        auto_start_break: settings?.auto_start_break,
+        auto_start_focus: settings?.auto_start_focus,
+        auto_start: settings?.auto_start,
+        settingsKeys: settings ? Object.keys(settings) : 'なし'
+      })
       
-      if (!settings?.auto_start_break && !settings?.auto_start_focus) {
+      // 後方互換性対応: auto_start_break/auto_start_focusが未定義の場合、auto_startをフォールバック
+      const hasAutoStartBreak = settings?.auto_start_break ?? settings?.auto_start ?? false
+      const hasAutoStartFocus = settings?.auto_start_focus ?? settings?.auto_start ?? false
+      
+      if (!hasAutoStartBreak && !hasAutoStartFocus) {
+        console.log('❌ [自動開始] 中止: すべての自動開始設定が無効です', {
+          auto_start_break: settings?.auto_start_break,
+          auto_start_focus: settings?.auto_start_focus,
+          auto_start: settings?.auto_start,
+          resolved_break: hasAutoStartBreak,
+          resolved_focus: hasAutoStartFocus
+        })
         return
       }
       
@@ -689,14 +733,28 @@ export default {
       const nextSessionType = this.pomodorooCycleManager.getNextSessionType()
       const cycleStats = this.pomodorooCycleManager.getCycleStats()
       
+      console.log('🔍 [自動開始] 次セッション判定:', {
+        nextSessionType: nextSessionType,
+        cycleStats: cycleStats,
+        completedFocusSessions: cycleStats.completedFocusSessions
+      })
       
-      // 自動開始設定の個別チェック
-      const breakCondition = (nextSessionType !== 'focus' && settings?.auto_start_break)
-      const focusCondition = (nextSessionType === 'focus' && settings?.auto_start_focus)
+      // 後方互換性対応の自動開始設定チェック
+      const breakCondition = (nextSessionType !== 'focus' && hasAutoStartBreak)
+      const focusCondition = (nextSessionType === 'focus' && hasAutoStartFocus)
       const shouldAutoStart = breakCondition || focusCondition
       
+      console.log('🔍 [自動開始] 条件チェック:', {
+        nextSessionType: nextSessionType,
+        breakCondition: breakCondition,
+        focusCondition: focusCondition,
+        shouldAutoStart: shouldAutoStart,
+        hasAutoStartBreak: hasAutoStartBreak,
+        hasAutoStartFocus: hasAutoStartFocus
+      })
       
       if (!shouldAutoStart) {
+        console.log('❌ [自動開始] 中止: 条件を満たしていません')
         return
       }
       
@@ -742,6 +800,12 @@ export default {
         
         if (response.status === 201 || response.status === 200) {
           const newSession = response.data
+          
+          console.log('✅ [自動開始] セッション作成成功:', {
+            sessionType: newSession.session_type,
+            sessionId: newSession.id,
+            duration: newSession.planned_duration
+          })
           
           // グローバルタイマーで新しいセッションを開始
           this.startGlobalPomodoroTimer(newSession)
