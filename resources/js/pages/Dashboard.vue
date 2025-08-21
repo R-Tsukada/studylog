@@ -134,7 +134,7 @@
           <button 
             @click="endStudySession" 
             :disabled="loading"
-            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 hover:bg-red-500"
+            class="flex-1 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 hover:bg-red-500 cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
             style="background-color: var(--color-muted-pink-dark);"
           >
             ⏹️ 学習終了
@@ -355,6 +355,8 @@ import apiClient from '../utils/ApiClient.js'
 import { createFutureVisionValidator } from '../utils/textValidator.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
+import SubjectAreaService from '../services/SubjectAreaService.js'
+import SessionManager from '../services/SessionManager.js'
 
 export default {
   name: 'Dashboard',
@@ -377,6 +379,12 @@ export default {
       selectedSubjectAreaId: '',
       studyComment: '',
       recentSessions: [],
+      
+      // SubjectAreaService
+      subjectAreaService: null,
+      
+      // SessionManager
+      sessionManager: null,
       
       // ローディング・エラー管理
       loading: false,
@@ -473,6 +481,13 @@ export default {
     // バリデーター初期化
     this.textValidator = createFutureVisionValidator()
     
+    // SubjectAreaService初期化
+    this.subjectAreaService = new SubjectAreaService()
+    
+    // SessionManager初期化
+    this.sessionManager = new SessionManager()
+    this.sessionManager.init(apiClient)
+    
     await this.loadInitialData()
     
     // イベントハンドラーを作成して参照を保持
@@ -547,14 +562,20 @@ export default {
       }
     },
 
-    // 試験タイプと学習分野を取得
+    // 試験タイプと学習分野を取得（SubjectAreaServiceを使用）
     async loadExamTypes() {
       try {
-        const response = await apiClient.get('/user/exam-types')
-        this.examTypes = response.data.exam_types || []
+        const result = await this.subjectAreaService.getSubjectAreasForDashboard()
+        
+        if (result.success) {
+          this.examTypes = result.data
+        } else {
+          console.error('学習分野取得エラー:', result.error)
+          this.showError('学習分野の取得に失敗しました: ' + result.error.message)
+        }
       } catch (error) {
-        console.error('試験タイプ取得エラー:', error)
-        this.showError('試験タイプの取得に失敗しました')
+        console.error('学習分野取得例外エラー:', error)
+        this.showError('学習分野の取得中にエラーが発生しました')
       }
     },
     
@@ -585,7 +606,7 @@ export default {
       }
     },
     
-    // 学習セッション開始
+    // 学習セッション開始（SessionManager使用）
     async startStudySession() {
       if (!this.selectedSubjectAreaId || !this.studyComment.trim()) {
         this.showError('学習分野とコメントを入力してください')
@@ -594,28 +615,36 @@ export default {
       
       this.loading = true
       try {
-        const response = await apiClient.post('/study-sessions/start', {
+        const result = await this.sessionManager.startSessionSafe({
           subject_area_id: this.selectedSubjectAreaId,
           study_comment: this.studyComment
         })
         
-        if (response.data.success) {
-          this.showSuccess('学習セッションを開始しました！')
+        if (result.success) {
+          let message = '学習セッションを開始しました！'
+          if (result.hadOldSessions) {
+            message += `（${result.cleanedSessionsCount}件の古いセッションを自動終了しました）`
+          }
+          
+          this.showSuccess(message)
+          
           // グローバルタイマーを開始
-          this.startGlobalStudyTimer(response.data.session)
+          this.startGlobalStudyTimer(result.session)
           this.selectedSubjectAreaId = ''
           this.studyComment = ''
           await this.loadDashboardData()
         } else {
-          this.showError(response.data.message || '学習開始に失敗しました')
+          if (result.needsAuth) {
+            this.showError('認証が必要です。ページをリフレッシュしてログインしてください。')
+          } else if (result.validationErrors) {
+            this.showError('入力内容を確認してください：' + Object.values(result.validationErrors).flat().join(', '))
+          } else {
+            this.showError(result.error || '学習開始に失敗しました')
+          }
         }
       } catch (error) {
-        console.error('学習開始エラー:', error)
-        if (error.response?.data?.message) {
-          this.showError(error.response.data.message)
-        } else {
-          this.showError('学習開始中にエラーが発生しました')
-        }
+        console.error('SessionManager学習開始エラー:', error)
+        this.showError('学習開始に失敗しました。もう一度お試しください。')
       } finally {
         this.loading = false
       }
@@ -625,23 +654,20 @@ export default {
     async endStudySession() {
       this.loading = true
       try {
-        const response = await apiClient.post('/study-sessions/end')
+        // SessionManagerを使用してセッション終了（session_idは指定せず、現在のアクティブセッションを自動取得）
+        const result = await this.sessionManager.endSession()
         
-        if (response.data.success) {
+        if (result.success) {
           this.showSuccess('学習セッションを終了しました！お疲れ様でした！')
           // グローバルタイマーを停止
           this.stopGlobalStudyTimer()
           await this.loadDashboardData() // 履歴も含めて更新
         } else {
-          this.showError(response.data.message || '学習終了に失敗しました')
+          this.showError(result.error || '学習終了に失敗しました')
         }
       } catch (error) {
         console.error('学習終了エラー:', error)
-        if (error.response?.data?.message) {
-          this.showError(error.response.data.message)
-        } else {
-          this.showError('学習終了中にエラーが発生しました')
-        }
+        this.showError('学習終了中にエラーが発生しました')
       } finally {
         this.loading = false
       }

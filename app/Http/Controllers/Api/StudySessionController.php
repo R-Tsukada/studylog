@@ -11,6 +11,91 @@ use Illuminate\Validation\ValidationException;
 class StudySessionController extends Controller
 {
     /**
+     * 安全な学習セッション開始（自動クリーンアップ付き）
+     */
+    public function startSafe(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'subject_area_id' => 'required|exists:subject_areas,id',
+                'study_comment' => 'required|string|max:1000',
+            ]);
+
+            $userId = auth()->id();
+
+            // 既存のアクティブセッションを全て自動終了
+            $oldSessions = StudySession::active()->forUser($userId)->get();
+            $cleanedSessionsCount = 0;
+            $autoClosedSession = null;
+
+            foreach ($oldSessions as $oldSession) {
+                $oldSession->endSession('システム自動終了（新セッション開始のため）');
+                $cleanedSessionsCount++;
+                if (! $autoClosedSession) {
+                    $autoClosedSession = [
+                        'id' => $oldSession->id,
+                        'reason' => 'システム自動終了（新セッション開始のため）',
+                    ];
+                }
+            }
+
+            // 新しいセッションを開始
+            $session = StudySession::create([
+                'user_id' => $userId,
+                'subject_area_id' => $validated['subject_area_id'],
+                'started_at' => now(),
+                'study_comment' => $validated['study_comment'],
+            ]);
+
+            // レスポンス用に関連データを読み込み
+            $session->load('subjectArea.examType');
+
+            $message = '学習セッションを開始しました';
+            if ($cleanedSessionsCount > 0) {
+                $message = '学習セッションを開始しました（前のセッションを自動終了）';
+            }
+
+            $response = [
+                'success' => true,
+                'message' => $message,
+                'session' => [
+                    'id' => $session->id,
+                    'subject_area_id' => $session->subject_area_id,
+                    'subject_area_name' => $session->subjectArea->name,
+                    'exam_type_name' => $session->subjectArea->examType->name,
+                    'started_at' => $session->started_at->format('Y-m-d H:i:s'),
+                    'started_at_timestamp' => $session->started_at->timestamp,
+                    'elapsed_minutes' => 0,
+                    'study_comment' => $session->study_comment,
+                ],
+            ];
+
+            if ($cleanedSessionsCount > 0) {
+                $response['cleaned_sessions_count'] = $cleanedSessionsCount;
+            }
+
+            if ($autoClosedSession) {
+                $response['auto_closed_session'] = $autoClosedSession;
+            }
+
+            return response()->json($response, 201);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'バリデーションエラー',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'セッション開始中にエラーが発生しました',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * 学習セッション開始
      */
     public function start(Request $request): JsonResponse
@@ -85,9 +170,14 @@ class StudySessionController extends Controller
     public function end(Request $request): JsonResponse
     {
         try {
+            \Log::info('StudySession end called', [
+                'request_data' => $request->all(),
+                'user_id' => auth()->id(),
+            ]);
+
             $validated = $request->validate([
                 'session_id' => 'sometimes|exists:study_sessions,id',
-                'study_comment' => 'sometimes|string|max:1000',
+                'study_comment' => 'sometimes|nullable|string|max:1000',
             ]);
 
             $userId = auth()->id();
@@ -109,10 +199,20 @@ class StudySessionController extends Controller
             }
 
             if (! $session->isActive()) {
+                // 既に終了しているセッションの場合、成功として扱う
                 return response()->json([
-                    'success' => false,
+                    'success' => true,
                     'message' => 'このセッションは既に終了しています',
-                ], 400);
+                    'session' => [
+                        'id' => $session->id,
+                        'subject_area_name' => $session->subjectArea->name,
+                        'exam_type_name' => $session->subjectArea->examType->name,
+                        'started_at' => $session->started_at->format('Y-m-d H:i:s'),
+                        'ended_at' => $session->ended_at->format('Y-m-d H:i:s'),
+                        'duration_minutes' => $session->duration_minutes,
+                        'study_comment' => $session->study_comment,
+                    ],
+                ], 200);
             }
 
             // セッション終了
@@ -135,6 +235,13 @@ class StudySessionController extends Controller
             ]);
 
         } catch (ValidationException $e) {
+            \Log::error('StudySession end validation failed', [
+                'request_data' => $request->all(),
+                'user_id' => auth()->id(),
+                'validation_errors' => $e->errors(),
+                'validator_data' => $e->validator->getData(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'バリデーションエラー',
@@ -433,6 +540,93 @@ class StudySessionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'セッション更新中にエラーが発生しました',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * セッション同期状態確認
+     */
+    public function syncStatus(): JsonResponse
+    {
+        try {
+            $userId = auth()->id();
+
+            $currentSession = StudySession::getCurrentSession($userId);
+
+            if (! $currentSession) {
+                return response()->json([
+                    'success' => true,
+                    'has_active_session' => false,
+                    'session_id' => null,
+                    'needs_cleanup' => false,
+                    'recommendation' => 'ready_to_start',
+                ]);
+            }
+
+            // アクティブセッションが存在する場合
+            $elapsedHours = $currentSession->started_at->diffInHours(now());
+            $needsCleanup = $elapsedHours > 24; // 24時間以上経過した場合はクリーンアップ推奨
+
+            return response()->json([
+                'success' => true,
+                'has_active_session' => true,
+                'session_id' => $currentSession->id,
+                'session_started_at' => $currentSession->started_at->format('Y-m-d H:i:s'),
+                'elapsed_hours' => $elapsedHours,
+                'needs_cleanup' => $needsCleanup,
+                'recommendation' => $needsCleanup ? 'force_end_and_start_new' : 'continue_or_end',
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '同期状態確認中にエラーが発生しました',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * 強制セッションクリーンアップ
+     */
+    public function forceCleanup(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'reason' => 'sometimes|string|max:255',
+            ]);
+
+            $userId = auth()->id();
+            $reason = $validated['reason'] ?? 'Manual cleanup from user interface';
+
+            // 全てのアクティブセッションを強制終了
+            $activeSessions = StudySession::active()->forUser($userId)->get();
+            $cleanedSessionsCount = 0;
+
+            foreach ($activeSessions as $session) {
+                $session->endSession($reason);
+                $cleanedSessionsCount++;
+            }
+
+            return response()->json([
+                'success' => true,
+                'cleaned_sessions_count' => $cleanedSessionsCount,
+                'message' => "古いセッションを{$cleanedSessionsCount}件クリーンアップしました",
+                'reason' => $reason,
+            ]);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'バリデーションエラー',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'クリーンアップ中にエラーが発生しました',
                 'error' => $e->getMessage(),
             ], 500);
         }
