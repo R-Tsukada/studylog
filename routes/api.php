@@ -48,9 +48,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('study-sessions')->group(function () {
         Route::get('/', [StudySessionController::class, 'index']);
         Route::post('/start', [StudySessionController::class, 'start']);
+        Route::post('/start-safe', [StudySessionController::class, 'startSafe']);
         Route::post('/end', [StudySessionController::class, 'end']);
         Route::get('/current', [StudySessionController::class, 'current']);
         Route::get('/history', [StudySessionController::class, 'history']);
+        Route::get('/sync-status', [StudySessionController::class, 'syncStatus']);
+        Route::post('/force-cleanup', [StudySessionController::class, 'forceCleanup']);
         Route::get('/{id}', [StudySessionController::class, 'show']);
         Route::put('/{id}', [StudySessionController::class, 'update']);
         Route::delete('/{id}', [StudySessionController::class, 'destroy']);
