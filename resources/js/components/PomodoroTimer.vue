@@ -243,6 +243,8 @@
 </template>
 
 <script>
+import SubjectAreaService from '@/services/SubjectAreaService.js'
+
 export default {
   name: 'PomodoroTimer',
   inject: ['globalPomodoroTimer', 'startGlobalPomodoroTimer', 'stopGlobalPomodoroTimer', 'pauseGlobalPomodoroTimer', 'resumeGlobalPomodoroTimer'],
@@ -265,6 +267,9 @@ export default {
       // データ
       availableSubjectAreas: [],
       todayStats: null,
+      
+      // SubjectAreaService
+      subjectAreaService: null,
       
       // 定数
       sessionTypes: [
@@ -324,6 +329,9 @@ export default {
   },
   
   async mounted() {
+    // SubjectAreaService初期化
+    this.subjectAreaService = new SubjectAreaService();
+    
     await this.checkCurrentSession();
     await this.loadAvailableSubjectAreas();
     await this.loadTodayStats();
@@ -397,28 +405,18 @@ export default {
     
     async loadAvailableSubjectAreas() {
       try {
-        console.log('学習分野取得開始...');
-        const token = localStorage.getItem('auth_token');
+        console.log('学習分野取得開始...(SubjectAreaServiceを使用)');
         
-        const response = await fetch('/api/user/subject-areas', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
-          }
-        });
+        const result = await this.subjectAreaService.getSubjectAreasForPomodoro();
         
-        console.log('学習分野レスポンス状態:', response.status);
-        const data = await response.json();
-        console.log('学習分野データ:', data);
-        
-        if (response.ok) {
-          this.availableSubjectAreas = data.subject_areas || [];
+        if (result.success) {
+          this.availableSubjectAreas = result.data;
           console.log('取得した学習分野:', this.availableSubjectAreas);
         } else {
-          console.error('学習分野APIエラー:', data);
+          console.error('学習分野取得エラー:', result.error);
         }
       } catch (error) {
-        console.error('学習分野取得エラー:', error);
+        console.error('学習分野取得例外エラー:', error);
       }
     },
     

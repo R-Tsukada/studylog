@@ -355,7 +355,7 @@ import apiClient from '../utils/ApiClient.js'
 import { createFutureVisionValidator } from '../utils/textValidator.js'
 import PomodoroTimer from '../components/PomodoroTimer.vue'
 import StudyGrassChart from '../components/StudyGrassChart.vue'
-import SubjectAreaService from '../services/SubjectAreaService.js'
+import SubjectAreaService from '@/services/SubjectAreaService.js'
 import SessionManager from '../services/SessionManager.js'
 
 export default {
